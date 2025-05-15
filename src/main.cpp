@@ -3,9 +3,17 @@
 #include <thread>
 #include <chrono>
 #include <windows.h>
+#include <QApplication>
+#include "main_window.h"
 
-int main()
+int main(int argc, char *argv[])
 {
+    QApplication app(argc, argv);
+    MainWindow window;
+    window.show();
+    return app.exec();
+
+#if 0
     SetConsoleOutputCP(CP_UTF8);
 
     if (!vive_initialize())
@@ -71,4 +79,5 @@ int main()
     vive_stop_logging();
     vive_shutdown();
     return 0;
+#endif
 }
