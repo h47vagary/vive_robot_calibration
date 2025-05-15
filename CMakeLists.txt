@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 头文件路径
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/htc_vive
+    ${PROJECT_SOURCE_DIR}/src/algorithm
+    ${PROJECT_SOURCE_DIR}/src/communication
+    ${PROJECT_SOURCE_DIR}/src/utils
     ${PROJECT_SOURCE_DIR}/lib/openvr/headers
     ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
     ${PROJECT_SOURCE_DIR}/lib/eigen
@@ -27,4 +31,21 @@ target_link_libraries(vive_robot_calibration
     communication
     htc_vive
     utils
+)
+
+# OpenVR SDK 路径
+set(OPENVR_ROOT "${PROJECT_SOURCE_DIR}/lib/openvr")
+set(OPENVR_BIN_DIR "${OPENVR_ROOT}/bin/win64")
+set(OPENVR_DLL "${OPENVR_BIN_DIR}/openvr_api.dll")
+
+# NRC SDK 路径
+set(NRC_ROOT "${PROJECT_SOURCE_DIR}/lib/nrc_host")
+set(NRC_DLL "${NRC_ROOT}/nrc_host.dll")
+
+# 编译完成后将 openvr_api.dll 和 nrc_host.dll 复制到可执行文件目录
+add_custom_command(TARGET vive_robot_calibration POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${OPENVR_DLL}
+        ${NRC_DLL}
+        $<TARGET_FILE_DIR:vive_robot_calibration>
 )
