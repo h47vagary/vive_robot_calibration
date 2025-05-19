@@ -154,6 +154,21 @@ void CalibrationManager::get_calibration_algorithm(int &method)
     method = c_calibration_method;
 }
 
+void CalibrationManager::set_toolhand_calibraion_pose(const int &index, const CartesianPose &flange_pose, const CartesianPose &tcp_pose)
+{
+    if (index >= flange_poses_.size())
+    {
+        flange_poses_.resize(index + 1);
+    }
+    if (index >= tcp_poses_.size())
+    {
+        tcp_poses_.resize(index + 1);
+    }
+
+    flange_poses_[index] = flange_pose;
+    tcp_poses_[index] = tcp_pose;
+}
+
 int CalibrationManager::calculate_position_calibration_matrix(double &error_out)
 {
     int n = robot_calibration_positions_.size();
@@ -397,4 +412,116 @@ void CalibrationManager::optimize_svd(const std::vector<Eigen::Vector3d> &robot_
 //        rotation = Eigen::Matrix3d::Identity() + sin(theta) * K + (1 - cos(theta)) * K * K;
     }
     transformation = params.tail<3>();
+}
+
+void CalibrationManager::set_tool_calibration_pose_flange(const int &index, const CartesianPose &pose)
+{
+    if (index >= flange_poses_.size())
+    {
+        flange_poses_.resize(index + 1);
+    }
+    
+    flange_poses_[index] = pose;
+}
+
+void CalibrationManager::set_tool_calibration_pose_tcp(const int &index, const CartesianPose &pose)
+{
+    if (index >= tcp_poses_.size())
+    {
+        tcp_poses_.resize(index + 1);
+    }
+    
+    tcp_poses_[index] = pose;
+}
+
+void CalibrationManager::get_tool_calibration_pose(std::vector<CartesianPose> &flange_poses, std::vector<CartesianPose> &tcp_poses)
+{
+    flange_poses = flange_poses_;
+    tcp_poses = tcp_poses_;
+}
+
+void CalibrationManager::get_tool_calibrated(bool &calibrated)
+{
+    calibrated = tool_calibrated_;
+}
+
+void CalibrationManager::get_tool_max_error(double &max_error)
+{
+    max_error = tool_max_error_;
+}
+
+void CalibrationManager::get_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix)
+{
+    pose_calibration_matrix = *tool_pose_calibration_matrix_;
+}
+
+int CalibrationManager::clear_tool_calibration_pose()
+{
+    flange_poses_.clear();
+    tcp_poses_.clear();
+    tool_calibrated_ = false;
+    tool_max_error_ = -1000;
+    return 0;
+}
+
+Eigen::Matrix4d CalibrationManager::pose_to_matrix(const CartesianPose &pose)
+{
+    Eigen::AngleAxisd rz(pose.orientation.C, Eigen::Vector3d::UnitZ());
+    Eigen::AngleAxisd ry(pose.orientation.B, Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd rx(pose.orientation.A, Eigen::Vector3d::UnitX());
+
+    Eigen::Matrix3d R = (rz * ry * rx).toRotationMatrix();
+    Eigen::Vector3d t(pose.position.x, pose.position.y, pose.position.z);
+
+    Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+    T.block<3,3>(0,0) = R;
+    T.block<3,1>(0,3) = t;
+    return T;
+}
+
+int CalibrationManager::calculate_toolhand_calibration_matrix(const std::vector<CartesianPose> &flange_poses, const std::vector<CartesianPose> &tcp_poses)
+{
+    if (flange_poses.size() != 6 || tcp_poses.size() != 6)
+    {
+        std::cout << "需要的标定点数为 6 个" << std::endl;
+    }
+
+    std::vector<Eigen::Matrix4d> f_list, t_list;
+    for (int i = 0; i < 6; ++i)
+    {
+        f_list.push_back(pose_to_matrix(flange_poses[i]));
+        t_list.push_back(pose_to_matrix(tcp_poses[i]));
+    }
+
+    Eigen::MatrixXd flange_mat(3, 6), tcp_mat(3, 6);
+
+    for (int i = 0; i < 6; ++i)
+    {
+        flange_mat.col(i)= f_list[i].block<3,1>(0,3);
+        tcp_mat.col(i) = t_list[i].block<3,1>(0,3);
+    }
+
+    Eigen::Vector3d flang_center = flange_mat.rowwise().mean();
+    Eigen::Vector3d tcp_center = tcp_mat.rowwise().mean();
+
+    flange_mat.colwise() -= flang_center;
+    tcp_mat.colwise() -= tcp_center;
+
+    Eigen::Matrix3d H = flange_mat * tcp_mat.transpose();
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+    Eigen::Matrix3d R = svd.matrixV() * svd.matrixU().transpose();
+    if (R.determinant() < 0)
+    {
+        Eigen::Matrix3d V = svd.matrixV();
+        V.col(2) *= -1;
+        R = V * svd.matrixU().transpose();
+    }
+
+    Eigen::Vector3d t = tcp_center - R * flang_center;
+    (*tool_pose_calibration_matrix_) = Eigen::Matrix4d::Identity();
+    (*tool_pose_calibration_matrix_).block<3,3>(0,0) = R;
+    (*tool_pose_calibration_matrix_).block<3,1>(0,3) = t;
+
+    return 0;
 }

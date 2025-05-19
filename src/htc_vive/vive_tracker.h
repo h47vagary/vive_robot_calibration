@@ -1,3 +1,12 @@
+/**
+ * @file vive_tracker.h
+ * @brief VIVE Tracker 的封装类，管理初始化、姿态获取、记录等功能
+ * @version 0.1
+ * @date 2025-05-15
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #pragma once
 
 #include <chrono>
@@ -10,9 +19,6 @@
 
 namespace htc_vive {
 
-/**
- * @brief VIVE Tracker 的封装类，管理初始化、姿态获取、记录等功能
- */
 class ViveTracker
 {
 public:

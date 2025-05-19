@@ -16,8 +16,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src/htc_vive
     ${PROJECT_SOURCE_DIR}/src/algorithm
-    ${PROJECT_SOURCE_DIR}/src/communication
     ${PROJECT_SOURCE_DIR}/src/utils
+    ${PROJECT_SOURCE_DIR}/src/communication
     ${PROJECT_SOURCE_DIR}/lib/openvr/headers
     ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
     ${PROJECT_SOURCE_DIR}/lib/eigen

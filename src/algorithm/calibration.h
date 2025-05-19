@@ -1,3 +1,13 @@
+/**
+ * @file calibration.h
+ * @brief 标定算法器
+ * @version 0.1
+ * @date 2025-05-19
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #ifndef CALIBRATION_MANAGER_H
 #define CALIBRATION_MANAGER_H
 
@@ -29,6 +39,8 @@ public:
     void set_calibration_algorithm(int method);
     void get_calibration_algorithm(int& method);
 
+    void set_toolhand_calibraion_pose(const int &index, const CartesianPose &flange_pose, const CartesianPose &tcp_pose);
+
 private:
     int calculate_position_calibration_matrix(double &error_out);
     int calculate_position_calibration_matrix(double rz, double &error_out);
@@ -53,6 +65,27 @@ private:
 
     int c_calibration_method = 2;    // 0-基于RZ值和位置的标定 1-九点标定 2-SVD标定
     const int c_max_iteration = 50;
+
+
+    //====== 工具手标定 ======//
+public:
+    void set_tool_calibration_pose_flange(const int &index, const CartesianPose &pose);
+    void set_tool_calibration_pose_tcp(const int &index, const CartesianPose &pose);
+    void get_tool_calibration_pose(std::vector<CartesianPose> &flange_poses, std::vector<CartesianPose> &tcp_poses);
+    void get_tool_calibrated(bool &calibrated);
+    void get_tool_max_error(double &max_error);
+    void get_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
+    int clear_tool_calibration_pose();
+private:
+    Eigen::Matrix4d pose_to_matrix(const CartesianPose& pose);
+    int calculate_toolhand_calibration_matrix(const std::vector<CartesianPose>& flange_poses, 
+                                                const std::vector<CartesianPose>& tcp_poses);
+    double tool_max_error_;
+    bool tool_calibrated_;
+    std::vector<CartesianPose> flange_poses_;
+    std::vector<CartesianPose> tcp_poses_;
+    Eigen::Matrix4d *tool_pose_calibration_matrix_;
+    
 };
 
 #endif

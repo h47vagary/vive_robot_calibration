@@ -1,3 +1,13 @@
+/**
+ * @file nrc_comm.h
+ * @brief 封装nrc库的通讯功能组件
+ * @version 0.1
+ * @date 2025-05-17
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #pragma once
 
 #include <string>

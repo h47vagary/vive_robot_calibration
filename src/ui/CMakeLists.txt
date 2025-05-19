@@ -22,6 +22,16 @@ add_library(ui STATIC ${UI_SOURCES}
 # 包含生成的头文件目录
 target_include_directories(ui PUBLIC 
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_BINARY_DIR})
+            ${CMAKE_CURRENT_BINARY_DIR}
+            ${PROJECT_SOURCE_DIR}/include
+            ${PROJECT_SOURCE_DIR}/src/communication
+            ${PROJECT_SOURCE_DIR}/src/algorithm
+            ${PROJECT_SOURCE_DIR}/src/htc_vive
+            ${PROJECT_SOURCE_DIR}/src/utils
+)
 
-target_link_libraries(ui Qt5::Widgets)
+target_link_libraries(ui
+    PUBLIC
+        Qt5::Widgets
+        communication
+)

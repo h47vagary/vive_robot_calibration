@@ -1,3 +1,12 @@
+/**
+ * @file comm_manager.h
+ * @brief 调用 nrc_comm.h 功能组件，封装给开发者使用
+ * @version 0.1
+ * @date 2025-05-16
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #pragma once 
 
 #include <string>

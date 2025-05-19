@@ -1,7 +1,6 @@
 /**
  * @file vive_wrapper.h
- * @author h47
- * @brief 封装了 VIVE Tracker 功能接口，用户可直接调用此接口使用对应功能
+ * @brief 封装了 VIVE Tracker 功能接口，可直接调用此接口使用对应功能
  * @version 0.1
  * @date 2025-05-15
  * 
