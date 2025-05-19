@@ -154,21 +154,6 @@ void CalibrationManager::get_calibration_algorithm(int &method)
     method = c_calibration_method;
 }
 
-void CalibrationManager::set_toolhand_calibraion_pose(const int &index, const CartesianPose &flange_pose, const CartesianPose &tcp_pose)
-{
-    if (index >= flange_poses_.size())
-    {
-        flange_poses_.resize(index + 1);
-    }
-    if (index >= tcp_poses_.size())
-    {
-        tcp_poses_.resize(index + 1);
-    }
-
-    flange_poses_[index] = flange_pose;
-    tcp_poses_[index] = tcp_pose;
-}
-
 int CalibrationManager::calculate_position_calibration_matrix(double &error_out)
 {
     int n = robot_calibration_positions_.size();

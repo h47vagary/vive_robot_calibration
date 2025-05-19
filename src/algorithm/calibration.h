@@ -39,8 +39,6 @@ public:
     void set_calibration_algorithm(int method);
     void get_calibration_algorithm(int& method);
 
-    void set_toolhand_calibraion_pose(const int &index, const CartesianPose &flange_pose, const CartesianPose &tcp_pose);
-
 private:
     int calculate_position_calibration_matrix(double &error_out);
     int calculate_position_calibration_matrix(double rz, double &error_out);
