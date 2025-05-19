@@ -4,6 +4,9 @@
 #include <atomic>
 #include <cstdint>
 
+#include "common_header.h"
+#include "utils.h"
+
 struct VivePose
 {
     float x, y, z;
@@ -23,7 +26,7 @@ public:
     void pause();   // 暂停读取
     void resume();  // 恢复读取
 
-    VivePose get_latest_pose();  // 获取最新点位
+    CartesianPose get_latest_pose();  // 获取最新点位
 
 private:
     void read_loop();

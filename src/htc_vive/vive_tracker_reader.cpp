@@ -50,10 +50,25 @@ void ViveTrackerReader::resume()
     paused_ = false;
 }
 
-VivePose ViveTrackerReader::get_latest_pose()
+CartesianPose ViveTrackerReader::get_latest_pose()
 {
     int index = active_index_.load(std::memory_order_acquire);
-    return pose_buf_[index];  // 直接返回副本
+    const VivePose& pose = pose_buf_[index];
+
+    CartesianPose cartesian_pose;
+    cartesian_pose.position.x = pose.x;
+    cartesian_pose.position.y = pose.y;
+    cartesian_pose.position.z = pose.z;
+
+    // 四元数转欧拉角 (ABC)
+    Quaternion quat(pose.qw, pose.qx, pose.qy, pose.qz);
+    quat = quat.normalize();  // 确保单位四元数
+    Utils::quaternion_to_euler_ABC(quat, 
+                                    cartesian_pose.orientation.A,
+                                    cartesian_pose.orientation.B,
+                                    cartesian_pose.orientation.C);
+
+    return cartesian_pose;
 }
 
 void ViveTrackerReader::read_loop()

@@ -21,4 +21,7 @@ target_include_directories(htc_vive
 )
 
 # 链接 openvr 静态库
-target_link_libraries(htc_vive PRIVATE ${OPENVR_LIB})
+target_link_libraries(htc_vive PRIVATE
+                        ${OPENVR_LIB}
+                        utils                         
+)

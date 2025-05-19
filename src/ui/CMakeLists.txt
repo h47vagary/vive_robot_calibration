@@ -34,4 +34,5 @@ target_link_libraries(ui
     PUBLIC
         Qt5::Widgets
         communication
+        htc_vive
 )

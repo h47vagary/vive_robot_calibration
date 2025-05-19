@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<CartesianPose>("CartesianPose");
 
     msg_handler_ = new MessageHandler(this);
+    vive_tracker_reader_ = new ViveTrackerReader();
+    vive_tracker_reader_->start();
 
     init_connect();
     init_style();
@@ -206,6 +208,7 @@ void MainWindow::slot_mark_point()
     if (index != -1)
     {
         emit signal_mark_point(index);
+        CartesianPose pose = vive_tracker_reader_->get_latest_pose();
         
         
     }

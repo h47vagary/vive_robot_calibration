@@ -8,6 +8,7 @@
 #include <QVector>
 
 #include "message_handler.h"
+#include "vive_tracker_reader.h"
 
 namespace Ui {
     class MainWindow;
@@ -65,6 +66,6 @@ private:
     QMap<int, QVector<QLabel*>> r_labels_map;  // label_r1_x ~ label_r6_C
 
     MessageHandler* msg_handler_;
-
+    ViveTrackerReader* vive_tracker_reader_;
 };
 
