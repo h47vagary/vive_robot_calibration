@@ -399,114 +399,139 @@ void CalibrationManager::optimize_svd(const std::vector<Eigen::Vector3d> &robot_
     transformation = params.tail<3>();
 }
 
-void CalibrationManager::set_tool_calibration_pose_flange(const int &index, const CartesianPose &pose)
+ToolCalibration6Points::ToolCalibration6Points()
 {
-    if (index >= flange_poses_.size())
+    calibration_matrix_ = new Eigen::Matrix4d();
+    calibrated_ = false;
+}
+
+ToolCalibration6Points::~ToolCalibration6Points()
+{
+    delete calibration_matrix_;
+}
+
+int ToolCalibration6Points::calibrate()
+{
+    if (source_poses_.size() != 6)
+        return -1;
+
+    if (!tool_calculate_6points(source_poses_, *calibration_matrix_))
     {
-        flange_poses_.resize(index + 1);
+        calibrated_ = true;
+        return 0;
     }
-    
-    flange_poses_[index] = pose;
-}
-
-void CalibrationManager::set_tool_calibration_pose_tcp(const int &index, const CartesianPose &pose)
-{
-    if (index >= tcp_poses_.size())
+    else
     {
-        tcp_poses_.resize(index + 1);
+        calibrated_ = false;
+        return -1;
     }
-    
-    tcp_poses_[index] = pose;
 }
 
-void CalibrationManager::get_tool_calibration_pose(std::vector<CartesianPose> &flange_poses, std::vector<CartesianPose> &tcp_poses)
+
+void ToolCalibration6Points::get_calibrated(bool &calibrated)
 {
-    flange_poses = flange_poses_;
-    tcp_poses = tcp_poses_;
+    calibrated = calibrated_;
 }
 
-void CalibrationManager::get_tool_calibrated(bool &calibrated)
+void ToolCalibration6Points::get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix)
 {
-    calibrated = tool_calibrated_;
+    pose_calibration_matrix = *calibration_matrix_;
 }
 
-void CalibrationManager::get_tool_max_error(double &max_error)
+void ToolCalibration6Points::get_calibration_poses(std::vector<CartesianPose> &calibration_poses)
 {
-    max_error = tool_max_error_;
+    calibration_poses = source_poses_;
 }
 
-void CalibrationManager::get_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix)
+void ToolCalibration6Points::set_calibration_pose(const int &index, const CartesianPose &pose)
 {
-    pose_calibration_matrix = *tool_pose_calibration_matrix_;
+    if (index >= source_poses_.size())
+    {
+        source_poses_.resize(index + 1);
+    }
+    source_poses_[index] = pose;
 }
 
-int CalibrationManager::clear_tool_calibration_pose()
+int ToolCalibration6Points::clear_calibration_pose()
 {
-    flange_poses_.clear();
-    tcp_poses_.clear();
-    tool_calibrated_ = false;
-    tool_max_error_ = -1000;
+    source_poses_.clear();
+    calibrated_ = false;
     return 0;
 }
 
-Eigen::Matrix4d CalibrationManager::pose_to_matrix(const CartesianPose &pose)
+int ToolCalibration6Points::tool_calculate_6points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d &calib_matrix)
 {
-    Eigen::AngleAxisd rz(pose.orientation.C, Eigen::Vector3d::UnitZ());
-    Eigen::AngleAxisd ry(pose.orientation.B, Eigen::Vector3d::UnitY());
-    Eigen::AngleAxisd rx(pose.orientation.A, Eigen::Vector3d::UnitX());
+    if (poses.size() != 6)
+        return -1;
 
-    Eigen::Matrix3d R = (rz * ry * rx).toRotationMatrix();
-    Eigen::Vector3d t(pose.position.x, pose.position.y, pose.position.z);
+    // Step 1: XY 平面标定（平移量）
+    Eigen::Matrix4d T1 = rpy_to_matrix(poses[0]);
+    Eigen::Matrix4d T2 = rpy_to_matrix(poses[1]);
+
+    double a = T1(0, 0) - T2(0, 0);
+    double b = T1(0, 1) - T2(0, 1);
+    double c = T1(1, 0) - T2(1, 0);
+    double d = T1(1, 1) - T2(1, 1);
+    double e = T2(0, 3) - T1(0, 3);
+    double f = T2(1, 3) - T1(1, 3);
+
+    Eigen::Vector3d offset;
+    offset[0] = (e * d - b * f) / (a * d - b * c);
+    offset[1] = (e * c - a * f) / (b * c - a * d);
+    offset[2] = 0.0;
+
+    // Step 2: Z 值
+    Eigen::Matrix4d T3 = rpy_to_matrix(poses[2]);
+    double dz = (T3(0, 3) - T1(0, 3) - offset[0] * (T1(0, 0) - T3(0, 0)) - offset[1] * (T1(0, 1) - T3(0, 1))) 
+                / (T1(0, 2) - T3(0, 2));
+    offset[2] = dz;
+
+    // Step 3: 构造方向基（方向向量）
+    Eigen::Vector3d vec1, vec2, vec3;
+    vec1 << poses[4].position.x - poses[3].position.x,
+            poses[4].position.y - poses[3].position.y,
+            poses[4].position.z - poses[3].position.z;
+    vec2 << poses[5].position.x - poses[3].position.x,
+            poses[5].position.y - poses[3].position.y,
+            poses[5].position.z - poses[3].position.z;
+
+    vec3 = vec1.cross(vec2);
+    vec2 = vec3.cross(vec1);
+
+    vec1.normalize();
+    vec2.normalize();
+    vec3.normalize();
+
+    // Step 4: 构造工具坐标系的齐次变换矩阵
+    calib_matrix = Eigen::Matrix4d::Identity();
+    calib_matrix.block<3, 1>(0, 0) = vec1;
+    calib_matrix.block<3, 1>(0, 1) = vec2;
+    calib_matrix.block<3, 1>(0, 2) = vec3;
+    calib_matrix.block<3, 1>(0, 3) = offset;
+
+    return 0;
+}
+
+Eigen::Matrix4d ToolCalibration6Points::rpy_to_matrix(const CartesianPose &pose_deg)
+{
+    double rx = pose_deg.orientation.A * M_PI / 180.0;
+    double ry = pose_deg.orientation.B * M_PI / 180.0;
+    double rz = pose_deg.orientation.C * M_PI / 180.0;
+
+    double cr = cos(rx), sr = sin(rx);
+    double cp = cos(ry), sp = sin(ry);
+    double cy = cos(rz), sy = sin(rz);
+
+    Eigen::Matrix3d R;
+    R << cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr,
+         sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr,
+         -sp,     cp * sr,               cp * cr;
 
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-    T.block<3,3>(0,0) = R;
-    T.block<3,1>(0,3) = t;
+    T.block<3, 3>(0, 0) = R;
+    T(0, 3) = pose_deg.position.x;
+    T(1, 3) = pose_deg.position.y;
+    T(2, 3) = pose_deg.position.z;
+
     return T;
-}
-
-int CalibrationManager::calculate_toolhand_calibration_matrix(const std::vector<CartesianPose> &flange_poses, const std::vector<CartesianPose> &tcp_poses)
-{
-    if (flange_poses.size() != 6 || tcp_poses.size() != 6)
-    {
-        std::cout << "需要的标定点数为 6 个" << std::endl;
-    }
-
-    std::vector<Eigen::Matrix4d> f_list, t_list;
-    for (int i = 0; i < 6; ++i)
-    {
-        f_list.push_back(pose_to_matrix(flange_poses[i]));
-        t_list.push_back(pose_to_matrix(tcp_poses[i]));
-    }
-
-    Eigen::MatrixXd flange_mat(3, 6), tcp_mat(3, 6);
-
-    for (int i = 0; i < 6; ++i)
-    {
-        flange_mat.col(i)= f_list[i].block<3,1>(0,3);
-        tcp_mat.col(i) = t_list[i].block<3,1>(0,3);
-    }
-
-    Eigen::Vector3d flang_center = flange_mat.rowwise().mean();
-    Eigen::Vector3d tcp_center = tcp_mat.rowwise().mean();
-
-    flange_mat.colwise() -= flang_center;
-    tcp_mat.colwise() -= tcp_center;
-
-    Eigen::Matrix3d H = flange_mat * tcp_mat.transpose();
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
-
-    Eigen::Matrix3d R = svd.matrixV() * svd.matrixU().transpose();
-    if (R.determinant() < 0)
-    {
-        Eigen::Matrix3d V = svd.matrixV();
-        V.col(2) *= -1;
-        R = V * svd.matrixU().transpose();
-    }
-
-    Eigen::Vector3d t = tcp_center - R * flang_center;
-    (*tool_pose_calibration_matrix_) = Eigen::Matrix4d::Identity();
-    (*tool_pose_calibration_matrix_).block<3,3>(0,0) = R;
-    (*tool_pose_calibration_matrix_).block<3,1>(0,3) = t;
-
-    return 0;
 }

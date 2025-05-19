@@ -63,27 +63,33 @@ private:
 
     int c_calibration_method = 2;    // 0-基于RZ值和位置的标定 1-九点标定 2-SVD标定
     const int c_max_iteration = 50;
+};
 
 
-    //====== 工具手标定 ======//
+class ToolCalibration6Points
+{
 public:
-    void set_tool_calibration_pose_flange(const int &index, const CartesianPose &pose);
-    void set_tool_calibration_pose_tcp(const int &index, const CartesianPose &pose);
-    void get_tool_calibration_pose(std::vector<CartesianPose> &flange_poses, std::vector<CartesianPose> &tcp_poses);
-    void get_tool_calibrated(bool &calibrated);
-    void get_tool_max_error(double &max_error);
-    void get_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
-    int clear_tool_calibration_pose();
+    ToolCalibration6Points();
+    ~ToolCalibration6Points();
+
+    int calibrate();
+
+    void get_calibrated(bool &calibrated);
+    void get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
+    void get_calibration_poses(std::vector<CartesianPose> &calibration_poses);
+
+    void set_calibration_pose(const int &index, const CartesianPose &pose);
+    int clear_calibration_pose();
+
 private:
-    Eigen::Matrix4d pose_to_matrix(const CartesianPose& pose);
-    int calculate_toolhand_calibration_matrix(const std::vector<CartesianPose>& flange_poses, 
-                                                const std::vector<CartesianPose>& tcp_poses);
-    double tool_max_error_;
-    bool tool_calibrated_;
-    std::vector<CartesianPose> flange_poses_;
-    std::vector<CartesianPose> tcp_poses_;
-    Eigen::Matrix4d *tool_pose_calibration_matrix_;
+    int tool_calculate_6points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix);
+    Eigen::Matrix4d rpy_to_matrix(const CartesianPose& pose_deg);
     
+
+private:
+    std::vector<CartesianPose> source_poses_;
+    Eigen::Matrix4d *calibration_matrix_;
+    bool calibrated_;
 };
 
 #endif
