@@ -79,6 +79,13 @@ void MainWindow::init_connect()
     connect(ui->pushButton_save_mark_result, SIGNAL(clicked()), this, SLOT(slot_save_calib_result()));
     connect(ui->pushButton_vive_start, SIGNAL(clicked()), this, SLOT(slot_start_update_track_pose()));
     connect(ui->pushButton_vive_stop, SIGNAL(clicked()), this, SLOT(slot_stop_update_track_pose()));
+    connect(ui->pushButton_tracker2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_point()));
+    connect(ui->pushButton_tracker2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_clear_point()));
+    connect(ui->pushButton_tracker2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_calibrate()));
+    connect(ui->pushButton_flange2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_mark_point()));
+    connect(ui->pushButton_flange2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_clear_point()));
+    connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
+
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -287,11 +294,12 @@ void MainWindow::slot_clear()
 
 void MainWindow::slot_tracker2tcp_mark_point()
 {
+    std::cout << __FUNCTION__ << std::endl;
     CartesianPose pose = vive_tracker_reader_->get_latest_pose();
     std::vector<CartesianPose> mark_poses;
     tracker2tcp_calibration_->get_calibration_poses(mark_poses);
     int size = mark_poses.size();
-    tracker2tcp_calibration_->set_calibration_pose(size+1, pose);
+    tracker2tcp_calibration_->set_calibration_pose(size, pose);
     ui->label_tracker2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(size + 1));
 }
 
@@ -301,7 +309,12 @@ void MainWindow::slot_tracker2tcp_calibrate()
     if (ret)
         std::cout << "tracker2tcp calibrate fail" << std::endl;
     else
+    {
         std::cout << "tracker2tcp calibrate success" << std::endl;
+        Eigen::Matrix4d calib_matrix;
+        tracker2tcp_calibration_->get_pose_calibration_matrix(calib_matrix);
+        std::cout << "tracker2tcp calib matrix:\n" << calib_matrix << std::endl;
+    }
 }
 
 void MainWindow::slot_tracker2tcp_clear_point()
