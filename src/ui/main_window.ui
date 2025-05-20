@@ -1785,7 +1785,7 @@
      <rect>
       <x>10</x>
       <y>490</y>
-      <width>421</width>
+      <width>521</width>
       <height>131</height>
      </rect>
     </property>
@@ -1837,7 +1837,7 @@
     <widget class="QLabel" name="label_vive_y_tag">
      <property name="geometry">
       <rect>
-       <x>160</x>
+       <x>170</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1853,7 +1853,7 @@
     <widget class="QLabel" name="label_vive_z_tag">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>250</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1869,7 +1869,7 @@
     <widget class="QLabel" name="label_vive_C_tag">
      <property name="geometry">
       <rect>
-       <x>390</x>
+       <x>470</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1885,7 +1885,7 @@
     <widget class="QLabel" name="label_vive_B_tag">
      <property name="geometry">
       <rect>
-       <x>330</x>
+       <x>410</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1901,7 +1901,7 @@
     <widget class="QLabel" name="label_vive_A_tag">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>330</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1917,9 +1917,9 @@
     <widget class="QLabel" name="label_vive_z">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>230</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -1933,9 +1933,9 @@
     <widget class="QLabel" name="label_vive_B">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>380</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -1951,7 +1951,7 @@
       <rect>
        <x>150</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -1965,9 +1965,9 @@
     <widget class="QLabel" name="label_vive_x">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>80</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -1981,9 +1981,9 @@
     <widget class="QLabel" name="label_vive_C">
      <property name="geometry">
       <rect>
-       <x>380</x>
+       <x>450</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -1997,9 +1997,9 @@
     <widget class="QLabel" name="label_vive_A">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>310</x>
        <y>40</y>
-       <width>41</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -2040,7 +2040,7 @@
    <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>550</x>
       <y>490</y>
       <width>301</width>
       <height>131</height>
@@ -2108,7 +2108,7 @@
    <widget class="QGroupBox" name="groupBox_tracker2tcp_calib">
     <property name="geometry">
      <rect>
-      <x>760</x>
+      <x>870</x>
       <y>490</y>
       <width>301</width>
       <height>131</height>

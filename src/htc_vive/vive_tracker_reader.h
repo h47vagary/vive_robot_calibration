@@ -9,7 +9,7 @@
 
 struct VivePose
 {
-    float x, y, z;
+    float x, y, z;              // mm
     float qx, qy, qz, qw;
     uint64_t button_mask;
     bool valid;

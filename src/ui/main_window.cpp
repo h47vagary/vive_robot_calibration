@@ -162,7 +162,6 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
     }
 }
 
-
 void MainWindow::slot_compute_result_received(double result)
 {
     ui->label_calibration_error->setText(QString::number(result, 'f', 2));
@@ -172,6 +171,7 @@ void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose po
 {
     std::cout << __FUNCTION__ << " index: " << index << std::endl;
     flange2tcp_calibration_->set_calibration_pose(index, pose);
+    ui->label_flange2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(index));
 }
 
 void MainWindow::slot_connect_ctr()
@@ -292,6 +292,7 @@ void MainWindow::slot_tracker2tcp_mark_point()
     tracker2tcp_calibration_->get_calibration_poses(mark_poses);
     int size = mark_poses.size();
     tracker2tcp_calibration_->set_calibration_pose(size+1, pose);
+    ui->label_tracker2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(size + 1));
 }
 
 void MainWindow::slot_tracker2tcp_calibrate()

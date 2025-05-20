@@ -52,9 +52,9 @@ bool ViveTracker::find_tracker()
 void ViveTracker::set_origin(float x, float y, float z,
                              float qx, float qy, float qz, float qw)
 {
-    origin_x_ = x / 1000.0f;
-    origin_y_ = y / 1000.0f;
-    origin_z_ = z / 1000.0f;
+    origin_x_ = x;
+    origin_y_ = y;
+    origin_z_ = z;
     origin_qx_ = qx;
     origin_qy_ = qy;
     origin_qz_ = qz;
@@ -78,6 +78,10 @@ bool ViveTracker::get_pose(float& x, float& y, float& z,
 
     get_position_and_rotation(pose, x, y, z, qx, qy, qz, qw);
     
+    x *= 1000.0f;
+    y *= 1000.0f;
+    z *= 1000.0f;
+
     button_mask = get_button_mask();
     return true;
 }
@@ -99,9 +103,9 @@ bool ViveTracker::get_relative_pose(float& x, float& y, float& z,
     }
 
 
-    x = (abs_x - origin_x_) * 1000.0f;
-    y = (abs_y - origin_y_) * 1000.0f;
-    z = (abs_z - origin_z_) * 1000.0f;
+    x = (abs_x - origin_x_);
+    y = (abs_y - origin_y_);
+    z = (abs_z - origin_z_);
 
     float inv_qx, inv_qy, inv_qz, inv_qw;
     quat_inverse(origin_qx_, origin_qy_, origin_qz_, origin_qw_,
