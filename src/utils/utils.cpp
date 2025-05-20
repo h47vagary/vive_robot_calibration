@@ -95,6 +95,33 @@ void Utils::slerp(const Quaternion &quat_start, const Quaternion &quat_end, cons
     }
 }
 
+Eigen::Matrix4d Utils::pose_to_matrix(const CartesianPose &pose)
+{
+    Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
+    Eigen::Matrix3d rotation;
+    Utils::euler_ABC_to_matrix(pose.orientation.A, pose.orientation.B, pose.orientation.C, rotation);
+
+    mat.block<3,3>(0,0) = rotation;
+    mat(0, 3) = pose.position.x;
+    mat(1, 3) = pose.position.y;
+    mat(2, 3) = pose.position.z;
+
+    return mat;
+}
+
+CartesianPose Utils::matrix_to_pose(const Eigen::Matrix4d &mat)
+{
+    CartesianPose pose;
+    pose.position.x = mat(0,3);
+    pose.position.y = mat(1,3);
+    pose.position.z = mat(2,3);
+    
+    Eigen::Matrix3d rotation = mat.block<3,3>(0,0);
+    Utils::matrix_to_eular_ABC(rotation, pose.orientation.A, pose.orientation.B, pose.orientation.C);
+
+    return pose;
+}
+
 std::string extract_trajectory_strings(const std::string& file_path)
 {
     std::string result = "";

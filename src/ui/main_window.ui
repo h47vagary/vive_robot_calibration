@@ -172,8 +172,8 @@
     <widget class="QPushButton" name="pushButton_delete_mark_result">
      <property name="geometry">
       <rect>
-       <x>70</x>
-       <y>320</y>
+       <x>30</x>
+       <y>350</y>
        <width>91</width>
        <height>41</height>
       </rect>
@@ -185,10 +185,10 @@
     <widget class="QPushButton" name="pushButton_compute">
      <property name="geometry">
       <rect>
-       <x>70</x>
+       <x>30</x>
        <y>250</y>
        <width>91</width>
-       <height>41</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -198,8 +198,8 @@
     <widget class="QPushButton" name="pushButton_save_mark_result">
      <property name="geometry">
       <rect>
-       <x>220</x>
-       <y>320</y>
+       <x>140</x>
+       <y>350</y>
        <width>91</width>
        <height>41</height>
       </rect>
@@ -211,10 +211,10 @@
     <widget class="QLabel" name="label_calibration_error">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>150</x>
        <y>250</y>
        <width>91</width>
-       <height>41</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -1783,10 +1783,10 @@
    <widget class="QGroupBox" name="groupBox_vive">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>520</y>
-      <width>541</width>
-      <height>141</height>
+      <x>10</x>
+      <y>490</y>
+      <width>421</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
@@ -1808,7 +1808,7 @@
     <widget class="QPushButton" name="pushButton_set_origin">
      <property name="geometry">
       <rect>
-       <x>430</x>
+       <x>320</x>
        <y>90</y>
        <width>81</width>
        <height>23</height>
@@ -1837,7 +1837,7 @@
     <widget class="QLabel" name="label_vive_y_tag">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>160</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1853,7 +1853,7 @@
     <widget class="QLabel" name="label_vive_z_tag">
      <property name="geometry">
       <rect>
-       <x>240</x>
+       <x>220</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1869,7 +1869,7 @@
     <widget class="QLabel" name="label_vive_C_tag">
      <property name="geometry">
       <rect>
-       <x>440</x>
+       <x>390</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1885,7 +1885,7 @@
     <widget class="QLabel" name="label_vive_B_tag">
      <property name="geometry">
       <rect>
-       <x>370</x>
+       <x>330</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1901,7 +1901,7 @@
     <widget class="QLabel" name="label_vive_A_tag">
      <property name="geometry">
       <rect>
-       <x>300</x>
+       <x>270</x>
        <y>20</y>
        <width>21</width>
        <height>21</height>
@@ -1917,7 +1917,7 @@
     <widget class="QLabel" name="label_vive_z">
      <property name="geometry">
       <rect>
-       <x>230</x>
+       <x>210</x>
        <y>40</y>
        <width>41</width>
        <height>21</height>
@@ -1933,7 +1933,7 @@
     <widget class="QLabel" name="label_vive_B">
      <property name="geometry">
       <rect>
-       <x>360</x>
+       <x>320</x>
        <y>40</y>
        <width>41</width>
        <height>21</height>
@@ -1949,7 +1949,7 @@
     <widget class="QLabel" name="label_vive_y">
      <property name="geometry">
       <rect>
-       <x>160</x>
+       <x>150</x>
        <y>40</y>
        <width>41</width>
        <height>21</height>
@@ -1981,7 +1981,7 @@
     <widget class="QLabel" name="label_vive_C">
      <property name="geometry">
       <rect>
-       <x>430</x>
+       <x>380</x>
        <y>40</y>
        <width>41</width>
        <height>21</height>
@@ -1997,7 +1997,7 @@
     <widget class="QLabel" name="label_vive_A">
      <property name="geometry">
       <rect>
-       <x>290</x>
+       <x>260</x>
        <y>40</y>
        <width>41</width>
        <height>21</height>
@@ -2034,6 +2034,142 @@
      </property>
      <property name="text">
       <string>停止</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>490</y>
+      <width>301</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>法兰盘 &lt;-&gt; TCP 标定</string>
+    </property>
+    <widget class="QPushButton" name="pushButton_flange2tcp_markpoint">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>记录点</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_flange2tcp_clear_point">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>清除所有点</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_flange2tcp_marked_num">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>30</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>需6个点,已记录点数: 0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_flange2tcp_calibrate">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>80</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>标定</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_tracker2tcp_calib">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>490</y>
+      <width>301</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Tracker &lt;-&gt; TCP 标定</string>
+    </property>
+    <widget class="QPushButton" name="pushButton_tracker2tcp_markpoint">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>记录点</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_tracker2tcp_clear_point">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>清除所有点</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_tracker2tcp_marked_num">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>30</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>需6个点,已记录点数: 0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>80</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>标定</string>
      </property>
     </widget>
    </widget>

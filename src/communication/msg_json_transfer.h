@@ -28,10 +28,12 @@ enum E_JSON_COMMAND
     E_JSON_COMMAND_SET_END_RECORD_,                     // 结束录制
     E_JSON_COMMAND_SET_START_PLAYBACK_,                 // 开始回放
     E_JSON_COMMAND_SET_END_PLAYBACK_,                   // 结束回放
+    E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_,           // 标定法兰盘2TCP点
     
     E_JSON_COMMAND_RECEIVE_MES_,                        // 接受控制器消息
     E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_,           // 接受控制器标定点 
     E_JSON_COMMAND_RECEIVE_ROBOT_COMPUTE_RESULT_,       // 接受控制器计算结果
+    E_JSON_COMMAND_RECEIVE_FLANG2TCP_MARK_POINT_,       // 接收法兰盘2TCP点
 };
 
 

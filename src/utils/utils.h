@@ -96,6 +96,9 @@ void quaternion_to_euler_ABC(const Quaternion &quat, double &A, double &B, doubl
 
 void plerp(const CartesianPosition &position_start, const CartesianPosition &position_end, const double &t, CartesianPosition &position_t);
 void slerp(const Quaternion &quat_start, const Quaternion &quat_end, const double &t, Quaternion &quat_t);
+
+Eigen::Matrix4d pose_to_matrix(const CartesianPose &pose);
+CartesianPose matrix_to_pose(const Eigen::Matrix4d &mat);
 }
 
 namespace TimeDealUtils

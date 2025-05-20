@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent)
     msg_handler_ = new MessageHandler(this);
     vive_tracker_reader_ = new ViveTrackerReader();
     vive_tracker_reader_->start();
+    calibration_manager_ = new CalibrationManager();
+    flange2tcp_calibration_ = new ToolCalibration6Points();
+    tracker2tcp_calibration_ = new ToolCalibration6Points();
 
     init_connect();
     init_style();
@@ -110,6 +113,14 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
     {
         if (!r_labels_map.contains(index)) return;
         labels = &r_labels_map[index];
+
+        Eigen::Matrix4d pose_calibration_matrix;
+        flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+        Eigen::Matrix4d flange_matrix = Utils::pose_to_matrix(pose);
+        Eigen::Matrix4d tcp_matrix = flange_matrix * pose_calibration_matrix;
+        CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
+        calibration_manager_->set_robot_calibration_positon(index, pose_tcp.position);
+        calibration_manager_->set_robot_calibration_orientation(index, pose_tcp.orientation);
     }
     else if (type == E_POSE_TYPE_VIVE)
     {
@@ -151,6 +162,12 @@ void MainWindow::slot_compute_result_received(double result)
     ui->label_calibration_error->setText(QString::number(result, 'f', 2));
 }
 
+void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose)
+{
+    std::cout << __FUNCTION__ << " index: " << index << std::endl;
+    flange2tcp_calibration_->set_calibration_pose(index, pose);
+}
+
 void MainWindow::slot_connect_ctr()
 {
     std::cout << __FUNCTION__ << std::endl;
@@ -186,8 +203,9 @@ void MainWindow::slot_end_playback()
 }
 
 void MainWindow::slot_delete_calib_result()
-{   
+{
     std::cout << __FUNCTION__ << std::endl;
+    calibration_manager_->clear_calibration_position();
 }
 void MainWindow::slot_save_calib_result()
 {
@@ -196,10 +214,34 @@ void MainWindow::slot_save_calib_result()
 void MainWindow::slot_compute()
 {
     std::cout << __FUNCTION__ << std::endl;
+    double max_error = -1000.0;
+    int rz = 0;
+    calibration_manager_->set_calibration_algorithm(2);
+    int ret = calibration_manager_->calibrate(0, max_error);
+    if (!ret)
+    {
+        ui->label_connect_state->setText("标定成功");
+    }
+    else
+    {
+        ui->label_connect_state->setText("标定失败");
+    }
+
+    ui->label_calibration_error->setText(QString::number(max_error));
+
 }
 
 void MainWindow::slot_mark_point()
 {
+    bool flange2tcp_calibrated = false, tracker2tcp_calibrated = false;
+    flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
+    tracker2tcp_calibration_->get_calibrated(tracker2tcp_calibrated);
+    if (!flange2tcp_calibration_ || !tracker2tcp_calibration_)
+    {
+        std::cout << "flange2tcp and tracker2tcp need to be calibrated first" << std::endl;
+        return;
+    }
+
     QObject* obj = sender();
     QPushButton* btn = qobject_cast<QPushButton*>(obj);
     if (!btn) return;
@@ -208,9 +250,17 @@ void MainWindow::slot_mark_point()
     if (index != -1)
     {
         emit signal_mark_point(index);
-        CartesianPose pose = vive_tracker_reader_->get_latest_pose();
         
-        
+        CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();
+        Eigen::Matrix4d pose_calibration_matrix;
+        tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+        Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
+        Eigen::Matrix4d tcp_matrix = tracker_matrix * pose_calibration_matrix;
+        CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
+        calibration_manager_->set_device_calibration_position(index, pose_tcp.position);
+        calibration_manager_->set_device_calibration_orientation(index, pose_tcp.orientation);
+
+        slot_mark_point_received(E_POSE_TYPE_VIVE, index, pose_tracker);
     }
     else
         std::cout << "not found in mark button list" << std::endl;
@@ -230,3 +280,47 @@ void MainWindow::slot_clear()
     ui->lineEdit_reciver_window->clear();
 }
 
+void MainWindow::slot_tracker2tcp_mark_point()
+{
+    CartesianPose pose = vive_tracker_reader_->get_latest_pose();
+    std::vector<CartesianPose> mark_poses;
+    tracker2tcp_calibration_->get_calibration_poses(mark_poses);
+    int size = mark_poses.size();
+    tracker2tcp_calibration_->set_calibration_pose(size+1, pose);
+}
+
+void MainWindow::slot_tracker2tcp_calibrate()
+{
+    int ret = tracker2tcp_calibration_->calibrate();
+    if (ret)
+        std::cout << "tracker2tcp calibrate fail" << std::endl;
+    else
+        std::cout << "tracker2tcp calibrate success" << std::endl;
+}
+
+void MainWindow::slot_tracker2tcp_clear_point()
+{
+    tracker2tcp_calibration_->clear_calibration_pose();
+}
+
+void MainWindow::slot_flange2tcp_mark_point()
+{
+    std::vector<CartesianPose> mark_poses;
+    flange2tcp_calibration_->get_calibration_poses(mark_poses);
+    int size = mark_poses.size();
+    emit signal_flang2tcp_mark_point(size + 1);
+}
+
+void MainWindow::slot_flange2tcp_calibrate()
+{
+    int ret = flange2tcp_calibration_->calibrate();
+    if (ret)
+        std::cout << "flange2tcp_calibration_ calibrate fail" << std::endl;
+    else
+        std::cout << "flange2tcp_calibration_ calibrate success" << std::endl;
+}
+
+void MainWindow::slot_flange2tcp_clear_point()
+{
+    flange2tcp_calibration_->clear_calibration_pose();
+}

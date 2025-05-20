@@ -134,6 +134,34 @@ void CalibrationManager::set_calibration_orientation(const CartesianOrientation 
     device_calibration_orientation_ = device_orientation;
 }
 
+void CalibrationManager::set_robot_calibration_positon(const int &index, const CartesianPosition &robot_position)
+{
+    if(index >= robot_calibration_positions_.size())
+    {
+        robot_calibration_positions_.resize(index + 1);
+    }
+    robot_calibration_positions_[index] = robot_position;
+}
+
+void CalibrationManager::set_device_calibration_position(const int &index, const CartesianPosition &device_position)
+{
+    if(index >= device_calibration_positions_.size())
+    {
+        device_calibration_positions_.resize(index + 1);
+    }
+    device_calibration_positions_[index] = device_position;
+}
+
+void CalibrationManager::set_robot_calibration_orientation(const int &index, const CartesianOrientation &robot_orientation)
+{
+    robot_calibration_orientation_ = robot_orientation;
+}
+
+void CalibrationManager::set_device_calibration_orientation(const int &index, const CartesianOrientation &device_orientation)
+{
+    device_calibration_orientation_ = device_orientation;
+}
+
 int CalibrationManager::clear_calibration_position()
 {
     robot_calibration_positions_.clear();
@@ -402,6 +430,7 @@ void CalibrationManager::optimize_svd(const std::vector<Eigen::Vector3d> &robot_
 ToolCalibration6Points::ToolCalibration6Points()
 {
     calibration_matrix_ = new Eigen::Matrix4d();
+    source_poses_.clear();
     calibrated_ = false;
 }
 
@@ -427,7 +456,6 @@ int ToolCalibration6Points::calibrate()
     }
 }
 
-
 void ToolCalibration6Points::get_calibrated(bool &calibrated)
 {
     calibrated = calibrated_;
@@ -447,7 +475,7 @@ void ToolCalibration6Points::set_calibration_pose(const int &index, const Cartes
 {
     if (index >= source_poses_.size())
     {
-        source_poses_.resize(index + 1);
+        source_poses_.resize(index+1);
     }
     source_poses_[index] = pose;
 }

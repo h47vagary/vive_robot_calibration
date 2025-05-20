@@ -148,6 +148,24 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
         }
         break;
     }
+    case E_JSON_COMMAND_RECEIVE_FLANG2TCP_MARK_POINT_:
+    {
+        std::cout << "=== 接收法兰盘->TCP标定点坐标 ===" << std::endl;
+        CartesianPose pose;
+        int point;
+        if (!MsgJsonTransfer::transfer_rob_pose(msg, point, pose))
+        {
+            std::cout << "point: " << point << std::endl;
+            std::cout << "pose.pos.x: " << pose.position.x << "  pose.pos.y: " << pose.position.y << " pose.pos.z: " << pose.position.z
+                        << " pose.ori.A: " << pose.orientation.A << " pose.ori.B: " << pose.orientation.B << "pose.ori.C: " << pose.orientation.C
+                            << std::endl;
+            emit signal_flange2tcp_mark_point_received(point, pose);
+        }
+        else
+        {
+            std::cout << "transfer_rob_pose fail !" << std::endl;
+        }
+    }
     default:
     {
         std::cout << "unknown command !" << std::endl;
@@ -216,6 +234,15 @@ void MessageHandler::slot_handler_end_playback()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_END_PLAYBACK_, ++serial_id_send_, json_str_out);
+    std::cout << "json_str_out: " << json_str_out << std::endl;
+    comm_.nrc_send_message(0x9206, json_str_out);
+}
+
+void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
+{
+    if (!running_) return;
+    std::string json_str_out;
+    MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_, ++serial_id_send_, index, json_str_out);
     std::cout << "json_str_out: " << json_str_out << std::endl;
     comm_.nrc_send_message(0x9206, json_str_out);
 }

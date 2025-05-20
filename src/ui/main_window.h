@@ -9,6 +9,7 @@
 
 #include "message_handler.h"
 #include "vive_tracker_reader.h"
+#include "calibration.h"
 
 namespace Ui {
     class MainWindow;
@@ -40,10 +41,21 @@ private slots:
     void slot_send();
     void slot_clear();
 
+    void slot_tracker2tcp_mark_point();
+    void slot_tracker2tcp_calibrate();
+    void slot_tracker2tcp_clear_point();
+    
+    void slot_flange2tcp_mark_point();
+    void slot_flange2tcp_calibrate();
+    void slot_flange2tcp_clear_point();
+    
+    
+
 public slots:
     void slot_handle_message(const QString& msg);
     void slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
     void slot_compute_result_received(double result);
+    void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
 
 signals:
     void signal_connect_ctr();
@@ -54,6 +66,7 @@ signals:
     void signal_end_record();
     void signal_start_playback();
     void signal_end_playback();
+    void signal_flang2tcp_mark_point(int point_index);
 
 private:
     void init_connect();
@@ -67,5 +80,8 @@ private:
 
     MessageHandler* msg_handler_;
     ViveTrackerReader* vive_tracker_reader_;
+    CalibrationManager* calibration_manager_;
+    ToolCalibration6Points* flange2tcp_calibration_;
+    ToolCalibration6Points* tracker2tcp_calibration_;
 };
 

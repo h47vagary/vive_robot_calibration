@@ -35,4 +35,5 @@ target_link_libraries(ui
         Qt5::Widgets
         communication
         htc_vive
+        algorithm
 )

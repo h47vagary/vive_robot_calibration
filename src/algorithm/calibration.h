@@ -35,6 +35,11 @@ public:
     void device_pose_to_robot_pose(const CartesianPosition &device_position, const CartesianOrientation &device_orientation, CartesianPose &robot_pose);
     void set_calibration_position(const int &index, const CartesianPosition &robot_position, const CartesianPosition &device_position);
     void set_calibration_orientation(const CartesianOrientation &robot_orientation, const CartesianOrientation &device_orientation);
+    void set_robot_calibration_positon(const int &index, const CartesianPosition &robot_position);
+    void set_device_calibration_position(const int &index, const CartesianPosition &device_position);
+    void set_robot_calibration_orientation(const int &index, const CartesianOrientation &robot_orientation);
+    void set_device_calibration_orientation(const int &index, const CartesianOrientation &device_orientation);
+    
     int clear_calibration_position();
     void set_calibration_algorithm(int method);
     void get_calibration_algorithm(int& method);
