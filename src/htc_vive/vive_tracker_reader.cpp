@@ -68,6 +68,8 @@ CartesianPose ViveTrackerReader::get_latest_pose()
                                     cartesian_pose.orientation.B,
                                     cartesian_pose.orientation.C);
 
+    std::cout << "x:" << cartesian_pose.position.x << " y:" << cartesian_pose.position.y << " z:" << cartesian_pose.position.z << 
+                " A:" << cartesian_pose.orientation.A << " B:" << cartesian_pose.orientation.B << " C:" << cartesian_pose.orientation.C << std::endl;
     return cartesian_pose;
 }
 
@@ -91,6 +93,9 @@ void ViveTrackerReader::read_loop()
             pose.qw = qw;
             pose.button_mask = button_mask;
             pose.valid = ok;
+
+            std::cout << "x:" << pose.x << " y:" << pose.y << " z:" << pose.z << " qx:" << pose.qx << " qy:" << pose.qy << " qz:" << 
+                                pose.qz << " qw:" << pose.qw << std::endl;
 
             // 切换可读索引
             active_index_.store(write_index, std::memory_order_release);

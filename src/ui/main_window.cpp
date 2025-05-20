@@ -24,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
     flange2tcp_calibration_ = new ToolCalibration6Points();
     tracker2tcp_calibration_ = new ToolCalibration6Points();
 
+    track_pose_timer_ = new QTimer(this);
+    track_pose_timer_->setInterval(5);
+
     init_connect();
     init_style();
     init_label_maps();
@@ -74,6 +77,8 @@ void MainWindow::init_connect()
     connect(ui->pushButton_end_playback, SIGNAL(clicked()), this, SLOT(slot_end_playback()));
     connect(ui->pushButton_delete_mark_result, SIGNAL(clicked()), this, SLOT(slot_delete_calib_result()));
     connect(ui->pushButton_save_mark_result, SIGNAL(clicked()), this, SLOT(slot_save_calib_result()));
+    connect(ui->pushButton_vive_start, SIGNAL(clicked()), this, SLOT(slot_start_update_track_pose()));
+    connect(ui->pushButton_vive_stop, SIGNAL(clicked()), this, SLOT(slot_stop_update_track_pose()));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -88,6 +93,7 @@ void MainWindow::init_connect()
     connect(msg_handler_, &MessageHandler::signal_message_received, this, &MainWindow::slot_handle_message);
     connect(msg_handler_, &MessageHandler::signal_mark_point_received, this, &MainWindow::slot_mark_point_received);
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
+    connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
     connect(this, &MainWindow::signal_send_message, msg_handler_, &MessageHandler::slot_handler_send_message);
@@ -266,7 +272,6 @@ void MainWindow::slot_mark_point()
         std::cout << "not found in mark button list" << std::endl;
 }
 
-
 void MainWindow::slot_send()
 {
     QString send_text = ui->lineEdit_sender_window->text();
@@ -323,4 +328,25 @@ void MainWindow::slot_flange2tcp_calibrate()
 void MainWindow::slot_flange2tcp_clear_point()
 {
     flange2tcp_calibration_->clear_calibration_pose();
+}
+
+void MainWindow::slot_track_pose_timeout()
+{
+    CartesianPose pose = vive_tracker_reader_->get_latest_pose();
+    ui->label_vive_A->setText(QString::number(pose.orientation.A));
+    ui->label_vive_B->setText(QString::number(pose.orientation.B));
+    ui->label_vive_C->setText(QString::number(pose.orientation.C));
+    ui->label_vive_x->setText(QString::number(pose.position.x));
+    ui->label_vive_y->setText(QString::number(pose.position.y));
+    ui->label_vive_z->setText(QString::number(pose.position.z));
+}
+
+void MainWindow::slot_start_update_track_pose()
+{
+    track_pose_timer_->start();
+}
+
+void MainWindow::slot_stop_update_track_pose()
+{
+    track_pose_timer_->stop();
 }

@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QMap>
 #include <QVector>
+#include <QTimer>
 
 #include "message_handler.h"
 #include "vive_tracker_reader.h"
@@ -49,7 +50,9 @@ private slots:
     void slot_flange2tcp_calibrate();
     void slot_flange2tcp_clear_point();
     
-    
+    void slot_track_pose_timeout();
+    void slot_start_update_track_pose();
+    void slot_stop_update_track_pose();
 
 public slots:
     void slot_handle_message(const QString& msg);
@@ -74,6 +77,7 @@ private:
     void init_label_maps(); // 初始化绑定
 
     Ui::MainWindow *ui;
+    QTimer* track_pose_timer_;
     QList<QPushButton*> mark_buttons_;
     QMap<int, QVector<QLabel*>> v_labels_map;  // label_v1_x ~ label_v6_C
     QMap<int, QVector<QLabel*>> r_labels_map;  // label_r1_x ~ label_r6_C
