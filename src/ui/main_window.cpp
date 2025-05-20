@@ -300,6 +300,8 @@ void MainWindow::slot_tracker2tcp_mark_point()
     tracker2tcp_calibration_->get_calibration_poses(mark_poses);
     int size = mark_poses.size();
     tracker2tcp_calibration_->set_calibration_pose(size, pose);
+    std::cout << "point" << size << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
     ui->label_tracker2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(size + 1));
 }
 
