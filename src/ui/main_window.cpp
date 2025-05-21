@@ -21,8 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     vive_tracker_reader_ = new ViveTrackerReader();
     vive_tracker_reader_->start();
     calibration_manager_ = new CalibrationManager();
-    flange2tcp_calibration_ = new ToolCalibration6Points();
-    tracker2tcp_calibration_ = new ToolCalibration6Points();
+    // flange2tcp_calibration_ = new ToolCalibration6Points();
+    // tracker2tcp_calibration_ = new ToolCalibration6Points();
+    flange2tcp_calibration_ = new ToolCalibration7Points();
+    tracker2tcp_calibration_ = new ToolCalibration7Points();
 
     track_pose_timer_ = new QTimer(this);
     track_pose_timer_->setInterval(5);

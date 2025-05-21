@@ -85,7 +85,9 @@ private:
     MessageHandler* msg_handler_;
     ViveTrackerReader* vive_tracker_reader_;
     CalibrationManager* calibration_manager_;
-    ToolCalibration6Points* flange2tcp_calibration_;
-    ToolCalibration6Points* tracker2tcp_calibration_;
+    // ToolCalibration6Points* flange2tcp_calibration_;
+    // ToolCalibration6Points* tracker2tcp_calibration_;
+    ToolCalibration7Points* flange2tcp_calibration_;
+    ToolCalibration7Points* tracker2tcp_calibration_;
 };
 

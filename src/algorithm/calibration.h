@@ -70,7 +70,10 @@ private:
     const int c_max_iteration = 50;
 };
 
-
+/**
+ * @brief 通用版本的 RobotModel::toolCalibration 接口抽出来的关于 6 点的工具手标定算法法
+ * 
+ */
 class ToolCalibration6Points
 {
 public:
@@ -97,4 +100,61 @@ private:
     bool calibrated_;
 };
 
+// /**
+//  * @brief 最小二乘法标定工具手
+//  * 
+//  */
+// class ToolCalibrationLeastSquare
+// {
+// public:
+//     ToolCalibrationLeastSquare();
+//     ~ToolCalibrationLeastSquare();
+
+//     int calibrate();
+//     void get_calibrated(bool &calibrated) const;
+//     void get_tcp_in_flange(Eigen::Vector3d &tcp_pos) const;
+
+//     void get_calibration_poses(std::vector<CartesianPose> &calibration_poses) const;
+//     void set_calibration_pose(const int &index, const CartesianPose &pose);
+//     int clear_calibration_pose();
+
+// private:
+//     int slove_least_square(const std::vector<CartesianPose> &poses, Eigen::Vector3d &tcp);
+
+// private:
+//     std::vector<CartesianPose> source_poses_;
+//     Eigen::Vector3d *tcp_pos_;   // 法兰坐标系下的TCP位置
+//     bool calibrated_;
+// };
+
+/**
+ * @brief 通用版本的 RobotModel::toolCalibration 接口抽出来的关于 7 点的工具手标定算法法
+ * 
+ */
+class ToolCalibration7Points
+{
+public:
+    ToolCalibration7Points();
+    ~ToolCalibration7Points();
+
+    int calibrate();
+
+    void get_calibrated(bool &calibrated);
+    void get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
+    void get_calibration_poses(std::vector<CartesianPose> &calibration_poses);
+
+    void set_calibration_pose(const int &index, const CartesianPose &pose);
+    int clear_calibration_pose();
+
+private:
+    int tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix);
+    int Sphere(double x1, double y1, double z1, double x2, double y2, double z2,
+        double x3, double y3, double z3, double x4, double y4, double z4,
+        double *px, double *py, double *pz);
+
+private:
+    std::vector<CartesianPose> source_poses_;
+    Eigen::Matrix4d *calibration_matrix_;
+    bool calibrated_;
+};
 #endif

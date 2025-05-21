@@ -493,8 +493,10 @@ int ToolCalibration6Points::tool_calculate_6points(const std::vector<CartesianPo
         return -1;
 
     // Step 1: XY 平面标定（平移量）
-    Eigen::Matrix4d T1 = rpy_to_matrix(poses[0]);
-    Eigen::Matrix4d T2 = rpy_to_matrix(poses[1]);
+    // Eigen::Matrix4d T1 = rpy_to_matrix(poses[0]);
+    // Eigen::Matrix4d T2 = rpy_to_matrix(poses[1]);
+    Eigen::Matrix4d T1 = Utils::pose_to_matrix(poses[0]);
+    Eigen::Matrix4d T2 = Utils::pose_to_matrix(poses[1]);
 
     double a = T1(0, 0) - T2(0, 0);
     double b = T1(0, 1) - T2(0, 1);
@@ -509,7 +511,8 @@ int ToolCalibration6Points::tool_calculate_6points(const std::vector<CartesianPo
     offset[2] = 0.0;
 
     // Step 2: Z 值
-    Eigen::Matrix4d T3 = rpy_to_matrix(poses[2]);
+    //Eigen::Matrix4d T3 = rpy_to_matrix(poses[2]);
+    Eigen::Matrix4d T3 = Utils::pose_to_matrix(poses[2]);
     double dz = (T3(0, 3) - T1(0, 3) - offset[0] * (T1(0, 0) - T3(0, 0)) - offset[1] * (T1(0, 1) - T3(0, 1))) 
                 / (T1(0, 2) - T3(0, 2));
     offset[2] = dz;
@@ -540,11 +543,12 @@ int ToolCalibration6Points::tool_calculate_6points(const std::vector<CartesianPo
     return 0;
 }
 
+// 欧拉角转旋转矩阵
 Eigen::Matrix4d ToolCalibration6Points::rpy_to_matrix(const CartesianPose &pose_deg)
 {
-    double rx = pose_deg.orientation.A * M_PI / 180.0;
-    double ry = pose_deg.orientation.B * M_PI / 180.0;
-    double rz = pose_deg.orientation.C * M_PI / 180.0;
+    double rx = pose_deg.orientation.A * PI / 180.0;
+    double ry = pose_deg.orientation.B * PI / 180.0;
+    double rz = pose_deg.orientation.C * PI / 180.0;
 
     double cr = cos(rx), sr = sin(rx);
     double cp = cos(ry), sp = sin(ry);
@@ -562,4 +566,292 @@ Eigen::Matrix4d ToolCalibration6Points::rpy_to_matrix(const CartesianPose &pose_
     T(2, 3) = pose_deg.position.z;
 
     return T;
+}
+
+
+
+// ToolCalibrationLeastSquare::ToolCalibrationLeastSquare()
+// {
+//     source_poses_.clear();
+//     calibrated_ = false;
+//     tcp_pos_ = new Eigen::Vector3d();
+// }
+
+// ToolCalibrationLeastSquare::~ToolCalibrationLeastSquare()
+// {
+//     delete tcp_pos_;
+// }
+
+// int ToolCalibrationLeastSquare::calibrate()
+// {
+//     if (source_poses_.size() < 2)
+//         return -1;
+
+//     int result = slove_least_square(source_poses_, *tcp_pos_);
+//     calibrated_ = (result == 0);
+//     return result;
+// }
+
+// void ToolCalibrationLeastSquare::get_calibrated(bool &calibrated) const
+// {
+//     calibrated = calibrated_;
+// }
+
+// void ToolCalibrationLeastSquare::get_tcp_in_flange(Eigen::Vector3d &tcp_pos) const
+// {
+//     tcp_pos = *tcp_pos_;
+// }
+
+// void ToolCalibrationLeastSquare::get_calibration_poses(std::vector<CartesianPose> &calibration_poses) const
+// {
+//     calibration_poses = source_poses_;
+// }
+
+// void ToolCalibrationLeastSquare::set_calibration_pose(const int &index, const CartesianPose &pose)
+// {
+//     if (index > source_poses_.size())
+//     {
+//         source_poses_.resize(index + 1);
+//     }
+//     source_poses_[index] = pose;
+// }
+
+// int ToolCalibrationLeastSquare::clear_calibration_pose()
+// {
+//     source_poses_.clear();
+//     calibrated_ = false;
+//     tcp_pos_->setZero();
+//     return 0;
+// }
+
+// int ToolCalibrationLeastSquare::slove_least_square(const std::vector<CartesianPose> &poses, Eigen::Vector3d &tcp)
+// {
+//     const size_t N = poses.size();
+//     if (N < 2)
+//         return -1;
+    
+//     std::vector<Eigen::Matrix4d> mats;
+//     for (const auto& p : poses)
+//     {
+//         mats.push_back(Utils::pose_to_matrix(p));
+//     }
+
+//     std::vector<Eigen::Matrix3d> R_list;
+//     std::vector<Eigen::Vector3d> T_list;
+
+//     for (size_t i = 0; i < N - 1; ++i)
+//     {
+//         Eigen::Matrix4d T1 = mats[i];
+//         Eigen::Matrix4d T2 = mats[i + 1];
+
+//         Eigen::Matrix4d T_rel = T1.inverse() * T2;
+//         Eigen::Matrix3d R = T_rel.block<3, 3>(0, 0);
+//         Eigen::Vector3d t = T_rel.block<3, 1>(0, 3);
+
+//         R_list.push_back(R - Eigen::Matrix3d::Identity());
+//         T_list.push_back(t);
+//     }
+
+//     const size_t M = R_list.size();
+//     Eigen::MatrixXd A(3 * M, 3);
+//     Eigen::VectorXd B(3 * M);
+
+//     for (size_t i = 0; i < M; ++i)
+//     {
+//         A.block<3,3>(3 * i, 0) = R_list[i];
+//         B.segment<3>(3 * i) = T_list[i];
+//     }
+
+//     tcp = A.colPivHouseholderQr().solve(B);
+
+//     return 0;
+// }
+
+
+//========================================= 七点标定 ============================================
+ToolCalibration7Points::ToolCalibration7Points()
+{
+    calibration_matrix_ = new Eigen::Matrix4d();
+    source_poses_.clear();
+    calibrated_ = false;
+}
+
+ToolCalibration7Points::~ToolCalibration7Points()
+{
+    delete calibration_matrix_;
+}
+
+int ToolCalibration7Points::calibrate()
+{
+    if (source_poses_.size() != 7)
+        return -1;
+
+    if (!tool_calculate_7points(source_poses_, *calibration_matrix_))
+    {
+        calibrated_ = true;
+        return 0;
+    }
+    else
+    {
+        calibrated_ = false;
+        return -1;
+    }
+}
+
+void ToolCalibration7Points::get_calibrated(bool &calibrated)
+{
+    calibrated = calibrated_;
+}
+
+void ToolCalibration7Points::get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix)
+{
+    pose_calibration_matrix = *calibration_matrix_;
+}
+
+void ToolCalibration7Points::get_calibration_poses(std::vector<CartesianPose> &calibration_poses)
+{
+    calibration_poses = source_poses_;
+}
+
+void ToolCalibration7Points::set_calibration_pose(const int &index, const CartesianPose &pose)
+{
+    if (index >= source_poses_.size())
+        source_poses_.resize(index + 1);
+
+    source_poses_[index] = pose;
+}
+
+int ToolCalibration7Points::clear_calibration_pose()
+{
+    source_poses_.clear();
+    calibrated_ = false;
+    return 0;
+}
+
+int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix)
+{
+    if (poses.size() != 7)
+        return -1;
+
+    //to store the centre of the sphere
+    double ox = 0.0, oy = 0.0, oz = 0.0;
+    //vars used in the step1
+    Eigen::Vector4d vecSphereCentre(4), vecTool2Flange(4);
+    Eigen::Matrix4d matPos1;
+    Eigen::VectorXd tcp1(6);
+    Eigen::VectorXd tcp5(6);
+    Eigen::VectorXd tcpFlange(6);
+    //vars used in the step2
+    Eigen::Vector4d vecPos5ToBase(4);
+    Eigen::Vector3d vecTemp1(3),vecTemp2(3),vecTemp3(3);
+    Eigen::Matrix4d matPos5, matTool2Base, matTool2Flange;
+    //Step1: 求解圆心,然后解出TCP点到法兰末端的位置P(Px Py Pz)，存放在tcpToFlange指针中
+    Sphere(poses[0].position.x, poses[0].position.y, poses[0].position.z, poses[1].position.x, poses[1].position.y, poses[1].position.z,
+           poses[2].position.x,poses[2].position.y,poses[2].position.z, poses[3].position.x, poses[3].position.y, poses[3].position.z,
+           &ox, &oy, &oz);
+    vecSphereCentre(0) = ox;
+    vecSphereCentre(1) = oy;
+    vecSphereCentre(2) = oz;
+    vecSphereCentre(3) = 1.0;
+
+    // tcp1(0) = tcpPos1.x;
+    // tcp1(1) = tcpPos1.y;
+    // tcp1(2) = tcpPos1.z;
+    // tcp1(3) = deg2rad(tcpPos1.A);
+    // tcp1(4) = deg2rad(tcpPos1.B);
+    // tcp1(5) = deg2rad(tcpPos1.C);
+    // matPos1 = rpy2tr(tcp1);
+    matPos1 = Utils::pose_to_matrix(poses[0]);
+    vecTool2Flange = matPos1.inverse()*vecSphereCentre;     //P(Px Py Pz) in the tool coordinate system
+
+    // Step2: 再求相对于法兰盘末端的旋转方向
+    // 1.求TCP点在基坐标系下的姿态（向量）
+    vecTemp1(0) = poses[5].position.x - poses[4].position.x;
+    vecTemp1(1) = poses[5].position.y - poses[4].position.y;
+    vecTemp1(2) = poses[5].position.z - poses[4].position.z;
+    vecTemp2(0) = poses[6].position.x - poses[4].position.x;
+    vecTemp2(1) = poses[6].position.y - poses[4].position.y;
+    vecTemp2(2) = poses[6].position.z - poses[4].position.z;
+    vecTemp3 = vecTemp1.cross(vecTemp2);    // vector3=vector1叉乘vector2
+    vecTemp2 = vecTemp3.cross(vecTemp1);    // vector2=vector3叉乘vector1
+    //2.姿态（向量）单位化得到N、O、A矢量，即旋转矩阵R
+    vecTemp1.normalize();
+    vecTemp2.normalize();
+    vecTemp3.normalize();
+    //3.在Pos5处创建TCP点在基坐标系下的齐次变换矩阵bTt
+    // tcp5(0) = tcpPos5.x;
+    // tcp5(1) = tcpPos5.y;
+    // tcp5(2) = tcpPos5.z;
+    // tcp5(3) = deg2rad(tcpPos5.A);
+    // tcp5(4) = deg2rad(tcpPos5.B);
+    // tcp5(5) = deg2rad(tcpPos5.C);
+    // matPos5 = rpy2tr(tcp5);
+    matPos5 = Utils::pose_to_matrix(poses[4]);
+    vecPos5ToBase = matPos5*vecTool2Flange; //position5 P(Px Py Pz)in the base coordinate system
+    matTool2Base(0,0) = vecTemp1(0);
+    matTool2Base(1,0) = vecTemp1(1);
+    matTool2Base(2,0) = vecTemp1(2);
+    matTool2Base(3,0) = 0.0;
+    matTool2Base(0,1) = vecTemp2(0);
+    matTool2Base(1,1) = vecTemp2(1);
+    matTool2Base(2,1) = vecTemp2(2);
+    matTool2Base(3,1) = 0.0;
+    matTool2Base(0,2) = vecTemp3(0);
+    matTool2Base(1,2) = vecTemp3(1);
+    matTool2Base(2,2) = vecTemp3(2);
+    matTool2Base(3,2) = 0.0;
+    matTool2Base(0,3) = vecPos5ToBase(0);
+    matTool2Base(1,3) = vecPos5ToBase(1);
+    matTool2Base(2,3) = vecPos5ToBase(2);
+    matTool2Base(3,3) = 1.0;
+    matTool2Flange = matPos5.inverse()*matTool2Base;
+
+    calib_matrix = matTool2Flange;
+
+    // tcpFlange = tr2MCS(matTool2Flange);
+    // for (AXIS_REFS_INDEX ai=0; ai<6; ++ai)
+    // {
+    //     if (fabs(tcpFlange[ai]) < 10e-4)
+    //     {
+    //         tcpFlange[ai] = 0;
+    //     }
+    // }
+    // tcpToFlange->x = tcpFlange(0);
+    // tcpToFlange->y = tcpFlange(1);
+    // tcpToFlange->z = tcpFlange(2);
+    // tcpToFlange->A = tcpFlange(3);
+    // tcpToFlange->B = tcpFlange(4);
+    // tcpToFlange->C = tcpFlange(5);
+    return 0;
+}
+int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, double y2, double z2,
+        double x3, double y3, double z3, double x4, double y4, double z4,
+        double *px, double *py, double *pz)
+{
+    double a11, a12, a13, a21, a22, a23, a31, a32, a33, b1, b2, b3, d, d1, d2,
+            d3;
+    a11 = 2 * (x2 - x1);
+    a12 = 2 * (y2 - y1);
+    a13 = 2 * (z2 - z1);
+    a21 = 2 * (x3 - x2);
+    a22 = 2 * (y3 - y2);
+    a23 = 2 * (z3 - z2);
+    a31 = 2 * (x4 - x3);
+    a32 = 2 * (y4 - y3);
+    a33 = 2 * (z4 - z3);
+    b1 = x2 * x2 - x1 * x1 + y2 * y2 - y1 * y1 + z2 * z2 - z1 * z1;
+    b2 = x3 * x3 - x2 * x2 + y3 * y3 - y2 * y2 + z3 * z3 - z2 * z2;
+    b3 = x4 * x4 - x3 * x3 + y4 * y4 - y3 * y3 + z4 * z4 - z3 * z3;
+    d = a11 * a22 * a33 + a12 * a23 * a31 + a13 * a21 * a32 - a11 * a23 * a32
+            - a12 * a21 * a33 - a13 * a22 * a31;
+    d1 = b1 * a22 * a33 + a12 * a23 * b3 + a13 * b2 * a32 - b1 * a23 * a32
+            - a12 * b2 * a33 - a13 * a22 * b3;
+    d2 = a11 * b2 * a33 + b1 * a23 * a31 + a13 * a21 * b3 - a11 * a23 * b3
+            - b1 * a21 * a33 - a13 * b2 * a31;
+    d3 = a11 * a22 * b3 + a12 * b2 * a31 + b1 * a21 * a32 - a11 * b2 * a32
+            - a12 * a21 * b3 - b1 * a22 * a31;
+    (*px) = d1 / d;
+    (*py) = d2 / d;
+    (*pz) = d3 / d;
+    return 0;
 }
