@@ -76,6 +76,23 @@ bool vive_get_pose(float* x, float* y, float* z,
                    uint64_t* button_mask);
 
 /**
+ * @brief 获取当前 Tracker 的全局位置与姿态。
+ *
+ * @param[out] x 位置 X（单位：米）
+ * @param[out] y 位置 Y（单位：米）
+ * @param[out] z 位置 Z（单位：米）
+ * @param[out] A 姿态四元数 X 分量
+ * @param[out] B 姿态四元数 Y 分量
+ * @param[out] C 姿态四元数 Z 分量
+ * @param[out] button_mask 当前按键状态（bitmask）
+ *
+ * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
+ */
+bool vive_get_pose_abc(double* x, double* y, double* z,
+                   double* A, double* B, double* C,
+                   uint64_t* button_mask);
+
+/**
  * @brief 获取 Tracker 相对于设置原点的相对位置与姿态。
  *
  * @param[out] x 相对位置 X（单位：毫米）

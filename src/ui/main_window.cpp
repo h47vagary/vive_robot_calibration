@@ -102,6 +102,7 @@ void MainWindow::init_connect()
     connect(msg_handler_, &MessageHandler::signal_message_received, this, &MainWindow::slot_handle_message);
     connect(msg_handler_, &MessageHandler::signal_mark_point_received, this, &MainWindow::slot_mark_point_received);
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
+    connect(msg_handler_, &MessageHandler::signal_flange2tcp_mark_point_received, this, &MainWindow::slot_fanlge2tcp_mark_point_received);
     connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
@@ -111,15 +112,21 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_end_record, msg_handler_, &MessageHandler::slot_handler_end_record);
     connect(this, &MainWindow::signal_start_playback, msg_handler_, &MessageHandler::slot_handler_start_playback);
     connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);  
+    connect(this, &MainWindow::signal_flang2tcp_mark_point, msg_handler_, &MessageHandler::slot_handler_flang2tcp_mark_point);
 }
 
 void MainWindow::slot_handle_message(const QString& msg)
 {
+    std::cout << __FUNCTION__ << " msg: " << msg.toStdString() << std::endl;
     ui->lineEdit_reciver_window->setText(msg);
 }
 
 void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose)
 {
+    std::cout << __FUNCTION__ << " type: " << type << " index: " << index << std::endl;
+    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
+
     if (index < 1 || index > 6) return;
 
     QVector<QLabel*>* labels = nullptr;
@@ -129,11 +136,16 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
         if (!r_labels_map.contains(index)) return;
         labels = &r_labels_map[index];
 
+        // 获取法兰盘->tcp的旋转矩阵
         Eigen::Matrix4d pose_calibration_matrix;
         flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+        // 将机器人当前法兰盘点位转为旋转矩阵
         Eigen::Matrix4d flange_matrix = Utils::pose_to_matrix(pose);
+        // 相乘取得 tcp 点的旋转矩阵
         Eigen::Matrix4d tcp_matrix = flange_matrix * pose_calibration_matrix;
+        // 将旋转矩阵转回位姿
         CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
+        // 存入点位
         calibration_manager_->set_robot_calibration_positon(index, pose_tcp.position);
         calibration_manager_->set_robot_calibration_orientation(index, pose_tcp.orientation);
     }
@@ -173,13 +185,17 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
 
 void MainWindow::slot_compute_result_received(double result)
 {
+    std::cout << __FUNCTION__ << " result: " << result << std::endl;
     ui->label_calibration_error->setText(QString::number(result, 'f', 2));
 }
 
 void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose)
 {
     std::cout << __FUNCTION__ << " index: " << index << std::endl;
+    
     flange2tcp_calibration_->set_calibration_pose(index, pose);
+    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
     ui->label_flange2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(index));
 }
 
@@ -264,14 +280,26 @@ void MainWindow::slot_mark_point()
     int index = mark_buttons_.indexOf(btn) + 1;
     if (index != -1)
     {
+        // 发送获取当前机器人点位的信号
         emit signal_mark_point(index);
         
+        // 获取 Tracker 当前位姿
         CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();
+        // 将位姿转为旋转矩阵
         Eigen::Matrix4d pose_calibration_matrix;
         tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
-        Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
+        // 获取 Tracker->tcp 齐次变换矩阵
+        //Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
+        // 修改为获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
+        Eigen::Vector3d pos_vec;
+        tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
+        Eigen::Matrix4d tracker_matrix = Eigen::Matrix4d::Identity();
+        tracker_matrix.block<3,1>(0,3) = pos_vec;  // 设置平移部分
+        // 相乘取得 tcp 旋转矩阵
         Eigen::Matrix4d tcp_matrix = tracker_matrix * pose_calibration_matrix;
+        // 再将旋转矩阵转回位姿点位
         CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
+        // 存入标定管理器的位置、姿态
         calibration_manager_->set_device_calibration_position(index, pose_tcp.position);
         calibration_manager_->set_device_calibration_orientation(index, pose_tcp.orientation);
 
@@ -331,7 +359,8 @@ void MainWindow::slot_flange2tcp_mark_point()
     std::vector<CartesianPose> mark_poses;
     flange2tcp_calibration_->get_calibration_poses(mark_poses);
     int size = mark_poses.size();
-    emit signal_flang2tcp_mark_point(size + 1);
+    emit signal_flang2tcp_mark_point(size);
+    //std::cout << " mark_poses.size():" << size << std::endl;
 }
 
 void MainWindow::slot_flange2tcp_calibrate()
@@ -340,7 +369,12 @@ void MainWindow::slot_flange2tcp_calibrate()
     if (ret)
         std::cout << "flange2tcp_calibration_ calibrate fail" << std::endl;
     else
-        std::cout << "flange2tcp_calibration_ calibrate success" << std::endl;
+    {
+        std::cout << "flange2tcp calibrate success" << std::endl;
+        Eigen::Matrix4d calib_matrix;
+        flange2tcp_calibration_->get_pose_calibration_matrix(calib_matrix);
+        std::cout << "flange2tcp calib matrix:\n" << calib_matrix << std::endl;
+    }
 }
 
 void MainWindow::slot_flange2tcp_clear_point()

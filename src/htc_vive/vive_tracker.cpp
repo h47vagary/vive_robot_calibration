@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include <thread>
+#include "Eigen/Eigen"
+#include "utils.h"
 
 namespace htc_vive {
 
@@ -77,6 +79,29 @@ bool ViveTracker::get_pose(float& x, float& y, float& z,
     if (!pose.bPoseIsValid) return false;
 
     get_position_and_rotation(pose, x, y, z, qx, qy, qz, qw);
+    
+    x *= 1000.0f;
+    y *= 1000.0f;
+    z *= 1000.0f;
+
+    button_mask = get_button_mask();
+    return true;
+}
+
+bool ViveTracker::get_pose(double &x, double &y, double &z, double &A, double &B, double &C, uint64_t &button_mask)
+{
+    if (!vr_system_) 
+    {
+        std::cout << __FUNCTION__ << " !vr_system_" << std::endl;
+        return false;
+    }
+
+    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
+    vr::VRCompositor()->WaitGetPoses(poses, vr::k_unMaxTrackedDeviceCount, nullptr, 0);
+    const vr::TrackedDevicePose_t& pose = poses[tracker_index_];
+    if (!pose.bPoseIsValid) return false;
+
+    get_position_and_rotation(pose, x, y, z, A, B, C);
     
     x *= 1000.0f;
     y *= 1000.0f;
@@ -190,6 +215,24 @@ void ViveTracker::get_position_and_rotation(const vr::TrackedDevicePose_t& pose,
     qx = copysign(qx, mat.m[2][1] - mat.m[1][2]);
     qy = copysign(qy, mat.m[0][2] - mat.m[2][0]);
     qz = copysign(qz, mat.m[1][0] - mat.m[0][1]);
+}
+
+void ViveTracker::get_position_and_rotation(const vr::TrackedDevicePose_t &pose, double &x, double &y, double &z, double &A, double &B, double &C)
+{
+    const vr::HmdMatrix34_t& mat = pose.mDeviceToAbsoluteTracking;
+    x = mat.m[0][3];
+    y = mat.m[1][3];
+    z = mat.m[2][3];
+
+    Eigen::Matrix3d eig_mat = Eigen::Matrix3d::Identity();
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col <3; ++col)
+        {
+            eig_mat(row, col) = mat.m[row][col];
+        }
+    }
+    Utils::matrix_to_eular_ABC(eig_mat, A, B, C);
 }
 
 uint64_t ViveTracker::get_button_mask()

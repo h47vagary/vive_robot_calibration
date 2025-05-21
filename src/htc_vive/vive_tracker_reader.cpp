@@ -6,8 +6,8 @@
 ViveTrackerReader::ViveTrackerReader()
     : running_(false), paused_(false), active_index_(0)
 {
-    pose_buf_[0] = {0, 0, 0, 0, 0, 0, 1, 0, false};
-    pose_buf_[1] = pose_buf_[0];
+    // pose_buf_[0] = {0, 0, 0, 0, 0, 0, 1, 0, false};
+    // pose_buf_[1] = pose_buf_[0];
 }
 
 ViveTrackerReader::~ViveTrackerReader()
@@ -53,24 +53,26 @@ void ViveTrackerReader::resume()
 CartesianPose ViveTrackerReader::get_latest_pose()
 {
     int index = active_index_.load(std::memory_order_acquire);
-    const VivePose& pose = pose_buf_[index];
+    // const VivePose& pose = pose_buf_[index];
 
-    CartesianPose cartesian_pose;
-    cartesian_pose.position.x = pose.x;
-    cartesian_pose.position.y = pose.y;
-    cartesian_pose.position.z = pose.z;
+    // CartesianPose cartesian_pose;
+    // cartesian_pose.position.x = pose.x;
+    // cartesian_pose.position.y = pose.y;
+    // cartesian_pose.position.z = pose.z;
 
-    // 四元数转欧拉角 (ABC)
-    Quaternion quat(pose.qw, pose.qx, pose.qy, pose.qz);
-    quat = quat.normalize();  // 确保单位四元数
-    Utils::quaternion_to_euler_ABC(quat, 
-                                    cartesian_pose.orientation.A,
-                                    cartesian_pose.orientation.B,
-                                    cartesian_pose.orientation.C);
+    // // 四元数转欧拉角 (ABC)
+    // Quaternion quat(pose.qw, pose.qx, pose.qy, pose.qz);
+    // quat = quat.normalize();  // 确保单位四元数
+    // Utils::quaternion_to_euler_ABC(quat, 
+    //                                 cartesian_pose.orientation.A,
+    //                                 cartesian_pose.orientation.B,
+    //                                 cartesian_pose.orientation.C);
 
     // std::cout << "x:" << cartesian_pose.position.x << " y:" << cartesian_pose.position.y << " z:" << cartesian_pose.position.z << 
     //             " A:" << cartesian_pose.orientation.A << " B:" << cartesian_pose.orientation.B << " C:" << cartesian_pose.orientation.C << std::endl;
     
+
+    const CartesianPose& cartesian_pose = pose_buf_[index];
     return cartesian_pose;
 }
 
@@ -80,20 +82,32 @@ void ViveTrackerReader::read_loop()
 
     while (running_) {
         if (!paused_) {
-            float x, y, z, qx, qy, qz, qw;
-            uint64_t button_mask = 0;
-            bool ok = vive_get_pose(&x, &y, &z, &qx, &qy, &qz, &qw, &button_mask);
+            // float x, y, z, qx, qy, qz, qw;
+            // uint64_t button_mask = 0;
+            // bool ok = vive_get_pose(&x, &y, &z, &qx, &qy, &qz, &qw, &button_mask);
 
-            VivePose& pose = pose_buf_[write_index];
-            pose.x = x;
-            pose.y = y;
-            pose.z = z;
-            pose.qx = qx;
-            pose.qy = qy;
-            pose.qz = qz;
-            pose.qw = qw;
-            pose.button_mask = button_mask;
-            pose.valid = ok;
+            double x, y, z, A, B, C;
+            uint64_t button_mask = 0;
+            bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
+
+            CartesianPose& pose = pose_buf_[write_index];
+            pose.position.x = x;
+            pose.position.y = y;
+            pose.position.z = z;
+            pose.orientation.A = A;
+            pose.orientation.B = B;
+            pose.orientation.C = C;
+
+            // VivePose& pose = pose_buf_[write_index];
+            // pose.x = x;
+            // pose.y = y;
+            // pose.z = z;
+            // pose.qx = qx;
+            // pose.qy = qy;
+            // pose.qz = qz;
+            // pose.qw = qw;
+            // pose.button_mask = button_mask;
+            // pose.valid = ok;
 
             // std::cout << "x:" << pose.x << " y:" << pose.y << " z:" << pose.z << " qx:" << pose.qx << " qy:" << pose.qy << " qz:" << 
             //                     pose.qz << " qw:" << pose.qw << std::endl;

@@ -35,6 +35,7 @@ private:
     std::atomic<bool> running_;
     std::atomic<bool> paused_;
 
-    VivePose pose_buf_[2];            // 双缓冲区
+    // VivePose pose_buf_[2];            // 双缓冲区
+    CartesianPose pose_buf_[2];            // 双缓冲区
     std::atomic<int> active_index_;   // 当前可读缓冲区索引（0或1）
 };

@@ -36,6 +36,10 @@ public:
                   float& qx, float& qy, float& qz, float& qw,
                   uint64_t& button_mask);
 
+    bool get_pose(double& x, double& y, double& z, 
+                  double &A, double &B, double &C,
+                  uint64_t& buttom_mask);
+
     bool get_relative_pose(float& x, float& y, float& z,
                            float& qx, float& qy, float& qz, float& qw,
                            uint64_t& button_mask);
@@ -54,6 +58,10 @@ private:
     void get_position_and_rotation(const vr::TrackedDevicePose_t& pose,
                                    float& x, float& y, float& z,
                                    float& qx, float& qy, float& qz, float& qw);
+
+    void get_position_and_rotation(const vr::TrackedDevicePose_t& pose,
+                                   double& x, double& y, double& z,
+                                   double& A, double& B, double& C);
 
     uint64_t get_button_mask();
 

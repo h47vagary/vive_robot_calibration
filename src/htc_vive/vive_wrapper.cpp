@@ -36,6 +36,14 @@ bool vive_get_pose(float* x, float* y, float* z,
     return g_tracker.get_pose(*x, *y, *z, *qx, *qy, *qz, *qw, *button_mask);
 }
 
+bool vive_get_pose_abc(double *x, double *y, double *z, double *A, double *B, double *C, uint64_t *button_mask)
+{
+    if (!x || !y || !z || !A || !B || !C || !button_mask)
+        return false;
+
+    return g_tracker.get_pose(*x, *y, *z, *A, *B, *C, *button_mask);
+}
+
 bool vive_get_relative_pose(float* x, float* y, float* z,
                             float* qx, float* qy, float* qz, float* qw,
                             uint64_t* button_mask)

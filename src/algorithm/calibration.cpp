@@ -672,6 +672,7 @@ Eigen::Matrix4d ToolCalibration6Points::rpy_to_matrix(const CartesianPose &pose_
 ToolCalibration7Points::ToolCalibration7Points()
 {
     calibration_matrix_ = new Eigen::Matrix4d();
+    calibration_pos_vec_ = new Eigen::Vector3d();
     source_poses_.clear();
     calibrated_ = false;
 }
@@ -679,6 +680,7 @@ ToolCalibration7Points::ToolCalibration7Points()
 ToolCalibration7Points::~ToolCalibration7Points()
 {
     delete calibration_matrix_;
+    delete calibration_pos_vec_;
 }
 
 int ToolCalibration7Points::calibrate()
@@ -686,7 +688,7 @@ int ToolCalibration7Points::calibrate()
     if (source_poses_.size() != 7)
         return -1;
 
-    if (!tool_calculate_7points(source_poses_, *calibration_matrix_))
+    if (!tool_calculate_7points(source_poses_, *calibration_matrix_, *calibration_pos_vec_))
     {
         calibrated_ = true;
         return 0;
@@ -713,6 +715,11 @@ void ToolCalibration7Points::get_calibration_poses(std::vector<CartesianPose> &c
     calibration_poses = source_poses_;
 }
 
+void ToolCalibration7Points::get_calibration_pos_vec(Eigen::Vector3d &pos_calibration_vec)
+{
+    pos_calibration_vec = *calibration_pos_vec_;
+}
+
 void ToolCalibration7Points::set_calibration_pose(const int &index, const CartesianPose &pose)
 {
     if (index >= source_poses_.size())
@@ -728,7 +735,7 @@ int ToolCalibration7Points::clear_calibration_pose()
     return 0;
 }
 
-int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix)
+int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix, Eigen::Vector3d& pos_vec)
 {
     if (poses.size() != 7)
         return -1;
@@ -748,11 +755,12 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
     //Step1: 求解圆心,然后解出TCP点到法兰末端的位置P(Px Py Pz)，存放在tcpToFlange指针中
     Sphere(poses[0].position.x, poses[0].position.y, poses[0].position.z, poses[1].position.x, poses[1].position.y, poses[1].position.z,
            poses[2].position.x,poses[2].position.y,poses[2].position.z, poses[3].position.x, poses[3].position.y, poses[3].position.z,
-           &ox, &oy, &oz);
+           &ox, &oy, &oz, pos_vec);
     vecSphereCentre(0) = ox;
     vecSphereCentre(1) = oy;
     vecSphereCentre(2) = oz;
     vecSphereCentre(3) = 1.0;
+    std::cout << __FUNCTION__ << " ox: " << ox << " oy: " << oy << " oz: " << oz << std::endl;
 
     // tcp1(0) = tcpPos1.x;
     // tcp1(1) = tcpPos1.y;
@@ -826,7 +834,7 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
 }
 int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, double y2, double z2,
         double x3, double y3, double z3, double x4, double y4, double z4,
-        double *px, double *py, double *pz)
+        double *px, double *py, double *pz, Eigen::Vector3d& vec)
 {
     double a11, a12, a13, a21, a22, a23, a31, a32, a33, b1, b2, b3, d, d1, d2,
             d3;
@@ -853,5 +861,7 @@ int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, d
     (*px) = d1 / d;
     (*py) = d2 / d;
     (*pz) = d3 / d;
+
+    vec = Eigen::Vector3d(x1 -*px, y1 - *py, z1 - *pz);
     return 0;
 }
