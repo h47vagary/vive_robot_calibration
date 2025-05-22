@@ -27,12 +27,15 @@ MainWindow::MainWindow(QWidget *parent)
     track_pose_timer_ = new QTimer(this);
     track_pose_timer_->setInterval(5);
 
-    tracker2tcp_rotation_matrix_ = new Eigen::Matrix4d();
+    tcp2tracker_rotation_matrix_ = new Eigen::Matrix4d();
 
     init_connect();
     init_style();
     init_label_maps();
+
+    //init_test_calib();
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -71,7 +74,74 @@ void MainWindow::init_label_maps()
 
 Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
 {
-    return *tracker2tcp_rotation_matrix_;
+    return *tcp2tracker_rotation_matrix_;
+}
+
+void MainWindow::init_test_calib()
+{
+    std::vector<CartesianPose> flange_test_poses_1_;
+    std::vector<CartesianPose> tracker_test_poses_1_;
+    std::vector<CartesianPose> flange_test_poses_2_;
+    std::vector<CartesianPose> tracker_test_poses_2_;
+
+    // 测试数据
+    flange_test_poses_1_.push_back({{483.188, 42.6536, 382.135}, {-3.1357, -0.0229753, 1.16085}});
+    flange_test_poses_1_.push_back({{477.357, 118.771, 350.244}, {2.9074, -0.00475082, 1.15924}});
+    flange_test_poses_1_.push_back({{478.981, -64.6805, 389.427}, {-2.81605, -0.00831388, 1.16014}});
+    flange_test_poses_1_.push_back({{608.515, 31.062, 400.169}, {-3.10181, -0.408744, 1.16181}});
+    flange_test_poses_1_.push_back({{535.759, 37.478, 386.652}, {-3.1242, -0.0525343, 1.14832}});
+    flange_test_poses_1_.push_back({{535.734, -1.01173, 386.581}, {-3.12425, -0.0528958, 1.14867}});
+    
+    tracker_test_poses_1_.push_back({{226.026, 681.279, -1862.37}, {1.59869, -0.0326651, -0.70241}});
+    tracker_test_poses_1_.push_back({{271.676, 669.992, -1915.5}, {1.40636, -0.202555, -0.712652}});
+    tracker_test_poses_1_.push_back({{161.133, 668.07, -1808.86}, {1.82494, 0.223285, -0.74037}});
+    tracker_test_poses_1_.push_back({{282.832, 655.727, -1782.55}, {1.91891, -0.261512, -0.662689}});
+    tracker_test_poses_1_.push_back({{224.368, 685.254, -1854.23}, {1.63115, -0.0349263, -0.713315}});
+    tracker_test_poses_1_.push_back({{252.988, 686.764, -1821.67}, {1.63128, -0.0354317, -0.712291}});
+    tracker_test_poses_1_.push_back({{225.273, 686.95, -1797.8}, {1.6349, -0.0337237, -0.712568}});
+
+    flange_test_poses_2_.push_back({{490.554, 22.8642, 389.293}, {-3.1194, -0.0864863, 1.03751}});
+    flange_test_poses_2_.push_back({{490.492, -109.683, 383.988}, {-2.73236, -0.0875694, 1.0378}});
+    flange_test_poses_2_.push_back({{481.507, 178.453, 314.034}, {2.65889, -0.0877801, 1.03728}});
+    flange_test_poses_2_.push_back({{659.687, 1.73947, 391.887}, {-3.03688, -0.607033, 1.09382}});
+    flange_test_poses_2_.push_back({{489.778, 22.8312, 389.359}, {-3.11965, -0.0986332, 1.03719}});
+    flange_test_poses_2_.push_back({{533.272, 22.8465, 389.304}, {-3.11963, -0.0988659, 1.03601}});
+    flange_test_poses_2_.push_back({{533.257, -21.4563, 389.229}, {-3.1196, -0.0991147, 1.03609}});
+
+    tracker_test_poses_2_.push_back({{834.229, -173.308, -3082.86}, {1.66904, -0.0240478, -0.482847}});
+    tracker_test_poses_2_.push_back({{738.664, -208.484, -3028.29}, {1.8428, 0.344454, -0.563848}});
+    tracker_test_poses_2_.push_back({{948.358, -271.747, -3120.06}, {1.42867, -0.506664, -0.493362}});
+    tracker_test_poses_2_.push_back({{865.582, -213.73, -2961.71}, {2.18897, -0.155467, -0.407141}});
+    tracker_test_poses_2_.push_back({{835.817, -177.911, -3085.96}, {1.68325, -0.0250073, -0.483887}});
+    tracker_test_poses_2_.push_back({{854.306, -206.823, -3047.61}, {1.67553, -0.0276747, -0.481855}});
+    tracker_test_poses_2_.push_back({{813.337, -155.399, -3029.74}, {1.69072, -0.0218522, -0.479085}});
+
+    for (int i = 0; i < tracker_test_poses_2_.size(); i++)
+    {
+        tracker2tcp_calibration_->set_calibration_pose(i, tracker_test_poses_2_[i]);
+    }
+    for (int i = 0; i < flange_test_poses_2_.size(); i++)
+    {
+        flange2tcp_calibration_->set_calibration_pose(i, flange_test_poses_2_[i]);
+    }
+
+    tracker2tcp_calibration_->calibrate();
+    bool pos_calibrated;
+    tracker2tcp_calibration_->get_calibrated(pos_calibrated);
+    if (!pos_calibrated)
+    {
+        std::cout << __FUNCTION__ << "tracker2tcp calibrate fail" << std::endl;
+        return;
+    }
+    Eigen::Vector4d tcp2tracker_vec;
+    tracker2tcp_calibration_->get_calibration_pos_vec(tcp2tracker_vec);
+    std::cout << "tcp2tracker_vec: ["
+          << tcp2tracker_vec.x() << ", "
+          << tcp2tracker_vec.y() << ", "
+          << tcp2tracker_vec.z() << "]" << std::endl;
+
+
+
 }
 
 void MainWindow::init_connect()
@@ -118,7 +188,7 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_start_record, msg_handler_, &MessageHandler::slot_handler_start_record);
     connect(this, &MainWindow::signal_end_record, msg_handler_, &MessageHandler::slot_handler_end_record);
     connect(this, &MainWindow::signal_start_playback, msg_handler_, &MessageHandler::slot_handler_start_playback);
-    connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);  
+    connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);
     connect(this, &MainWindow::signal_flang2tcp_mark_point, msg_handler_, &MessageHandler::slot_handler_flang2tcp_mark_point);
     connect(this, &MainWindow::signal_handler_tracker2tcp_mark_rotation_use_robotpose, 
                 msg_handler_, &MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose);
@@ -145,7 +215,7 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
         if (!r_labels_map.contains(index)) return;
         labels = &r_labels_map[index];
 
-        // 获取法兰盘->tcp的旋转矩阵
+        // 获取tcp->法兰盘的旋转矩阵
         Eigen::Matrix4d pose_calibration_matrix;
         flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
         // 将机器人当前法兰盘点位转为旋转矩阵
@@ -216,18 +286,18 @@ void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
     // 转换为相对机器人基座标的法兰盘旋转矩阵
     Eigen::Matrix4d flange_mat = Utils::pose_to_matrix(pose);
     // 获取TCP相对于机器人基座标的旋转矩阵
-    Eigen::Matrix4d flange2tcp_mat;
-    flange2tcp_calibration_->get_pose_calibration_matrix(flange2tcp_mat);
+    Eigen::Matrix4d tcp2flange_mat;
+    flange2tcp_calibration_->get_pose_calibration_matrix(tcp2flange_mat);
     // 获取定位器坐标系相对于机器人坐标系的旋转矩阵
     Eigen::Matrix4d location2robotbase_mat;
     calibration_manager_->get_calibratoin_matrix(location2robotbase_mat);
     // 获取当前追踪器的位姿，并转换为旋转矩阵（追踪器相对于定位器）
     CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
     Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
-
+    
     // 联立求出TCP相对于追踪器的旋转矩阵
-    *tracker2tcp_rotation_matrix_ =
-    tracker_mat.inverse() * location2robotbase_mat.inverse() * flange_mat * flange2tcp_mat;
+    *tcp2tracker_rotation_matrix_ =
+    tracker_mat.inverse() * location2robotbase_mat.inverse() * flange_mat * tcp2flange_mat;
 
 }
 
@@ -303,11 +373,11 @@ void MainWindow::slot_compute()
     int ret = calibration_manager_->calibrate(0, max_error);
     if (!ret)
     {
-        ui->label_connect_state->setText("标定成功");
+        ui->label_connect_state->setText("calib success");
     }
     else
     {
-        ui->label_connect_state->setText("标定失败");
+        ui->label_connect_state->setText("calib fail");
     }
 
     ui->label_calibration_error->setText(QString::number(max_error));
@@ -340,17 +410,19 @@ void MainWindow::slot_mark_point()
         // 将位姿转为旋转矩阵
         Eigen::Matrix4d pose_calibration_matrix;
         tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
-        // 获取 Tracker->tcp 齐次变换矩阵
+        // 获取 tcp->Tracker 齐次变换矩阵
         //Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
         // 修改为获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
-        Eigen::Vector3d pos_vec;
+        Eigen::Vector4d pos_vec;
         tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
         Eigen::Matrix4d tracker_matrix = Eigen::Matrix4d::Identity();
-        tracker_matrix.block<3,1>(0,3) = pos_vec;  // 设置平移部分
+        tracker_matrix.block<3,1>(0,3) = pos_vec.head<3>();  // 只取前三个作为平移
         // 相乘取得 tcp 旋转矩阵
-        Eigen::Matrix4d tcp_matrix = tracker_matrix * pose_calibration_matrix;
+       pose_calibration_matrix(0,3) += pos_vec(0);
+       pose_calibration_matrix(1,3) += pos_vec(1);
+       pose_calibration_matrix(2,3) += pos_vec(2);
         // 再将旋转矩阵转回位姿点位
-        CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
+        CartesianPose pose_tcp = Utils::matrix_to_pose(pose_calibration_matrix);
         // 存入标定管理器的位置、姿态
         calibration_manager_->set_device_calibration_position(index, pose_tcp.position);
         calibration_manager_->set_device_calibration_orientation(index, pose_tcp.orientation);
@@ -395,9 +467,15 @@ void MainWindow::slot_tracker2tcp_calibrate()
     else
     {
         std::cout << "tracker2tcp calibrate success" << std::endl;
-        Eigen::Matrix4d calib_matrix;
-        tracker2tcp_calibration_->get_pose_calibration_matrix(calib_matrix);
-        std::cout << "tracker2tcp calib matrix:\n" << calib_matrix << std::endl;
+        // Eigen::Matrix4d calib_matrix;
+        // tracker2tcp_calibration_->get_pose_calibration_matrix(calib_matrix);
+        // std::cout << "tracker2tcp calib matrix:\n" << calib_matrix << std::endl;
+        Eigen::Vector4d calib_pos_vec;
+        tracker2tcp_calibration_->get_calibration_pos_vec(calib_pos_vec);
+        std::cout << "tcp2tracker_vec: ["
+          << calib_pos_vec.x() << ", "
+          << calib_pos_vec.y() << ", "
+          << calib_pos_vec.z() << "]" << std::endl;
     }
 }
 

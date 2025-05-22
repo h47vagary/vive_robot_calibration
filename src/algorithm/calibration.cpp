@@ -678,7 +678,7 @@ Eigen::Matrix4d ToolCalibration6Points::rpy_to_matrix(const CartesianPose &pose_
 ToolCalibration7Points::ToolCalibration7Points()
 {
     calibration_matrix_ = new Eigen::Matrix4d();
-    calibration_pos_vec_ = new Eigen::Vector3d();
+    calibration_pos_vec_ = new Eigen::Vector4d();
     source_poses_.clear();
     calibrated_ = false;
 }
@@ -721,7 +721,7 @@ void ToolCalibration7Points::get_calibration_poses(std::vector<CartesianPose> &c
     calibration_poses = source_poses_;
 }
 
-void ToolCalibration7Points::get_calibration_pos_vec(Eigen::Vector3d &pos_calibration_vec)
+void ToolCalibration7Points::get_calibration_pos_vec(Eigen::Vector4d &pos_calibration_vec)
 {
     pos_calibration_vec = *calibration_pos_vec_;
 }
@@ -741,7 +741,7 @@ int ToolCalibration7Points::clear_calibration_pose()
     return 0;
 }
 
-int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix, Eigen::Vector3d& pos_vec)
+int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix, Eigen::Vector4d& pos_vec)
 {
     if (poses.size() != 7)
         return -1;
@@ -761,7 +761,7 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
     //Step1: 求解圆心,然后解出TCP点到法兰末端的位置P(Px Py Pz)，存放在tcpToFlange指针中
     Sphere(poses[0].position.x, poses[0].position.y, poses[0].position.z, poses[1].position.x, poses[1].position.y, poses[1].position.z,
            poses[2].position.x,poses[2].position.y,poses[2].position.z, poses[3].position.x, poses[3].position.y, poses[3].position.z,
-           &ox, &oy, &oz, pos_vec);
+           &ox, &oy, &oz);
     vecSphereCentre(0) = ox;
     vecSphereCentre(1) = oy;
     vecSphereCentre(2) = oz;
@@ -777,6 +777,7 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
     // matPos1 = rpy2tr(tcp1);
     matPos1 = Utils::pose_to_matrix(poses[0]);
     vecTool2Flange = matPos1.inverse()*vecSphereCentre;     //P(Px Py Pz) in the tool coordinate system
+    pos_vec = vecTool2Flange;
 
     // Step2: 再求相对于法兰盘末端的旋转方向
     // 1.求TCP点在基坐标系下的姿态（向量）
@@ -840,7 +841,7 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
 }
 int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, double y2, double z2,
         double x3, double y3, double z3, double x4, double y4, double z4,
-        double *px, double *py, double *pz, Eigen::Vector3d& vec)
+        double *px, double *py, double *pz)
 {
     double a11, a12, a13, a21, a22, a23, a31, a32, a33, b1, b2, b3, d, d1, d2,
             d3;
@@ -868,6 +869,10 @@ int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, d
     (*py) = d2 / d;
     (*pz) = d3 / d;
 
-    vec = Eigen::Vector3d(x1 -*px, y1 - *py, z1 - *pz);
+    std::cout << __FUNCTION__ << std::endl;
+    std::cout << "x1: " << x1 << " *px: " << *px << " x1-*px: " << x1-*px << "\n"
+              << "y1: " << y1 << " *py: " << *py << " y1-*py: " << y1-*py << "\n"
+              << "z1: " << z1 << " *pz: " << *pz << " z1-*pz: " << z1-*pz << std::endl;
+                
     return 0;
 }

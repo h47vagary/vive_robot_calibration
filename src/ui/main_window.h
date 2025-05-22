@@ -92,6 +92,8 @@ private:
     CalibrationManager* calibration_manager_;
     ToolCalibration7Points* flange2tcp_calibration_;
     ToolCalibration7Points* tracker2tcp_calibration_;
-    Eigen::Matrix4d* tracker2tcp_rotation_matrix_;
+    Eigen::Matrix4d* tcp2tracker_rotation_matrix_;
+
+    void init_test_calib();    // 模拟数据测试标定
 };
 

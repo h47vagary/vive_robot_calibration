@@ -144,21 +144,21 @@ public:
     void get_calibrated(bool &calibrated);
     void get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
     void get_calibration_poses(std::vector<CartesianPose> &calibration_poses);
-    void get_calibration_pos_vec(Eigen::Vector3d &pos_calibration_vec);
+    void get_calibration_pos_vec(Eigen::Vector4d &pos_calibration_vec);
 
     void set_calibration_pose(const int &index, const CartesianPose &pose);
     int clear_calibration_pose();
 
 private:
-    int tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix, Eigen::Vector3d& pos_vec);
+    int tool_calculate_7points(const std::vector<CartesianPose> &poses, Eigen::Matrix4d& calib_matrix, Eigen::Vector4d& pos_vec);
     int Sphere(double x1, double y1, double z1, double x2, double y2, double z2,
         double x3, double y3, double z3, double x4, double y4, double z4,
-        double *px, double *py, double *pz, Eigen::Vector3d& vec);
+        double *px, double *py, double *pz);
 
 private:
     std::vector<CartesianPose> source_poses_;
     Eigen::Matrix4d *calibration_matrix_;
-    Eigen::Vector3d *calibration_pos_vec_;
+    Eigen::Vector4d *calibration_pos_vec_;
     bool calibrated_;
 };
 #endif
