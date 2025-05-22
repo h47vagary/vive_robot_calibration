@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
     track_pose_timer_ = new QTimer(this);
     track_pose_timer_->setInterval(5);
 
+    tracker2tcp_rotation_matrix_ = new Eigen::Matrix4d();
+
     init_connect();
     init_style();
     init_label_maps();
@@ -71,11 +73,7 @@ void MainWindow::init_label_maps()
 
 Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
 {
-    // 获取法兰盘->tcp的旋转矩阵
-    Eigen::Matrix4d pose_calibration_matrix;
-    flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
-    // 获取当前法兰盘点位
-    return Eigen::Matrix4d();
+    return *tracker2tcp_rotation_matrix_;
 }
 
 void MainWindow::init_connect()
@@ -112,6 +110,7 @@ void MainWindow::init_connect()
     connect(msg_handler_, &MessageHandler::signal_mark_point_received, this, &MainWindow::slot_mark_point_received);
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
     connect(msg_handler_, &MessageHandler::signal_flange2tcp_mark_point_received, this, &MainWindow::slot_fanlge2tcp_mark_point_received);
+    connect(msg_handler_, &MessageHandler::signal_tracker2tcp_mark_use_robot_pose, this, &MainWindow::slot_tracker2tcp_mark_use_robot_pose);
     connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
@@ -206,6 +205,29 @@ void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose po
     std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
                 << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
     ui->label_flange2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(index));
+}
+
+void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
+{
+    std::cout << __FUNCTION__ << std::endl;
+    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
+    // 转换为相对机器人基座标的法兰盘旋转矩阵
+    Eigen::Matrix4d flange_mat = Utils::pose_to_matrix(pose);
+    // 获取TCP相对于机器人基座标的旋转矩阵
+    Eigen::Matrix4d flange2tcp_mat;
+    flange2tcp_calibration_->get_pose_calibration_matrix(flange2tcp_mat);
+    // 获取定位器坐标系相对于机器人坐标系的旋转矩阵
+    Eigen::Matrix4d location2robotbase_mat;
+    calibration_manager_->get_calibratoin_matrix(location2robotbase_mat);
+    // 获取当前追踪器的位姿，并转换为旋转矩阵（追踪器相对于定位器）
+    CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
+
+    // 联立求出TCP相对于追踪器的旋转矩阵
+    *tracker2tcp_rotation_matrix_ =
+    tracker_mat.inverse() * location2robotbase_mat.inverse() * flange_mat * flange2tcp_mat;
+
 }
 
 void MainWindow::slot_connect_ctr()

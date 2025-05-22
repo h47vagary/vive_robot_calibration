@@ -32,6 +32,7 @@ signals:
     void signal_message_received(QString msg);
     void signal_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
     void signal_flange2tcp_mark_point_received(int index, CartesianPose pose);
+    void signal_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
     void signal_compute_result_received(double result);
     
 

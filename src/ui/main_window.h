@@ -59,6 +59,7 @@ public slots:
     void slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
     void slot_compute_result_received(double result);
     void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
+    void slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
 
 signals:
     void signal_connect_ctr();
@@ -89,5 +90,6 @@ private:
     CalibrationManager* calibration_manager_;
     ToolCalibration7Points* flange2tcp_calibration_;
     ToolCalibration7Points* tracker2tcp_calibration_;
+    Eigen::Matrix4d* tracker2tcp_rotation_matrix_;
 };
 

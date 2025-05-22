@@ -165,6 +165,25 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
         {
             std::cout << "transfer_rob_pose fail !" << std::endl;
         }
+        break;
+    }
+    case E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_:
+    {
+        CartesianPose pose;
+        int point;
+        if (!MsgJsonTransfer::transfer_rob_pose(msg, point, pose))
+        {
+            // std::cout << "point: " << point << std::endl;
+            // std::cout << "pose.pos.x: " << pose.position.x << "  pose.pos.y: " << pose.position.y << " pose.pos.z: " << pose.position.z
+            //             << " pose.ori.A: " << pose.orientation.A << " pose.ori.B: " << pose.orientation.B << "pose.ori.C: " << pose.orientation.C
+            //                 << std::endl;
+            emit signal_flange2tcp_mark_point_received(point, pose);
+        }
+        else
+        {
+            std::cout << "transfer_rob_pose fail !" << std::endl;
+        }
+        break;
     }
     default:
     {
