@@ -76,6 +76,8 @@ private:
     void init_style();
     void init_label_maps(); // 初始化绑定
 
+    Eigen::Matrix4d get_tracker2tcp_rotation_matrix();
+
     Ui::MainWindow *ui;
     QTimer* track_pose_timer_;
     QList<QPushButton*> mark_buttons_;

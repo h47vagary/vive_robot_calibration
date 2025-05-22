@@ -130,6 +130,7 @@ private:
 
 /**
  * @brief 通用版本的 RobotModel::toolCalibration 接口抽出来的关于 7 点的工具手标定算法法
+ * @details 拓展了标定位置向量，还有旋转矩阵
  * 
  */
 class ToolCalibration7Points

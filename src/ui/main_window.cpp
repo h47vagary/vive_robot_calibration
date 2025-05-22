@@ -69,6 +69,15 @@ void MainWindow::init_label_maps()
     }
 }
 
+Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
+{
+    // 获取法兰盘->tcp的旋转矩阵
+    Eigen::Matrix4d pose_calibration_matrix;
+    flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+    // 获取当前法兰盘点位
+    return Eigen::Matrix4d();
+}
+
 void MainWindow::init_connect()
 {
     connect(ui->pushButton_connect_ctr, SIGNAL(clicked()), this, SLOT(slot_connect_ctr()));
