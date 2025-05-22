@@ -1,13 +1,15 @@
 #include "vive_tracker_reader.h"
 #include "vive_wrapper.h"
 
+#include <iostream>
+#include <fstream>
 #include <chrono>
 
 ViveTrackerReader::ViveTrackerReader()
-    : running_(false), paused_(false), active_index_(0)
+    : running_(false), paused_(false), active_index_(0), 
+    record_enabled_(false), max_record_size_(5000), loop_interval_ms_(9)
 {
-    // pose_buf_[0] = {0, 0, 0, 0, 0, 0, 1, 0, false};
-    // pose_buf_[1] = pose_buf_[0];
+
 }
 
 ViveTrackerReader::~ViveTrackerReader()
@@ -76,16 +78,76 @@ CartesianPose ViveTrackerReader::get_latest_pose()
     return cartesian_pose;
 }
 
+void ViveTrackerReader::enable_record(size_t max_size)
+{
+    std::lock_guard<std::mutex> lock(record_mutex_);
+    recorded_poses_.clear();
+    max_record_size_ = max_size;
+    record_enabled_ = true;
+}
+
+void ViveTrackerReader::disable_record()
+{
+    std::lock_guard<std::mutex> lock(record_mutex_);
+    recorded_poses_.clear();
+    record_enabled_ = false;
+}
+
+std::vector<CartesianPose> ViveTrackerReader::get_recorded_poses()
+{
+    std::lock_guard<std::mutex> lock(record_mutex_);
+    return recorded_poses_;
+}
+
+void ViveTrackerReader::clear_recorded_poses()
+{
+    std::lock_guard<std::mutex> lock(record_mutex_);
+    recorded_poses_.clear();
+}
+
+bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename)
+{
+    std::lock_guard<std::mutex> lock(record_mutex_);
+
+    std::ofstream file(filename);
+    if (!file.is_open()) 
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return false;
+    }
+
+    file << "x,y,z,A,B,C\n";
+    for (const auto& pose : recorded_poses_) 
+    {
+        file << pose.position.x << ","
+             << pose.position.y << ","
+             << pose.position.z << ","
+             << pose.orientation.A << ","
+             << pose.orientation.B << ","
+             << pose.orientation.C << "\n";
+    }
+
+    return true;
+}
+
+void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
+{
+    if (interval_ms > 0) 
+    {
+        loop_interval_ms_.store(interval_ms, std::memory_order_relaxed);
+    } 
+    else 
+    {
+        std::cerr << "Invalid loop interval: " << interval_ms << " ms" << std::endl;
+    }
+}
+
 void ViveTrackerReader::read_loop()
 {
     int write_index = 0;
 
     while (running_) {
         if (!paused_) {
-            // float x, y, z, qx, qy, qz, qw;
-            // uint64_t button_mask = 0;
-            // bool ok = vive_get_pose(&x, &y, &z, &qx, &qy, &qz, &qw, &button_mask);
-
             double x, y, z, A, B, C;
             uint64_t button_mask = 0;
             bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
@@ -98,25 +160,26 @@ void ViveTrackerReader::read_loop()
             pose.orientation.B = B;
             pose.orientation.C = C;
 
-            // VivePose& pose = pose_buf_[write_index];
-            // pose.x = x;
-            // pose.y = y;
-            // pose.z = z;
-            // pose.qx = qx;
-            // pose.qy = qy;
-            // pose.qz = qz;
-            // pose.qw = qw;
-            // pose.button_mask = button_mask;
-            // pose.valid = ok;
-
-            // std::cout << "x:" << pose.x << " y:" << pose.y << " z:" << pose.z << " qx:" << pose.qx << " qy:" << pose.qy << " qz:" << 
-            //                     pose.qz << " qw:" << pose.qw << std::endl;
-
             // 切换可读索引
             active_index_.store(write_index, std::memory_order_release);
             write_index = 1 - write_index;
+
+            if (ok && record_enabled_)
+            {
+                std::lock_guard<std::mutex> lock(record_mutex_);
+                if (recorded_poses_.size() >= max_record_size_)
+                {
+                    record_enabled_ = false;
+                    std::cerr << "Recording buffer is full. Stopping recording." << std::endl;
+                }
+                else
+                {
+                    recorded_poses_.push_back(pose);
+                }
+                
+            }
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(9));
+        std::this_thread::sleep_for(std::chrono::milliseconds(loop_interval_ms_));
     }
 }

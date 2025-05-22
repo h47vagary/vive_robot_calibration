@@ -27,6 +27,7 @@ public:
     void get_max_error(double &max_error);
     void get_position_calibration_matrix(Eigen::Matrix4d &position_calibration_matrix);
     void get_orientation_offset_matrix(Eigen::Matrix3d &orientation_offset_matrix);
+    void get_calibratoin_matrix(Eigen::Matrix4d &pose_calibration_matrix);
     void get_calibration_positions(std::vector<CartesianPosition> &robot_calibration_positions,
                                    std::vector<CartesianPosition> &device_calibration_positions);
     void get_calibration_orientation(CartesianOrientation &robot_calibration_orientation,

@@ -215,11 +215,31 @@ void MainWindow::slot_start_record()
 {
     std::cout << __FUNCTION__ << std::endl;
     emit signal_start_record();
+    vive_tracker_reader_->enable_record();
 }
 void MainWindow::slot_end_record()
 {
     std::cout << __FUNCTION__ << std::endl;
     emit signal_end_record();
+    vive_tracker_reader_->disable_record();
+    std::vector<CartesianPose> poses = vive_tracker_reader_->get_recorded_poses();
+    std::cout << "recorded poses size: " << poses.size() << std::endl;
+    // 逐个取出点位进行旋转乘得机器人基座下的点位，再存进文件
+    for (auto iter : poses)
+    {
+        // 1. 采集到 tracker 的点位转为旋转矩阵
+        Eigen::Matrix4d mat_track = Utils::pose_to_matrix(iter);    
+        // 2. 获取 tracker->robot_base 的旋转矩阵
+        Eigen::Matrix4d mat_robotbase2location;
+        calibration_manager_->get_calibratoin_matrix(mat_robotbase2location);
+        // 3. 相乘取得 robot_base 下的点位
+        Eigen::Matrix4d mat_robot_base = mat_robotbase2location * mat_track;
+        // 4. 将该点位转换为 robot_flange 的点位旋转矩阵
+
+        // 5. 将该点位转换为 robot_tcp 的点位旋转矩阵
+
+        // 6. 将点位旋转矩阵转回位姿结构体，存入临时容器
+    }
 }
 
 void MainWindow::slot_start_playback()

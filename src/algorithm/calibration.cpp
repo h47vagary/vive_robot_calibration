@@ -83,6 +83,12 @@ void CalibrationManager::get_orientation_offset_matrix(Eigen::Matrix3d &orientat
     orientation_offset_matrix = *orientation_offset_matrix_;
 }
 
+void CalibrationManager::get_calibratoin_matrix(Eigen::Matrix4d &pose_calibration_matrix)
+{
+    pose_calibration_matrix = *position_calibration_matrix_;
+    pose_calibration_matrix.block<3, 3>(0, 0) = *orientation_offset_matrix_;
+}
+
 void CalibrationManager::get_calibration_positions(std::vector<CartesianPosition> &robot_calibration_positions,
                                                    std::vector<CartesianPosition> &device_calibration_positions)
 {
