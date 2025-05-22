@@ -2111,7 +2111,7 @@
       <x>870</x>
       <y>490</y>
       <width>301</width>
-      <height>131</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="title">
@@ -2159,17 +2159,30 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate">
+    <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_pos">
      <property name="geometry">
       <rect>
        <x>180</x>
-       <y>80</y>
+       <y>70</y>
        <width>91</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>标定</string>
+      <string>标定位置</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_ori">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>110</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>标定姿态</string>
      </property>
     </widget>
    </widget>

@@ -21,8 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
     vive_tracker_reader_ = new ViveTrackerReader();
     vive_tracker_reader_->start();
     calibration_manager_ = new CalibrationManager();
-    // flange2tcp_calibration_ = new ToolCalibration6Points();
-    // tracker2tcp_calibration_ = new ToolCalibration6Points();
     flange2tcp_calibration_ = new ToolCalibration7Points();
     tracker2tcp_calibration_ = new ToolCalibration7Points();
 
@@ -90,7 +88,8 @@ void MainWindow::init_connect()
     connect(ui->pushButton_vive_stop, SIGNAL(clicked()), this, SLOT(slot_stop_update_track_pose()));
     connect(ui->pushButton_tracker2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_point()));
     connect(ui->pushButton_tracker2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_clear_point()));
-    connect(ui->pushButton_tracker2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_calibrate()));
+    connect(ui->pushButton_tracker2tcp_calibrate_pos, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_calibrate()));
+    connect(ui->pushButton_tracker2tcp_calibrate_ori, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_rotation_use_robotpose()));
     connect(ui->pushButton_flange2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_mark_point()));
     connect(ui->pushButton_flange2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_clear_point()));
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
@@ -121,6 +120,8 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_start_playback, msg_handler_, &MessageHandler::slot_handler_start_playback);
     connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);  
     connect(this, &MainWindow::signal_flang2tcp_mark_point, msg_handler_, &MessageHandler::slot_handler_flang2tcp_mark_point);
+    connect(this, &MainWindow::signal_handler_tracker2tcp_mark_rotation_use_robotpose, 
+                msg_handler_, &MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose);
 }
 
 void MainWindow::slot_handle_message(const QString& msg)
@@ -452,4 +453,21 @@ void MainWindow::slot_start_update_track_pose()
 void MainWindow::slot_stop_update_track_pose()
 {
     track_pose_timer_->stop();
+}
+
+void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
+{
+    bool manager_calibrated = false, flange2tcp_calibrated = false, tracker2tcp_pos_calibrated = false;
+    calibration_manager_->get_calibrated(manager_calibrated);
+    flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
+    tracker2tcp_calibration_->get_calibrated(tracker2tcp_pos_calibrated);
+    if (!calibration_manager_ || !flange2tcp_calibration_ || !tracker2tcp_calibration_)
+    {
+        std::cout << "not all calibrated yet" << std::endl;
+        std::cout << "calibration_manager_: " << calibration_manager_ << " flange2tcp_calibration_: " << flange2tcp_calibration_ 
+                    << " tracker2tcp_calibration_: " << tracker2tcp_calibration_ << std::endl;
+        return;
+    }
+
+    emit signal_handler_tracker2tcp_mark_rotation_use_robotpose();
 }

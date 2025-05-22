@@ -53,6 +53,7 @@ private slots:
     void slot_track_pose_timeout();
     void slot_start_update_track_pose();
     void slot_stop_update_track_pose();
+    void slot_tracker2tcp_mark_rotation_use_robotpose();
 
 public slots:
     void slot_handle_message(const QString& msg);
@@ -71,6 +72,7 @@ signals:
     void signal_start_playback();
     void signal_end_playback();
     void signal_flang2tcp_mark_point(int point_index);
+    void signal_handler_tracker2tcp_mark_rotation_use_robotpose();
 
 private:
     void init_connect();

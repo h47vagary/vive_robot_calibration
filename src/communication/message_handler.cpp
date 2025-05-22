@@ -177,7 +177,7 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
             // std::cout << "pose.pos.x: " << pose.position.x << "  pose.pos.y: " << pose.position.y << " pose.pos.z: " << pose.position.z
             //             << " pose.ori.A: " << pose.orientation.A << " pose.ori.B: " << pose.orientation.B << "pose.ori.C: " << pose.orientation.C
             //                 << std::endl;
-            emit signal_flange2tcp_mark_point_received(point, pose);
+            emit signal_tracker2tcp_mark_use_robot_pose(pose);
         }
         else
         {
@@ -263,4 +263,11 @@ void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
     MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_, ++serial_id_send_, index, json_str_out);
     //std::cout << "json_str_out: " << json_str_out << std::endl;
     comm_.nrc_send_message(0x9206, json_str_out);
+}
+
+void MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose()
+{
+    if (!running_) return;
+    std::string json_str_out;
+    MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_, ++serial_id_send_, json_str_out);
 }

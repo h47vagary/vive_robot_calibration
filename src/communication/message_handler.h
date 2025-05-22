@@ -46,6 +46,7 @@ public slots:
     void slot_handler_start_playback();                         // 开始回放
     void slot_handler_end_playback();                           // 结束回放
     void slot_handler_flang2tcp_mark_point(int index);          // 法兰盘2TCP的标定点 
+    void slot_handler_tracker2tcp_mark_rotation_use_robotpose();          // 标定追踪器到tcp点需要一次机器人姿态
 
 private:
     void thread_loop();  // 后台线程处理
