@@ -273,41 +273,33 @@ int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_
 {
     int n = robot_calibration_positions_.size();
     if(n < 2 ||  device_calibration_positions_.size() != n) return -1;
-
-    std::vector<Eigen::Vector3d> robot_positions, device_positions;
     Eigen::Vector3d robot_position_centroid = Eigen::Vector3d::Zero();
     Eigen::Vector3d device_position_centroid = Eigen::Vector3d::Zero();
     for(int i = 0; i < n; ++i)
     {
-        Eigen::Vector3d robot_position;
-        robot_position(0) = robot_calibration_positions_[i].x;
-        robot_position(1) = robot_calibration_positions_[i].y;
-        robot_position(2) = robot_calibration_positions_[i].z;
-        robot_positions.push_back(robot_position);
-        robot_position_centroid += robot_position;
-
-        Eigen::Vector3d device_position;
-        device_position(0) = device_calibration_positions_[i].x;
-        device_position(1) = device_calibration_positions_[i].y;
-        device_position(2) = device_calibration_positions_[i].z;
-        device_positions.push_back(device_position);
-        device_position_centroid += device_position;
+        robot_position_centroid(0) += robot_calibration_positions_[i].x;
+        robot_position_centroid(1) += robot_calibration_positions_[i].y;
+        robot_position_centroid(2) += robot_calibration_positions_[i].z;
+        device_position_centroid(0) += device_calibration_positions_[i].x;
+        device_position_centroid(1) += device_calibration_positions_[i].y;
+        device_position_centroid(2) += device_calibration_positions_[i].z;
     }
     robot_position_centroid /= n;
     device_position_centroid /= n;
-
     Eigen::MatrixXd P(3, n), Q(3, n);
     for(int i = 0; i < n; ++i)
     {
-        P.col(i) = device_positions[i] - device_position_centroid;
-        Q.col(i) = robot_positions[i] - robot_position_centroid;
+        P(0, i) = device_calibration_positions_[i].x - device_position_centroid(0);
+        P(1, i) = device_calibration_positions_[i].y - device_position_centroid(1);
+        P(2, i) = device_calibration_positions_[i].z - device_position_centroid(2);
+        Q(0, i) = robot_calibration_positions_[i].x - robot_position_centroid(0);
+        Q(1, i) = robot_calibration_positions_[i].y - robot_position_centroid(1);
+        Q(2, i) = robot_calibration_positions_[i].z - robot_position_centroid(2);
     }
-
     Eigen::Matrix3d H = P * Q.transpose();
     Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
     Eigen::Matrix3d U = svd.matrixU();
     Eigen::Matrix3d V = svd.matrixV();
-
     Eigen::Matrix3d rotation = V * U.transpose();
     if(rotation.determinant() < EPSILON)
     {
@@ -315,18 +307,8 @@ int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_
         rotation = V * U.transpose();
     }
     Eigen::Vector3d transformation = robot_position_centroid - rotation * device_position_centroid;
-    for(int i = 0; i < 3; ++i)
-    {
-        for(int j = 0; j < 3; ++j)
-        {
-            std::cout<<"333 rotation : "<<i<<", "<<j<<" : "<<rotation(i, j)<<std::endl;
-        }
-    }
-    std::cout<<"333 transformation : "<<transformation(0)<<", "<<transformation(1)<<", "<<transformation(2)<<std::endl;
-    optimize_svd(robot_positions, device_positions, rotation, transformation);
     (*position_calibration_matrix_).block<3, 3>(0, 0) = rotation;
     (*position_calibration_matrix_).col(3).head(3) = transformation;
-
     for(int i = 0; i < n; ++i)
     {
         Eigen::VectorXd d(3);
@@ -334,13 +316,87 @@ int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_
         Eigen::VectorXd r(3);
         r << robot_calibration_positions_[i].x, robot_calibration_positions_[i].y, robot_calibration_positions_[i].z;
         Eigen::Vector3d cr = rotation * d + transformation - r;
-        double error = cr.norm();
+        double error = sqrt(pow(cr(1), 2) + pow(cr(2), 2));
         max_error_ = std::max(max_error_, error);
         std::cout<<"error : "<<error<<std::endl;
     }
     error_out = max_error_;
     return 0;
 }
+
+
+// int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_out)
+// {
+//     int n = robot_calibration_positions_.size();
+//     if(n < 2 ||  device_calibration_positions_.size() != n) return -1;
+
+//     std::vector<Eigen::Vector3d> robot_positions, device_positions;
+//     Eigen::Vector3d robot_position_centroid = Eigen::Vector3d::Zero();
+//     Eigen::Vector3d device_position_centroid = Eigen::Vector3d::Zero();
+//     for(int i = 0; i < n; ++i)
+//     {
+//         Eigen::Vector3d robot_position;
+//         robot_position(0) = robot_calibration_positions_[i].x;
+//         robot_position(1) = robot_calibration_positions_[i].y;
+//         robot_position(2) = robot_calibration_positions_[i].z;
+//         robot_positions.push_back(robot_position);
+//         robot_position_centroid += robot_position;
+
+//         Eigen::Vector3d device_position;
+//         device_position(0) = device_calibration_positions_[i].x;
+//         device_position(1) = device_calibration_positions_[i].y;
+//         device_position(2) = device_calibration_positions_[i].z;
+//         device_positions.push_back(device_position);
+//         device_position_centroid += device_position;
+//     }
+//     robot_position_centroid /= n;
+//     device_position_centroid /= n;
+
+//     Eigen::MatrixXd P(3, n), Q(3, n);
+//     for(int i = 0; i < n; ++i)
+//     {
+//         P.col(i) = device_positions[i] - device_position_centroid;
+//         Q.col(i) = robot_positions[i] - robot_position_centroid;
+//     }
+
+//     Eigen::Matrix3d H = P * Q.transpose();
+//     Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
+//     Eigen::Matrix3d U = svd.matrixU();
+//     Eigen::Matrix3d V = svd.matrixV();
+
+//     Eigen::Matrix3d rotation = V * U.transpose();
+//     if(rotation.determinant() < EPSILON)
+//     {
+//         V.col(2) *= -1;
+//         rotation = V * U.transpose();
+//     }
+//     Eigen::Vector3d transformation = robot_position_centroid - rotation * device_position_centroid;
+//     for(int i = 0; i < 3; ++i)
+//     {
+//         for(int j = 0; j < 3; ++j)
+//         {
+//             std::cout<<"333 rotation : "<<i<<", "<<j<<" : "<<rotation(i, j)<<std::endl;
+//         }
+//     }
+//     std::cout<<"333 transformation : "<<transformation(0)<<", "<<transformation(1)<<", "<<transformation(2)<<std::endl;
+//     optimize_svd(robot_positions, device_positions, rotation, transformation);
+//     (*position_calibration_matrix_).block<3, 3>(0, 0) = rotation;
+//     (*position_calibration_matrix_).col(3).head(3) = transformation;
+
+//     for(int i = 0; i < n; ++i)
+//     {
+//         Eigen::VectorXd d(3);
+//         d << device_calibration_positions_[i].x, device_calibration_positions_[i].y, device_calibration_positions_[i].z;
+//         Eigen::VectorXd r(3);
+//         r << robot_calibration_positions_[i].x, robot_calibration_positions_[i].y, robot_calibration_positions_[i].z;
+//         Eigen::Vector3d cr = rotation * d + transformation - r;
+//         double error = cr.norm();
+//         max_error_ = std::max(max_error_, error);
+//         std::cout<<"error : "<<error<<std::endl;
+//     }
+//     error_out = max_error_;
+//     return 0;
+// }
 
 int CalibrationManager::calculate_orientation_offset_matrix()
 {

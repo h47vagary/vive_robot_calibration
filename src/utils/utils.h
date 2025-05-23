@@ -99,6 +99,8 @@ void slerp(const Quaternion &quat_start, const Quaternion &quat_end, const doubl
 
 Eigen::Matrix4d pose_to_matrix(const CartesianPose &pose);
 CartesianPose matrix_to_pose(const Eigen::Matrix4d &mat);
+
+void print_matrix(const Eigen::Matrix4d &mat);
 }
 
 namespace TimeDealUtils

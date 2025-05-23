@@ -55,6 +55,9 @@ private slots:
     void slot_stop_update_track_pose();
     void slot_tracker2tcp_mark_rotation_use_robotpose();
 
+    void slot_use_robot_toolhand(bool);
+    //void slot_use_tracker2tcp(bool);
+
 public slots:
     void slot_handle_message(const QString& msg);
     void slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
@@ -93,6 +96,8 @@ private:
     ToolCalibration7Points* flange2tcp_calibration_;
     ToolCalibration7Points* tracker2tcp_calibration_;
     Eigen::Matrix4d* tcp2tracker_rotation_matrix_;
+
+    bool use_toolhand_ = false;
 
     void init_test_calib();    // 模拟数据测试标定
 };

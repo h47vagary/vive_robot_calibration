@@ -1,0 +1,450 @@
+PS E:\vive_robot_calibration\build> ."E:/vive_robot_calibration/build/vive_robot_calibration.exe"
+MainWindow constructed
+slot_connect_ctr
+[MessageHandler] Thread started.
+[MessageHandler] Connected to controller
+slot_tracker2tcp_mark_point
+point0 x:222.287 y:-590.257 z:-868.581 A:1.60908 B:-0.0469068 C:-1.38642
+slot_fanlge2tcp_mark_point_received index: 0
+point x:666.147 y:-436.259 z:890.948 A:3.14158 B:1.4033e-05 C:9.38866e-05
+slot_tracker2tcp_mark_point
+point1 x:221.242 y:-606.067 z:-971.455 A:1.22505 B:-0.0402633 C:-1.40804
+slot_fanlge2tcp_mark_point_received index: 1
+point x:666.06 y:-324.627 z:835.772 A:2.75687 B:5.70489e-05 C:0.000154223
+slot_tracker2tcp_mark_point
+point2 x:222.187 y:-644.231 z:-728.207 A:2.1738 B:-0.0406656 C:-1.35929
+slot_fanlge2tcp_mark_point_received index: 2
+point x:666.161 y:-619.1 z:886.223 A:-2.57758 B:3.37487e-05 C:0.000132775
+slot_tracker2tcp_mark_point
+point3 x:102.428 y:-601.176 z:-865.707 A:1.61099 B:0.397182 C:-1.39885
+slot_fanlge2tcp_mark_point_received index: 3
+point x:543.276 y:-436.633 z:802.796 A:3.14159 B:0.448563 C:0.00018149
+slot_tracker2tcp_mark_point
+point4 x:221.673 y:-589.084 z:-867.26 A:1.60949 B:-0.0476408 C:-1.38615
+slot_fanlge2tcp_mark_point_received index: 4
+point x:666.148 y:-436.25 z:890.965 A:3.14158 B:2.8985e-05 C:0.000104602
+slot_tracker2tcp_mark_point
+point5 x:135.339 y:-585.488 z:-868.004 A:1.60969 B:-0.048349 C:-1.38697
+slot_fanlge2tcp_mark_point_received index: 5
+point x:579.374 y:-436.252 z:890.956 A:3.14156 B:5.3574e-05 C:0.000210577
+slot_tracker2tcp_mark_point
+point6 x:134.744 y:-582.571 z:-1026.11 A:1.61013 B:-0.0478389 C:-1.38835
+slot_fanlge2tcp_mark_point_received index: 6
+point x:579.38 y:-278.578 z:890.969 A:3.14155 B:0.000111323 C:0.000193777
+Sphere
+x1: 666.147 *px: 795.463 x1-*px: -129.315
+y1: -436.259 *py: -519.731 y1-*py: 83.4724
+z1: 890.948 *pz: 581.343 z1-*pz: 309.605
+tool_calculate_7points ox: 795.463 oy: -519.731 oz: 581.343
+flange2tcp calibrate success
+flange2tcp calib matrix:
+          -1 -0.000129107  7.24443e-05      129.319
+   0.0001291           -1 -9.72049e-05      83.4567
+ 7.24568e-05 -9.71955e-05            1      309.608
+           0            0            0            1
+Sphere
+x1: 222.287 *px: 183.96 x1-*px: 38.327
+y1: -590.257 *py: -837.022 y1-*py: 246.765
+z1: -868.581 *pz: -882.926 z1-*pz: 14.3448
+tool_calculate_7points ox: 183.96 oy: -837.022 oz: -882.926
+tracker2tcp calibrate success
+tcp2tracker_vec: [-0.0889067, -27.1406, 248.659]
+is_checked true
+slot_mark_point_received type: 1 index: 1
+point x:240.089 y:-277.054 z:-652.841 A:1.60975 B:-0.0439077 C:-1.38478
+point: 1
+pose.pos.x: 798.953  pose.pos.y: -728.74 pose.pos.z: 890.617 pose.ori.A: 3.14158 pose.ori.B: 3.05123e-05pose.ori.C: -3.14149   
+slot_mark_point_received type: 0 index: 1
+point x:798.953 y:-728.74 z:890.617 A:3.14158 B:3.05123e-05 C:-3.14149
+slot_mark_point_received type: 1 index: 2
+point x:230.282 y:-464.918 z:-656.562 A:1.60915 B:-0.0450679 C:-1.38564
+point: 2
+pose.pos.x: 798.955  pose.pos.y: -728.745 pose.pos.z: 702.687 pose.ori.A: 3.14156 pose.ori.B: 3.96128e-05pose.ori.C: -3.14149  
+slot_mark_point_received type: 0 index: 2
+point x:798.955 y:-728.745 z:702.687 A:3.14156 B:3.96128e-05 C:-3.14149
+slot_mark_point_received type: 1 index: 3
+point x:228.456 y:-458.452 z:-960.415 A:1.60943 B:-0.0462519 C:-1.38694
+point: 3
+pose.pos.x: 798.949  pose.pos.y: -425.063 pose.pos.z: 702.686 pose.ori.A: 3.14158 pose.ori.B: 2.53412e-05pose.ori.C: -3.14148  
+slot_mark_point_received type: 0 index: 3
+point x:798.949 y:-425.063 z:702.686 A:3.14158 B:2.53412e-05 C:-3.14148
+slot_mark_point_received type: 1 index: 4
+point x:240.35 y:-228.293 z:-954.976 A:1.61105 B:-0.044249 C:-1.38725
+point: 4
+pose.pos.x: 798.953  pose.pos.y: -425.064 pose.pos.z: 932.526 pose.ori.A: 3.14158 pose.ori.B: 2.97823e-05pose.ori.C: -3.14149  
+slot_mark_point_received type: 0 index: 4
+point x:798.953 y:-425.064 z:932.526 A:3.14158 B:2.97823e-05 C:-3.14149
+slot_mark_point_received type: 1 index: 5
+point x:432.618 y:-273.614 z:-900.841 A:1.60606 B:-0.0461027 C:-1.38363
+point: 5
+pose.pos.x: 992.493  pose.pos.y: -480.996 pose.pos.z: 898.62 pose.ori.A: 3.14158 pose.ori.B: 2.50833e-05pose.ori.C: -3.14149   
+slot_mark_point_received type: 0 index: 5
+point x:992.493 y:-480.996 z:898.62 A:3.14158 B:2.50833e-05 C:-3.14149
+slot_compute
+浣跨敤SVD鏍囧畾
+333 rotation : 0, 0 : -0.552712
+333 rotation : 0, 1 : 0.456746
+333 rotation : 0, 2 : 0.69706
+333 rotation : 1, 0 : -0.833368
+333 rotation : 1, 1 : -0.30017
+333 rotation : 1, 2 : -0.464108
+333 rotation : 2, 0 : -0.00274322
+333 rotation : 2, 1 : -0.837425
+333 rotation : 2, 2 : 0.546545
+333 transformation : 429.746, -286.129, 423.47
+444 i : 0
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 1
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 2
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 3
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 4
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 5
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 6
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 7
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 8
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 9
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 10
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 11
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 12
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 13
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 14
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 15
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 16
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 17
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 18
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 19
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 20
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 21
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 22
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 23
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 24
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 25
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 26
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 27
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 28
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 29
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 30
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 31
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 32
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 33
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 34
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 35
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 36
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 37
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 38
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 39
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 40
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 41
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 42
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 43
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 44
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 45
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 46
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 47
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 48
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+444 i : 49
+333 delta : 0 : 2.94301e-16
+333 delta : 1 : -5.71106e-17
+333 delta : 2 : -8.98255e-28
+333 delta : 3 : 4.54235e-15
+333 delta : 4 : -1.00413e-13
+333 delta : 5 : -1.04397e-13
+error : 667.741
+error : 277.114
+error : 236.171
+error : 96.7938
+error : 211.438
+error : 288.59

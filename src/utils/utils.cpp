@@ -122,6 +122,20 @@ CartesianPose Utils::matrix_to_pose(const Eigen::Matrix4d &mat)
     return pose;
 }
 
+void Utils::print_matrix(const Eigen::Matrix4d &mat)
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        std::cout << " [ ";
+        for (int j = 0; j < 4; ++j)
+        {
+            std::cout << mat(i, j);
+            if (j < 3) std::cout << ", ";
+        }
+        std::cout << " ]\n";
+    }
+}
+
 std::string extract_trajectory_strings(const std::string& file_path)
 {
     std::string result = "";

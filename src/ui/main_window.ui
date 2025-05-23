@@ -1623,6 +1623,32 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBox_use_toolhand">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>410</y>
+       <width>131</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>机器人使用工具手</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_use_track2tcp">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>410</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>追踪器转置TCP点位</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="pushButton_start_plackback">
     <property name="geometry">

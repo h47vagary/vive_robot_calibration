@@ -163,7 +163,7 @@ void MainWindow::init_connect()
     connect(ui->pushButton_flange2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_mark_point()));
     connect(ui->pushButton_flange2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_clear_point()));
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
-
+    connect(ui->checkBox_use_toolhand, SIGNAL(toggled(bool)), this, SLOT(slot_use_robot_toolhand(bool)));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -206,7 +206,7 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
     std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
                 << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
 
-    if (index < 1 || index > 6) return;
+    //if (index < 1 || index > 6) return;
 
     QVector<QLabel*>* labels = nullptr;
 
@@ -214,19 +214,36 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
     {
         if (!r_labels_map.contains(index)) return;
         labels = &r_labels_map[index];
+        int index_real = index - 1;
+        if (use_toolhand_)
+        {
+            // 存入点位
+            calibration_manager_->set_robot_calibration_positon(index_real, pose.position);
+            calibration_manager_->set_robot_calibration_orientation(index_real, pose.orientation);
+            std::cout << "svd calibration pose: " << "x=" << pose.position.x << " y=" << pose.position.y <<
+                        " z=" << pose.position.z << " A=" << pose.orientation.A << " B=" << pose.orientation.B <<
+                        " C=" << pose.orientation.C << std::endl;
+        }
+        else
+        {
+            // 获取tcp->法兰盘的旋转矩阵
+            Eigen::Matrix4d pose_calibration_matrix;
+            flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+            // 将机器人当前法兰盘点位转为旋转矩阵
+            Eigen::Matrix4d flange_matrix = Utils::pose_to_matrix(pose);
+            // 相乘取得 tcp 点的旋转矩阵
+            Eigen::Matrix4d tcp_matrix = flange_matrix * pose_calibration_matrix;
+            // 将旋转矩阵转回位姿
+            CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
 
-        // 获取tcp->法兰盘的旋转矩阵
-        Eigen::Matrix4d pose_calibration_matrix;
-        flange2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
-        // 将机器人当前法兰盘点位转为旋转矩阵
-        Eigen::Matrix4d flange_matrix = Utils::pose_to_matrix(pose);
-        // 相乘取得 tcp 点的旋转矩阵
-        Eigen::Matrix4d tcp_matrix = flange_matrix * pose_calibration_matrix;
-        // 将旋转矩阵转回位姿
-        CartesianPose pose_tcp = Utils::matrix_to_pose(tcp_matrix);
-        // 存入点位
-        calibration_manager_->set_robot_calibration_positon(index, pose_tcp.position);
-        calibration_manager_->set_robot_calibration_orientation(index, pose_tcp.orientation);
+            std::cout << " tcp_matrix: " << std::endl;
+            Utils::print_matrix(tcp_matrix);
+
+            // 存入点位
+            calibration_manager_->set_robot_calibration_positon(index_real, pose_tcp.position);
+            calibration_manager_->set_robot_calibration_orientation(index_real, pose_tcp.orientation);
+        }
+        
     }
     else if (type == E_POSE_TYPE_VIVE)
     {
@@ -369,6 +386,18 @@ void MainWindow::slot_compute()
     std::cout << __FUNCTION__ << std::endl;
     double max_error = -1000.0;
     int rz = 0;
+    std::vector<CartesianPosition> robot_calib_positions;
+    std::vector<CartesianPosition> tracker_calib_positions;
+    calibration_manager_->get_calibration_positions(robot_calib_positions, tracker_calib_positions);
+    std::cout << "robot_calib_position.size(): " << robot_calib_positions.size() << " devie_calib_position.size(): " <<
+                    tracker_calib_positions.size() << std::endl;
+    for (int i = 1; i <= robot_calib_positions.size(); i++)
+    {
+        std::cout << "position[" << i << "] robot.x=" << robot_calib_positions[i].x << " robot.y=" << robot_calib_positions[i].y
+                  << " robot.z=" << robot_calib_positions[i].z << " tracker.x=" << tracker_calib_positions[i].x
+                  << " trakcer.y=" << tracker_calib_positions[i].y << " tracker.z=" << tracker_calib_positions[i].z << std::endl;
+    }
+
     calibration_manager_->set_calibration_algorithm(2);
     int ret = calibration_manager_->calibrate(0, max_error);
     if (!ret)
@@ -407,26 +436,47 @@ void MainWindow::slot_mark_point()
         
         // 获取 Tracker 当前位姿
         CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();
+        std::cout << "pose_tracker point" << " x:" << pose_tracker.position.x << " y:" << pose_tracker.position.y << " z:" << pose_tracker.position.z
+                << " A:" << pose_tracker.orientation.A << " B:" << pose_tracker.orientation.B << " C:" << pose_tracker.orientation.C << std::endl;
+
         // 将位姿转为旋转矩阵
-        Eigen::Matrix4d pose_calibration_matrix;
-        tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
+        // Eigen::Matrix4d pose_calibration_matrix;
+        // tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
         // 获取 tcp->Tracker 齐次变换矩阵
-        //Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
+        Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
+        std::cout << " tracker_matrix before: " << std::endl;
+        Utils::print_matrix(tracker_matrix);
         // 修改为获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
         Eigen::Vector4d pos_vec;
         tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
-        Eigen::Matrix4d tracker_matrix = Eigen::Matrix4d::Identity();
-        tracker_matrix.block<3,1>(0,3) = pos_vec.head<3>();  // 只取前三个作为平移
+        std::cout << " pos_vec.(0): " << pos_vec(0) << " pos_vec(1): " << pos_vec(1) << " pos_vec(2): " << pos_vec(2) << std::endl;
+        Eigen::Matrix4d pos_matrix = Eigen::Matrix4d::Identity();
+        pos_matrix.block<3,1>(0,3) = pos_vec.head<3>();  // 只取前三个作为平移
         // 相乘取得 tcp 旋转矩阵
-       pose_calibration_matrix(0,3) += pos_vec(0);
-       pose_calibration_matrix(1,3) += pos_vec(1);
-       pose_calibration_matrix(2,3) += pos_vec(2);
-        // 再将旋转矩阵转回位姿点位
-        CartesianPose pose_tcp = Utils::matrix_to_pose(pose_calibration_matrix);
-        // 存入标定管理器的位置、姿态
-        calibration_manager_->set_device_calibration_position(index, pose_tcp.position);
-        calibration_manager_->set_device_calibration_orientation(index, pose_tcp.orientation);
+        #if 0
+        tracker_matrix(0,3) += pos_vec(0);
+        tracker_matrix(1,3) += pos_vec(1);
+        tracker_matrix(2,3) += pos_vec(2);
+        #endif
+        Eigen::Matrix4d tcp2location_matrix = tracker_matrix * pos_matrix;
+        std::cout << "\n tcp2location_matrix: " << std::endl;
+        Utils::print_matrix(tcp2location_matrix);
 
+        // 再将旋转矩阵转回位姿点位
+        //CartesianPose pose_tcp = Utils::matrix_to_pose(tracker_matrix);
+        CartesianPose pose_tcp = Utils::matrix_to_pose(tcp2location_matrix);
+        // 存入标定管理器的位置、姿态
+        int index_real = index - 1;
+        #if 1
+        calibration_manager_->set_device_calibration_position(index_real, pose_tcp.position);
+        calibration_manager_->set_device_calibration_orientation(index_real, pose_tcp.orientation);
+        #else
+        calibration_manager_->set_device_calibration_position(index_real, pose_tracker.position);
+        calibration_manager_->set_device_calibration_orientation(index_real, pose_tracker.orientation);
+        #endif
+        std::cout << "\n pose_tcp" << " x:" << pose_tcp.position.x << " y:" << pose_tcp.position.y << " z:" << pose_tcp.position.z
+                << " A:" << pose_tcp.orientation.A << " B:" << pose_tcp.orientation.B << " C:" << pose_tcp.orientation.C << std::endl;
+        
         slot_mark_point_received(E_POSE_TYPE_VIVE, index, pose_tracker);
     }
     else
@@ -548,4 +598,19 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
     }
 
     emit signal_handler_tracker2tcp_mark_rotation_use_robotpose();
+}
+
+void MainWindow::slot_use_robot_toolhand(bool state)
+{
+    if (ui->checkBox_use_toolhand->isChecked())
+    {
+        std::cout << "is_checked true" << std::endl;
+        use_toolhand_ = true;
+        
+    }
+    else
+    {
+        std::cout << "is_checked false" << std::endl;
+        use_toolhand_ = false;
+    }
 }
