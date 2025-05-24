@@ -41,7 +41,7 @@ Sphere
 x1: -443.955 *px: -464.875 x1-*px: 20.9207
 y1: -178.092 *py: -426.472 y1-*py: 248.379
 z1: -2786.27 *pz: -2840.87 z1-*pz: 54.6017
-tool_calculate_7points ox: -464.875 oy: -426.472 oz: -2840.87
+tool_calculate_7points  nb  ox: -464.875 oy: -426.472 oz: -2840.87
 tracker2tcp calibrate success
 tcp2tracker_vec: [3.33994, -26.0792, 253.811]
 slot_mark_point_received type: 1 index: 1
