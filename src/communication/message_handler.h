@@ -34,6 +34,7 @@ signals:
     void signal_flange2tcp_mark_point_received(int index, CartesianPose pose);
     void signal_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
     void signal_compute_result_received(double result);
+    void signal_get_linear_error_use_robot_pose(CartesianPose pose);
     
 
 public slots:

@@ -65,6 +65,8 @@ public slots:
     void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
     void slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
 
+    void slot_get_linear_error_use_robot_pose(CartesianPose pose);      // 感觉会比较大，因为多一个网络传输的时间
+
 signals:
     void signal_connect_ctr();
     void signal_disconnect_ctr();
@@ -98,6 +100,7 @@ private:
     Eigen::Matrix4d* tcp2tracker_rotation_matrix_;
 
     bool use_toolhand_ = false;
+    double linear_error_ = 0.0; // 线性误差
 
     void init_test_calib();    // 模拟数据测试标定
 };

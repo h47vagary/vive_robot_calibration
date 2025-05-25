@@ -180,6 +180,7 @@ void MainWindow::init_connect()
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
     connect(msg_handler_, &MessageHandler::signal_flange2tcp_mark_point_received, this, &MainWindow::slot_fanlge2tcp_mark_point_received);
     connect(msg_handler_, &MessageHandler::signal_tracker2tcp_mark_use_robot_pose, this, &MainWindow::slot_tracker2tcp_mark_use_robot_pose);
+    connect(msg_handler_, &MessageHandler::signal_get_linear_error_use_robot_pose, this, &MainWindow::slot_get_linear_error_use_robot_pose);
     connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
@@ -330,6 +331,42 @@ void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
     *tcp2tracker_rotation_matrix_ =
         tracker_mat.inverse() * location2robotbase_mat.inverse() * tcp_mat;
     #endif
+    // 拼接 tcp2tracker 的旋转矩阵
+    Eigen::Vector4d tcp2tracker_pos_vec;
+    tracker2tcp_calibration_->get_calibration_pos_vec(tcp2tracker_pos_vec);
+    Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
+    mat.block<3, 3>(0, 0) =  tcp2tracker_rotation_matrix_->block<3, 3>(0, 0);
+    mat.block<3, 1>(0, 3) = tcp2tracker_pos_vec.head<3>();
+
+    std::cout << "mat: " << std::endl;
+    Utils::print_matrix(mat);
+
+    tracker2tcp_calibration_->set_pose_calibration_matrix(mat);
+
+}
+
+void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
+{
+    std::cout << __FUNCTION__ << std::endl;
+    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
+    CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
+    Eigen::Matrix4d tcp2trakcker_mat;
+    tracker2tcp_calibration_->get_pose_calibration_matrix(tcp2trakcker_mat);
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
+    Eigen::Matrix4d location2robotbase_mat;
+    calibration_manager_->get_calibratoin_matrix(location2robotbase_mat);
+
+    // 求当前追踪器读到的位姿，转换到机器人基座下的TCP位姿
+    Eigen::Matrix4d robot_tcp_mat = location2robotbase_mat * tcp2trakcker_mat * tracker_mat;
+    CartesianPose robot_tcp_pose = Utils::matrix_to_pose(robot_tcp_mat);
+    
+    double x = pose.position.x - robot_tcp_pose.position.x;
+    double y = pose.position.y - robot_tcp_pose.position.y;
+    double z = pose.position.z - robot_tcp_pose.position.z;
+    linear_error_ = std::sqrt(x * x + y * y + z * z);
+    ui->label_linear_error->setText(QString::number(linear_error_, 'f', 2));
+    //std::cout << "linear error: " << linear_error_ << std::endl;
 }
 
 void MainWindow::slot_connect_ctr()

@@ -1639,14 +1639,46 @@
     <widget class="QCheckBox" name="checkBox_use_track2tcp">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>410</y>
+       <x>210</x>
+       <y>400</y>
        <width>151</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>追踪器转置TCP点位</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_linear_error_tag">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>310</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>线性误差</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_linear_error">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>350</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </widget>
