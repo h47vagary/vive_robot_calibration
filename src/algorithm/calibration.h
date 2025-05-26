@@ -27,7 +27,6 @@ public:
     void get_max_error(double &max_error);
     void get_position_calibration_matrix(Eigen::Matrix4d &position_calibration_matrix);
     void get_orientation_offset_matrix(Eigen::Matrix3d &orientation_offset_matrix);
-    void get_calibratoin_matrix(Eigen::Matrix4d &pose_calibration_matrix);
     void get_calibration_positions(std::vector<CartesianPosition> &robot_calibration_positions,
                                    std::vector<CartesianPosition> &device_calibration_positions);
     void get_calibration_orientation(CartesianOrientation &robot_calibration_orientation,
@@ -48,11 +47,13 @@ public:
     void set_calibration_algorithm(int method);
     void get_calibration_algorithm(int& method);
 
+    int calculate_orientation_offset_matrix();
+
 private:
     int calculate_position_calibration_matrix(double &error_out);
     int calculate_position_calibration_matrix(double rz, double &error_out);
     int calculate_position_calibration_matrix_svd(double &error_out);
-    int calculate_orientation_offset_matrix();
+    // int calculate_orientation_offset_matrix();
 
     void cartesian_orientation_to_matrix(const CartesianOrientation &orientation, Eigen::Matrix3d &matrix);
     void matrix_to_cartesian_orientation(const Eigen::Matrix3d &matrix, CartesianOrientation &orientation);
@@ -92,6 +93,7 @@ public:
     void get_calibration_poses(std::vector<CartesianPose> &calibration_poses);
     void get_calibration_pos_vec(Eigen::Vector4d &pos_calibration_vec);
     void set_pose_calibration_matrix(const Eigen::Matrix4d &pose_calibration_matrix);
+    void set_calibration_pos_vec(const Eigen::Vector4d &calibration_pos_vec);
 
     void set_calibration_pose(const int &index, const CartesianPose &pose);
     int clear_calibration_pose();

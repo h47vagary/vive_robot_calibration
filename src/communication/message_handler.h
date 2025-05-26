@@ -48,6 +48,7 @@ public slots:
     void slot_handler_end_playback();                           // 结束回放
     void slot_handler_flang2tcp_mark_point(int index);          // 法兰盘2TCP的标定点 
     void slot_handler_tracker2tcp_mark_rotation_use_robotpose();          // 标定追踪器到tcp点需要一次机器人姿态
+    void slot_linear_error_acquire();                           // 获取线性误差（需要一次机器人姿态）
 
 private:
     void thread_loop();  // 后台线程处理
@@ -56,6 +57,6 @@ private:
 
     std::thread thread_;
     std::atomic_bool running_{false};
-    CommManager comm_;  // 控制器通信管理类（你已有）
+    CommManager comm_;  // 控制器通信管理类
 
 };

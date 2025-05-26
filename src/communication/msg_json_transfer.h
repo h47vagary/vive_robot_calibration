@@ -30,7 +30,7 @@ enum E_JSON_COMMAND
     E_JSON_COMMAND_SET_END_PLAYBACK_,                   // 结束回放
     E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_,           // 标定法兰盘2TCP点
     E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_,           // 标定追踪器到TCP点（需要取一次当前机器人法兰盘点位）
-    E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_,    // 计算线性误差（需要取一次当前机器人法兰盘点位）
+    E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_,    // 计算线性误差（需要取一次当前机器人位置）
     
     E_JSON_COMMAND_RECEIVE_MES_,                        // 接受控制器消息
     E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_,           // 接受控制器标定点 

@@ -51,12 +51,14 @@ private slots:
     void slot_flange2tcp_clear_point();
     
     void slot_track_pose_timeout();
+    void slot_linear_error_cotinue_acquire();
     void slot_start_update_track_pose();
     void slot_stop_update_track_pose();
     void slot_tracker2tcp_mark_rotation_use_robotpose();
 
     void slot_use_robot_toolhand(bool);
-    //void slot_use_tracker2tcp(bool);
+    void slot_use_tracker2tcp(bool);
+    void slot_continue_get(bool);
 
 public slots:
     void slot_handle_message(const QString& msg);
@@ -78,6 +80,7 @@ signals:
     void signal_end_playback();
     void signal_flang2tcp_mark_point(int point_index);
     void signal_handler_tracker2tcp_mark_rotation_use_robotpose();
+    void signal_linear_error_acquire();
 
 private:
     void init_connect();
@@ -88,6 +91,7 @@ private:
 
     Ui::MainWindow *ui;
     QTimer* track_pose_timer_;
+    QTimer* linear_error_continue_acquire_;
     QList<QPushButton*> mark_buttons_;
     QMap<int, QVector<QLabel*>> v_labels_map;  // label_v1_x ~ label_v6_C
     QMap<int, QVector<QLabel*>> r_labels_map;  // label_r1_x ~ label_r6_C
@@ -100,6 +104,7 @@ private:
     Eigen::Matrix4d* tcp2tracker_rotation_matrix_;
 
     bool use_toolhand_ = false;
+    bool use_track2tcp_ = false;
     double linear_error_ = 0.0; // 线性误差
 
     void init_test_calib();    // 模拟数据测试标定

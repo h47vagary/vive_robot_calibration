@@ -169,6 +169,7 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
     }
     case E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_:
     {
+        std::cout << "######## E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_ #############" << std::endl;
         CartesianPose pose;
         int point;
         if (!MsgJsonTransfer::transfer_rob_pose(msg, point, pose))
@@ -284,7 +285,17 @@ void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
 
 void MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose()
 {
+    std::cout << __FUNCTION__ << std::endl;
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_, ++serial_id_send_, json_str_out);
+    comm_.nrc_send_message(0x9206, json_str_out);
+}
+
+void MessageHandler::slot_linear_error_acquire()
+{
+    if (!running_) return;
+    std::string json_str_out;
+    MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_, ++serial_id_send_, json_str_out);
+    comm_.nrc_send_message(0x9206, json_str_out);
 }

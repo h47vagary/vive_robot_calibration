@@ -83,12 +83,6 @@ void CalibrationManager::get_orientation_offset_matrix(Eigen::Matrix3d &orientat
     orientation_offset_matrix = *orientation_offset_matrix_;
 }
 
-void CalibrationManager::get_calibratoin_matrix(Eigen::Matrix4d &pose_calibration_matrix)
-{
-    pose_calibration_matrix = *position_calibration_matrix_;
-    pose_calibration_matrix.block<3, 3>(0, 0) = *orientation_offset_matrix_;
-}
-
 void CalibrationManager::get_calibration_positions(std::vector<CartesianPosition> &robot_calibration_positions,
                                                    std::vector<CartesianPosition> &device_calibration_positions)
 {
@@ -335,6 +329,8 @@ int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_
     Eigen::Vector3d transformation = robot_position_centroid - rotation * device_position_centroid;
     (*position_calibration_matrix_).block<3, 3>(0, 0) = rotation;
     (*position_calibration_matrix_).col(3).head(3) = transformation;
+    std::cout << "## position_calibration_matrix: " << std::endl;
+    std::cout << *position_calibration_matrix_ << std::endl;
     for(int i = 0; i < n; ++i)
     {
         Eigen::VectorXd d(3);
@@ -433,6 +429,8 @@ int CalibrationManager::calculate_orientation_offset_matrix()
 
     if(fabs(device_orientation_matrix.determinant()) < EPSILON) return -1;
     *orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();
+    std::cout << __FUNCTION__ << " *orientation_offset_matrix_:" << std::endl;
+    std::cout << *orientation_offset_matrix_ << std::endl;
 
     return 0;
 }
@@ -571,6 +569,11 @@ void ToolCalibration7Points::get_calibration_pos_vec(Eigen::Vector4d &pos_calibr
 void ToolCalibration7Points::set_pose_calibration_matrix(const Eigen::Matrix4d &pose_calibration_matrix)
 {
     *calibration_matrix_ = pose_calibration_matrix;
+}
+
+void ToolCalibration7Points::set_calibration_pos_vec(const Eigen::Vector4d &calibration_pos_vec)
+{
+    *calibration_pos_vec_ = calibration_pos_vec;
 }
 
 void ToolCalibration7Points::set_calibration_pose(const int &index, const CartesianPose &pose)
