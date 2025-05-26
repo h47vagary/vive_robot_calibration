@@ -30,12 +30,17 @@ public:
 
     CartesianPose get_latest_pose();  // 获取最新点位
 
-    void enable_record(size_t max_size = 5000);                         // 开启轨迹缓存
-    void disable_record();                                              // 停止轨迹缓存并清空
+    void enable_record(size_t max_size = 8000);                         // 开启轨迹缓存
+    void disable_record();                                              // 停止轨迹缓存
     std::vector<CartesianPose> get_recorded_poses();                    // 获取缓存的轨迹
     void clear_recorded_poses();                                        // 清空缓存的轨迹   
-    bool save_record_poses_to_file(const std::string& filename);        // 保存缓存的轨迹到文件
+    bool save_record_poses_to_file(const std::string& filename);        // 保存缓存的轨迹到文件(CSV格式)
     void set_loop_interval_ms(int interval_ms);                         // 设置读取间隔时间(ms)
+    bool load_record_poses_from_file(const std::string& filename, std::vector<CartesianPose>& out_poses);
+
+private:
+    bool parse_double(const std::string &str, double &value);
+
 
 private:
     void read_loop();
@@ -51,6 +56,7 @@ private:
     std::vector<CartesianPose> recorded_poses_; // 缓存的轨迹
     std::mutex record_mutex_;                   // 轨迹缓存的互斥锁
     size_t max_record_size_;                    // 最大缓存大小   
+    size_t record_count_;                       // 当前缓存的轨迹数量
 
     std::atomic<int> loop_interval_ms_;         // 读取间隔时间(ms)
 };

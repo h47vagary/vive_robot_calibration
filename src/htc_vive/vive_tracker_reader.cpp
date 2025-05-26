@@ -7,7 +7,7 @@
 
 ViveTrackerReader::ViveTrackerReader()
     : running_(false), paused_(false), active_index_(0), 
-    record_enabled_(false), max_record_size_(5000), loop_interval_ms_(9)
+    record_enabled_(false), max_record_size_(8000), loop_interval_ms_(4)
 {
 
 }
@@ -55,59 +55,41 @@ void ViveTrackerReader::resume()
 CartesianPose ViveTrackerReader::get_latest_pose()
 {
     int index = active_index_.load(std::memory_order_acquire);
-    // const VivePose& pose = pose_buf_[index];
-
-    // CartesianPose cartesian_pose;
-    // cartesian_pose.position.x = pose.x;
-    // cartesian_pose.position.y = pose.y;
-    // cartesian_pose.position.z = pose.z;
-
-    // // 四元数转欧拉角 (ABC)
-    // Quaternion quat(pose.qw, pose.qx, pose.qy, pose.qz);
-    // quat = quat.normalize();  // 确保单位四元数
-    // Utils::quaternion_to_euler_ABC(quat, 
-    //                                 cartesian_pose.orientation.A,
-    //                                 cartesian_pose.orientation.B,
-    //                                 cartesian_pose.orientation.C);
-
-    // std::cout << "x:" << cartesian_pose.position.x << " y:" << cartesian_pose.position.y << " z:" << cartesian_pose.position.z << 
-    //             " A:" << cartesian_pose.orientation.A << " B:" << cartesian_pose.orientation.B << " C:" << cartesian_pose.orientation.C << std::endl;
-    
-
     const CartesianPose& cartesian_pose = pose_buf_[index];
     return cartesian_pose;
 }
 
 void ViveTrackerReader::enable_record(size_t max_size)
 {
-    std::lock_guard<std::mutex> lock(record_mutex_);
-    recorded_poses_.clear();
+    // std::lock_guard<std::mutex> lock(record_mutex_);
     max_record_size_ = max_size;
+    recorded_poses_.clear();
+    recorded_poses_.resize(max_record_size_);      // 预分配内存以提高性能
+    record_count_ = 0;
     record_enabled_ = true;
 }
 
 void ViveTrackerReader::disable_record()
 {
-    std::lock_guard<std::mutex> lock(record_mutex_);
-    recorded_poses_.clear();
+    // std::lock_guard<std::mutex> lock(record_mutex_);
     record_enabled_ = false;
 }
 
 std::vector<CartesianPose> ViveTrackerReader::get_recorded_poses()
 {
-    std::lock_guard<std::mutex> lock(record_mutex_);
-    return recorded_poses_;
+    // std::lock_guard<std::mutex> lock(record_mutex_); 
+    return std::vector<CartesianPose>(recorded_poses_.begin(), recorded_poses_.begin() + record_count_);
 }
 
 void ViveTrackerReader::clear_recorded_poses()
 {
-    std::lock_guard<std::mutex> lock(record_mutex_);
+    // std::lock_guard<std::mutex> lock(record_mutex_);
     recorded_poses_.clear();
 }
 
 bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename)
 {
-    std::lock_guard<std::mutex> lock(record_mutex_);
+    // std::lock_guard<std::mutex> lock(record_mutex_);
 
     std::ofstream file(filename);
     if (!file.is_open()) 
@@ -117,14 +99,15 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename)
     }
 
     file << "x,y,z,A,B,C\n";
-    for (const auto& pose : recorded_poses_) 
+    for (size_t i = 0; i < record_count_; ++i)
     {
+        const auto& pose = recorded_poses_[i];
         file << pose.position.x << ","
-             << pose.position.y << ","
-             << pose.position.z << ","
-             << pose.orientation.A << ","
-             << pose.orientation.B << ","
-             << pose.orientation.C << "\n";
+            << pose.position.y << ","
+            << pose.position.z << ","
+            << pose.orientation.A << ","
+            << pose.orientation.B << ","
+            << pose.orientation.C << "\n";
     }
 
     return true;
@@ -142,12 +125,66 @@ void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
     }
 }
 
+bool ViveTrackerReader::load_record_poses_from_file(const std::string &filename, std::vector<CartesianPose> &out_poses)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return false;
+    }
+
+    out_poses.clear();
+
+    std::string line;
+    std::getline(file, line); // 跳过标题行
+
+    while (std::getline(file, line))
+    {
+        std::istringstream ss(line);
+        std::string token;
+        CartesianPose pose;
+
+        // 依次读取6个字段
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.position.x)) return false;
+
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.position.y)) return false;
+
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.position.z)) return false;
+
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.orientation.A)) return false;
+
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.orientation.B)) return false;
+
+        if (!std::getline(ss, token, ',')) return false;
+        if (!parse_double(token, pose.orientation.C)) return false;
+
+        out_poses.push_back(pose);
+    }
+
+    return true;
+}
+
+bool ViveTrackerReader::parse_double(const std::string &str, double &value)
+{
+    char* endptr = nullptr;
+    value = std::strtod(str.c_str(), &endptr);
+    return endptr != str.c_str() && *endptr == '\0';
+}
+
 void ViveTrackerReader::read_loop()
 {
     int write_index = 0;
 
-    while (running_) {
-        if (!paused_) {
+    while (running_) 
+    {
+        if (!paused_) 
+        {
             double x, y, z, A, B, C;
             uint64_t button_mask = 0;
             bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
@@ -166,15 +203,17 @@ void ViveTrackerReader::read_loop()
 
             if (ok && record_enabled_)
             {
-                std::lock_guard<std::mutex> lock(record_mutex_);
-                if (recorded_poses_.size() >= max_record_size_)
+                // TODO: 暂时无锁写入，后续如有稳定性问题，需改为无锁缓冲或双缓冲
+                // std::lock_guard<std::mutex> lock(record_mutex_);
+                if (record_count_ >= max_record_size_)
                 {
                     record_enabled_ = false;
                     std::cerr << "Recording buffer is full. Stopping recording." << std::endl;
                 }
                 else
                 {
-                    recorded_poses_.push_back(pose);
+                    recorded_poses_[record_count_] = pose;
+                    record_count_++;
                 }
                 
             }
