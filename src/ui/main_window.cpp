@@ -396,15 +396,6 @@ void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
     Eigen::Matrix3d orientation_offset_matrix;
     calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
     std::cout << " orientation_offset_matrix: " << std::endl;
-    // 结果是绕Z轴正方向旋转90°
-    /*
-    calculate_orientation_offset_matrix *orientation_offset_matrix_:
-    -0.187234   -0.982184  -0.0160803
-        0.98229   -0.187322  0.00413392
-    -0.00707246  -0.0150215    0.999862
-    ===> 转 XYZ 欧拉角
-    [ x: -0.0041345, y: -0.016081, z: 1.7591669 ]
-    */
     std::cout << orientation_offset_matrix << std::endl;
 }
 
@@ -446,17 +437,13 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
     std::cout << " tcp2robotbase_ori_mat:" << std::endl;
     std::cout << tcp2robotbase_ori_mat << std::endl;
 
-    // ??求取线性误差需要补偿姿态吗
     // 获取TCP姿态补偿矩阵
     Eigen::Matrix3d orientation_offset_matrix;
     calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
     std::cout << "used orientation_offset_matrix:" << std::endl;
     std::cout << orientation_offset_matrix << std::endl;
-    // Eigen::Matrix4d orientation_offset_matrix_4x4 = Eigen::Matrix4d::Identity();
-    // orientation_offset_matrix_4x4.block<3,3>(0,0) = orientation_offset_matrix;
     // 进行补偿TCP姿态
     Eigen::Matrix3d tcp2robotbase_ori_mat_offset = orientation_offset_matrix * tcp2robotbase_ori_mat; //左乘
-    //Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix; //右乘
     Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
     tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
     std::cout << " tcp2robotbase_ori_mat_offset:" << std::endl;
@@ -465,7 +452,6 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
     std::cout << "\n tcp2robotbase_mat: " << std::endl;
     std::cout << tcp2robotbase_mat << std::endl;
 
-    //Eigen::Matrix4d tcp2robotbase_mat = tcp2robotbase_pos_mat * orientation_offset_matrix_4x4;
     CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
     std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
                 << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
@@ -595,15 +581,11 @@ void MainWindow::slot_mark_point()
         CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();
         std::cout << "pose_tracker point" << " x:" << pose_tracker.position.x << " y:" << pose_tracker.position.y << " z:" << pose_tracker.position.z
                 << " A:" << pose_tracker.orientation.A << " B:" << pose_tracker.orientation.B << " C:" << pose_tracker.orientation.C << std::endl;
-
-        // 将位姿转为旋转矩阵
-        // Eigen::Matrix4d pose_calibration_matrix;
-        // tracker2tcp_calibration_->get_pose_calibration_matrix(pose_calibration_matrix);
-        // 获取 tcp->Tracker 齐次变换矩阵
         Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
         std::cout << " tracker_matrix before: " << std::endl;
         Utils::print_matrix(tracker_matrix);
-        // 修改为获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
+
+        // 获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
         Eigen::Vector4d pos_vec;
         tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
         std::cout << " pos_vec.(0): " << pos_vec(0) << " pos_vec(1): " << pos_vec(1) << " pos_vec(2): " << pos_vec(2) << std::endl;
@@ -611,28 +593,19 @@ void MainWindow::slot_mark_point()
         pos_matrix.block<3,1>(0,3) = pos_vec.head<3>();  // 只取前三个作为平移
         std::cout << "pos_vec_matrix: " << std::endl;
         std::cout << pos_matrix << std::endl;
-        // 相乘取得 tcp 旋转矩阵
-        #if 0
-        tracker_matrix(0,3) += pos_vec(0);
-        tracker_matrix(1,3) += pos_vec(1);
-        tracker_matrix(2,3) += pos_vec(2);
-        #endif
+
+        // 将追踪器的旋转矩阵与位置向量变换矩阵相乘，得到追踪器坐标系下的TCP位置
         Eigen::Matrix4d tcp2location_matrix = tracker_matrix * pos_matrix;
         std::cout << "\n tcp2location_matrix: " << std::endl;
         Utils::print_matrix(tcp2location_matrix);
 
         // 再将旋转矩阵转回位姿点位
-        //CartesianPose pose_tcp = Utils::matrix_to_pose(tracker_matrix);
         CartesianPose pose_tcp = Utils::matrix_to_pose(tcp2location_matrix);
+        
         // 存入标定管理器的位置、姿态
         int index_real = index - 1;
-        #if 1
         calibration_manager_->set_device_calibration_position(index_real, pose_tcp.position);
         calibration_manager_->set_device_calibration_orientation(index_real, pose_tcp.orientation);
-        #else
-        calibration_manager_->set_device_calibration_position(index_real, pose_tracker.position);
-        calibration_manager_->set_device_calibration_orientation(index_real, pose_tracker.orientation);
-        #endif
         std::cout << "\n pose_tcp" << " x:" << pose_tcp.position.x << " y:" << pose_tcp.position.y << " z:" << pose_tcp.position.z
                 << " A:" << pose_tcp.orientation.A << " B:" << pose_tcp.orientation.B << " C:" << pose_tcp.orientation.C << std::endl;
         
