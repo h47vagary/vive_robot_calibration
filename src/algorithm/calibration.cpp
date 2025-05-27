@@ -422,15 +422,33 @@ int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_
 
 int CalibrationManager::calculate_orientation_offset_matrix()
 {
+    std::cout << __FUNCTION__ << std::endl;
     Eigen::Matrix3d robot_orientation_matrix;
     Eigen::Matrix3d device_orientation_matrix;
     cartesian_orientation_to_matrix(robot_calibration_orientation_, robot_orientation_matrix);
     cartesian_orientation_to_matrix(device_calibration_orientation_, device_orientation_matrix);
 
+    std::cout << "robot_orientation_matrix: " << std::endl;
+    std::cout << robot_orientation_matrix << std::endl;
+
+    std::cout << "device_orientation_matrix: " << std::endl;
+    std::cout << device_orientation_matrix << std::endl;
+
     if(fabs(device_orientation_matrix.determinant()) < EPSILON) return -1;
-    *orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();
+    //*orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();
+    *orientation_offset_matrix_ = device_orientation_matrix.transpose() * robot_orientation_matrix;
     std::cout << __FUNCTION__ << " *orientation_offset_matrix_:" << std::endl;
     std::cout << *orientation_offset_matrix_ << std::endl;
+    double A, B, C;
+    Utils::matrix_to_eular_ABC(*orientation_offset_matrix_, A, B, C);
+    std::cout << "*orientation_offset_matrix_->A " << A << " B " << B << " C " << C << std::endl;
+
+    // std::cout << __FUNCTION__ << " manual set value: " << std::endl;
+    // *orientation_offset_matrix_ << 0.0007963, 0.9999997, 0.000000,
+    //                                -0.9999997, 0.0007963, 0.000000,
+    //                                0.0000000, 0.0000000, 1.000000;
+    // std::cout << "manual value *orientation_offset_matrix_:" << std::endl;
+    // std::cout << *orientation_offset_matrix_ << std::endl;
 
     return 0;
 }

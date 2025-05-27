@@ -87,10 +87,8 @@ void ViveTrackerReader::clear_recorded_poses()
     recorded_poses_.clear();
 }
 
-bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename)
+bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, std::vector<CartesianPose> poses)
 {
-    // std::lock_guard<std::mutex> lock(record_mutex_);
-
     std::ofstream file(filename);
     if (!file.is_open()) 
     {
@@ -99,9 +97,9 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename)
     }
 
     file << "x,y,z,A,B,C\n";
-    for (size_t i = 0; i < record_count_; ++i)
+    for (size_t i = 0; i < poses.size(); ++i)
     {
-        const auto& pose = recorded_poses_[i];
+        const auto& pose = poses[i];
         file << pose.position.x << ","
             << pose.position.y << ","
             << pose.position.z << ","

@@ -307,9 +307,6 @@ void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose po
 void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
 {
     std::cout << __FUNCTION__ << std::endl;
-    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
-                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
-    
     #if 0       // 没使用工具手
     // 转换为相对机器人基座标的法兰盘旋转矩阵
     Eigen::Matrix4d flange_mat = Utils::pose_to_matrix(pose);
@@ -327,10 +324,40 @@ void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
     *tcp2tracker_rotation_matrix_ =
     tracker_mat.inverse() * location2robotbase_mat.inverse() * flange_mat * tcp2flange_mat;
     #else       // 使用工具手
-    // 获取TCP相对于机器人基座标的旋转矩阵
-    Eigen::Matrix4d tcp_mat = Utils::pose_to_matrix(pose);
-    std::cout << "\n tcp_mat: " << std::endl;
-    Utils::print_matrix(tcp_mat);
+    // // 获取TCP相对于机器人基座标的旋转矩阵
+    // Eigen::Matrix4d tcp_mat = Utils::pose_to_matrix(pose);
+    // std::cout << "\n tcp_mat: " << std::endl;
+    // Utils::print_matrix(tcp_mat);
+    // // 获取定位器坐标系相对于机器人坐标系的旋转矩阵
+    // Eigen::Matrix4d location2robotbase_mat;
+    // calibration_manager_->get_position_calibration_matrix(location2robotbase_mat);
+    // std::cout << "\n location2robotbase_mat: " << std::endl;
+    // Utils::print_matrix(location2robotbase_mat);
+    // // 获取当前追踪器的位姿，并转换为旋转矩阵（追踪器相对于定位器）
+    // CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
+    // Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
+    // std::cout << "\n tracker_mat: " << std::endl;
+    // Utils::print_matrix(tracker_mat);
+    // // 联立求出TCP相对于追踪器的旋转矩阵
+    // *tcp2tracker_rotation_matrix_ =
+    //     tracker_mat.inverse() * location2robotbase_mat.inverse() * tcp_mat;
+    // std::cout << "\n *tcp2tracker_rotation_matrix_: " << std::endl;
+    // Utils::print_matrix(*tcp2tracker_rotation_matrix_);
+    #endif
+    // // 拼接 tcp2tracker 的旋转矩阵
+    // Eigen::Vector4d tcp2tracker_pos_vec;
+    // tracker2tcp_calibration_->get_calibration_pos_vec(tcp2tracker_pos_vec);
+    // Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
+    // mat.block<3, 3>(0, 0) =  tcp2tracker_rotation_matrix_->block<3, 3>(0, 0);
+    // mat.block<3, 1>(0, 3) = tcp2tracker_pos_vec.head<3>();
+
+    // std::cout << "mat: " << std::endl;
+    // Utils::print_matrix(mat);
+
+    // tracker2tcp_calibration_->set_pose_calibration_matrix(mat);
+
+    // test tracker in robot base
+    std::cout << "##### test tracker in robot base #####" << std::endl;
     // 获取定位器坐标系相对于机器人坐标系的旋转矩阵
     Eigen::Matrix4d location2robotbase_mat;
     calibration_manager_->get_position_calibration_matrix(location2robotbase_mat);
@@ -341,27 +368,6 @@ void MainWindow::slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose)
     Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
     std::cout << "\n tracker_mat: " << std::endl;
     Utils::print_matrix(tracker_mat);
-    // 联立求出TCP相对于追踪器的旋转矩阵
-    *tcp2tracker_rotation_matrix_ =
-        tracker_mat.inverse() * location2robotbase_mat.inverse() * tcp_mat;
-    std::cout << "\n *tcp2tracker_rotation_matrix_: " << std::endl;
-    Utils::print_matrix(*tcp2tracker_rotation_matrix_);
-    #endif
-    // 拼接 tcp2tracker 的旋转矩阵
-    Eigen::Vector4d tcp2tracker_pos_vec;
-    tracker2tcp_calibration_->get_calibration_pos_vec(tcp2tracker_pos_vec);
-    Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
-    mat.block<3, 3>(0, 0) =  tcp2tracker_rotation_matrix_->block<3, 3>(0, 0);
-    mat.block<3, 1>(0, 3) = tcp2tracker_pos_vec.head<3>();
-
-    std::cout << "mat: " << std::endl;
-    Utils::print_matrix(mat);
-
-    tracker2tcp_calibration_->set_pose_calibration_matrix(mat);
-
-
-    // test tracker in robot base
-    std::cout << "##### test tracker in robot base #####" << std::endl;
     // 追踪器在机器人基座标系下的旋转矩阵
     Eigen::Matrix4d tracker2robotbase;
     tracker2robotbase = location2robotbase_mat * tracker_mat;
@@ -461,13 +467,18 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
 
     //Eigen::Matrix4d tcp2robotbase_mat = tcp2robotbase_pos_mat * orientation_offset_matrix_4x4;
     CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-    std::cout << "point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
+    std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
                 << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
+
+    std::cout << "read robot_tcp_pose point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
+
 
     double x = pose.position.x - robot_tcp_pose.position.x;
     double y = pose.position.y - robot_tcp_pose.position.y;
     double z = pose.position.z - robot_tcp_pose.position.z;
     linear_error_ = std::sqrt(x * x + y * y + z * z);
+    std::cout << "#### linear_error: " << linear_error_ << std::endl;
     ui->label_linear_error->setText(QString::number(linear_error_, 'f', 2));
 }
 
@@ -495,23 +506,16 @@ void MainWindow::slot_end_record()
     emit signal_end_record();
     vive_tracker_reader_->disable_record();
     std::vector<CartesianPose> poses = vive_tracker_reader_->get_recorded_poses();
+    std::vector<CartesianPose> poses_tcp2rb;
     std::cout << "recorded poses size: " << poses.size() << std::endl;
     // 逐个取出点位进行旋转乘得机器人基座下的点位，再存进文件
     for (auto iter : poses)
     {
-        // 1. 采集到 tracker 的点位转为旋转矩阵
-        Eigen::Matrix4d mat_track = Utils::pose_to_matrix(iter);    
-        // 2. 获取 tracker->robot_base 的旋转矩阵
-        Eigen::Matrix4d mat_robotbase2location;
-        calibration_manager_->get_position_calibration_matrix(mat_robotbase2location);
-        // 3. 相乘取得 robot_base 下的点位
-        Eigen::Matrix4d mat_robot_base = mat_robotbase2location * mat_track;
-        // 4. 将该点位转换为 robot_flange 的点位旋转矩阵
-
-        // 5. 将该点位转换为 robot_tcp 的点位旋转矩阵
-
-        // 6. 将点位旋转矩阵转回位姿结构体，存入临时容器
+        CartesianPose robot_pose;
+        calibration_manager_->device_pose_to_robot_pose(iter.position, iter.orientation, robot_pose);
+        poses_tcp2rb.push_back(robot_pose);
     }
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_tcp2rb);
 }
 
 void MainWindow::slot_start_playback()
