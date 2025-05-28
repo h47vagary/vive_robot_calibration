@@ -27,6 +27,7 @@ enum E_JSON_COMMAND
     E_JSON_COMMAND_SET_START_RECORD_,                   // 开始录制
     E_JSON_COMMAND_SET_END_RECORD_,                     // 结束录制
     E_JSON_COMMAND_SET_START_PLAYBACK_,                 // 开始回放
+    E_JSON_COMMAND_SET_CEASE_PLAYBACK_,                 // 暂停回放
     E_JSON_COMMAND_SET_END_PLAYBACK_,                   // 结束回放
     E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_,           // 标定法兰盘2TCP点
     E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_,           // 标定追踪器到TCP点（需要取一次当前机器人法兰盘点位）

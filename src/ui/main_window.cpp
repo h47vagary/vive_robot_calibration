@@ -446,7 +446,8 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
     std::cout << "used orientation_offset_matrix:" << std::endl;
     std::cout << orientation_offset_matrix << std::endl;
     // 进行补偿TCP姿态
-    Eigen::Matrix3d tcp2robotbase_ori_mat_offset = orientation_offset_matrix * tcp2robotbase_ori_mat; //左乘
+    // Eigen::Matrix3d tcp2robotbase_ori_mat_offset = orientation_offset_matrix * tcp2robotbase_ori_mat; //左乘
+    Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix;
     Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
     tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
     std::cout << " tcp2robotbase_ori_mat_offset:" << std::endl;
@@ -781,7 +782,8 @@ void MainWindow::slot_use_tracker2tcp(bool)
     {
         std::cout << "use_track2tcp_ is_checked true" << std::endl;
         use_track2tcp_ = true;
-        Eigen::Vector4d tcp2tracker_pos_vec(1.77239, -22.9953, 245.185, 1);
+        //Eigen::Vector4d tcp2tracker_pos_vec(1.77239, -22.9953, 245.185, 1);
+        Eigen::Vector4d tcp2tracker_pos_vec(0, -35, 270, 1);
         tracker2tcp_calibration_->set_calibration_pos_vec(tcp2tracker_pos_vec);
     }
     else
