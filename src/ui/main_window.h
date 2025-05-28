@@ -61,6 +61,8 @@ private slots:
     void slot_use_tracker2tcp(bool);
     void slot_continue_get(bool);
 
+    void slot_vive_tracker_reader_interval();
+
 public slots:
     void slot_handle_message(const QString& msg);
     void slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);

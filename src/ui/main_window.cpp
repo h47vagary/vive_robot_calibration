@@ -173,6 +173,7 @@ void MainWindow::init_connect()
     connect(ui->checkBox_use_track2tcp, SIGNAL(toggled(bool)), this, SLOT(slot_use_tracker2tcp(bool)));
     connect(ui->checkBox_continue_get, SIGNAL(toggled(bool)), this, SLOT(slot_continue_get(bool)));
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
+    connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -805,4 +806,15 @@ void MainWindow::slot_continue_get(bool state)
         std::cout << "is_checked false" << std::endl;
         linear_error_continue_acquire_->stop();
     }
+}
+
+void MainWindow::slot_vive_tracker_reader_interval()
+{
+    int interval_ms = ui->lineEdit_refresh_rate->text().toInt();
+    if (interval_ms <= 0)
+    {
+        std::cout << "interval too small, set to 10ms" << std::endl;
+        interval_ms = 4;
+    }
+    vive_tracker_reader_->set_loop_interval_ms(interval_ms);
 }
