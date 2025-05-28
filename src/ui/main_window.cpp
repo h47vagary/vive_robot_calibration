@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     tcp2tracker_rotation_matrix_ = new Eigen::Matrix4d();
 
+    csv_parser_window_vive = new CSVParserWindow(this);
+    csv_parser_window_vive2robot = new CSVParserWindow(this);
+
     init_connect();
     init_style();
     init_label_maps();
@@ -493,7 +496,7 @@ void MainWindow::slot_end_record()
     vive_tracker_reader_->disable_record();
     std::vector<CartesianPose> poses = vive_tracker_reader_->get_recorded_poses();
     std::vector<CartesianPose> poses_tcp2rb;
-    std::cout << "recorded poses size: " << poses.size() << std::endl;
+    
     // 逐个取出点位进行旋转乘得机器人基座下的点位，再存进文件
     for (auto iter : poses)
     {
@@ -501,7 +504,26 @@ void MainWindow::slot_end_record()
         calibration_manager_->device_pose_to_robot_pose(iter.position, iter.orientation, robot_pose);
         poses_tcp2rb.push_back(robot_pose);
     }
-    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_tcp2rb);
+
+    std::cout << "recorded poses size: " << poses.size() << std::endl;
+    std::cout << "poses_tcp2rb size: " << poses_tcp2rb.size() << std::endl;
+
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses);
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb);
+
+    csv_parser_window_vive->loadData("vive_traj.csv");
+    csv_parser_window_vive->show();
+    csv_parser_window_vive->plotData();
+    csv_parser_window_vive->setWindowTitle("vive数据曲线");
+
+    csv_parser_window_vive2robot->loadData("vive_traj2robot.csv");
+    csv_parser_window_vive2robot->show();
+    csv_parser_window_vive2robot->plotData();
+    csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
+
+    vive_tracker_reader_->clear_recorded_poses();
+    poses_tcp2rb.clear();
+
 }
 
 void MainWindow::slot_start_playback()

@@ -4,11 +4,15 @@ set(UI_FORMS
 )
 
 set(UI_SOURCES
-    main_window.cpp    
+    main_window.cpp  
+    ${PROJECT_SOURCE_DIR}/lib/qcustomplot/qcustomplot.cpp
+    csv_parser.cpp
 )
 
 set(UI_HEADERS
-    main_window.h    
+    main_window.h
+    ${PROJECT_SOURCE_DIR}/lib/qcustomplot/qcustomplot.h
+    csv_parser.h
 )
 
 # 自动处理 .ui 文件，生成头文件
@@ -28,11 +32,13 @@ target_include_directories(ui PUBLIC
             ${PROJECT_SOURCE_DIR}/src/algorithm
             ${PROJECT_SOURCE_DIR}/src/htc_vive
             ${PROJECT_SOURCE_DIR}/src/utils
+            ${PROJECT_SOURCE_DIR}/lib/qcustomplot/
 )
 
 target_link_libraries(ui
     PUBLIC
         Qt5::Widgets
+        Qt5::PrintSupport
         communication
         htc_vive
         algorithm
