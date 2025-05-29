@@ -123,58 +123,6 @@ void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
     }
 }
 
-bool ViveTrackerReader::load_record_poses_from_file(const std::string &filename, std::vector<CartesianPose> &out_poses)
-{
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return false;
-    }
-
-    out_poses.clear();
-
-    std::string line;
-    std::getline(file, line); // 跳过标题行
-
-    while (std::getline(file, line))
-    {
-        std::istringstream ss(line);
-        std::string token;
-        CartesianPose pose;
-
-        // 依次读取6个字段
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.position.x)) return false;
-
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.position.y)) return false;
-
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.position.z)) return false;
-
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.orientation.A)) return false;
-
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.orientation.B)) return false;
-
-        if (!std::getline(ss, token, ',')) return false;
-        if (!parse_double(token, pose.orientation.C)) return false;
-
-        out_poses.push_back(pose);
-    }
-
-    return true;
-}
-
-bool ViveTrackerReader::parse_double(const std::string &str, double &value)
-{
-    char* endptr = nullptr;
-    value = std::strtod(str.c_str(), &endptr);
-    return endptr != str.c_str() && *endptr == '\0';
-}
-
 void ViveTrackerReader::read_loop()
 {
     int write_index = 0;

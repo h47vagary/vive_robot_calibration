@@ -2181,6 +2181,19 @@
       <string>选择绘图</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBox_filtering">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>150</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>滤波</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
     <property name="geometry">

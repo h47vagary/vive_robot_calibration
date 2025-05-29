@@ -22,6 +22,12 @@ public:
 
     void filter_position(std::vector<CartesianPose>& trajectory);
     void filter_orientation(std::vector<CartesianPose>& trajectory);
+    void filter_xyzabc(std::vector<double>& x,
+                       std::vector<double>& y,
+                       std::vector<double>& z,
+                       std::vector<double>& a,
+                       std::vector<double>& b,
+                       std::vector<double>& c);
 
 private:
     int window_size_;

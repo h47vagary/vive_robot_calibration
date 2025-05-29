@@ -36,10 +36,8 @@ public:
     void clear_recorded_poses();                                        // 清空缓存的轨迹   
     bool save_record_poses_to_file(const std::string& filename, std::vector<CartesianPose> poses);        // 保存缓存的轨迹到文件(CSV格式)
     void set_loop_interval_ms(int interval_ms);                         // 设置读取间隔时间(ms)
-    bool load_record_poses_from_file(const std::string& filename, std::vector<CartesianPose>& out_poses);
 
-private:
-    bool parse_double(const std::string &str, double &value);
+
 
 
 private:

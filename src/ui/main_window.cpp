@@ -866,7 +866,8 @@ void MainWindow::slot_parse_chart()
     QString filename = QFileDialog::getOpenFileName(this, tr("选择CSV文件"), "", tr("CSV Files (*.csv);;All Files (*.*)"));
     if (!filename.isEmpty()) 
     {
-        csv_parser_window_select->loadData(filename);
+        bool is_filtering = ui->checkBox_filtering->isChecked();
+        csv_parser_window_select->loadData(filename.toStdString(), is_filtering);
         csv_parser_window_select->plotData();
         csv_parser_window_select->show();  // 显示绘图窗口
     }
