@@ -1,0 +1,47 @@
+slot_fanlge2tcp_mark_point_received index: 0
+point x:651.383 y:-194.77 z:881.835 A:-3.14158 B:0.000184045 C:0.000394059
+slot_tracker2tcp_mark_point
+point0 x:287.008 y:-517.712 z:-1408.81 A:-3.11134 B:-1.40335 C:3.13158
+slot_fanlge2tcp_mark_point_received index: 1
+point x:651.341 y:-80.9777 z:832.165 A:2.75131 B:0.000153163 C:0.000324828
+slot_tracker2tcp_mark_point
+point1 x:276.353 y:-531.28 z:-1513.2 A:2.54826 B:-1.38744 C:2.90039
+flange2tcp_calibration_ calibrate fail
+slot_fanlge2tcp_mark_point_received index: 2
+point x:651.417 y:-394.516 z:861.328 A:-2.50449 B:0.00033553 C:0.00055446
+slot_tracker2tcp_mark_point
+point2 x:309.511 y:-591.232 z:-1272.72 A:-2.30816 B:-1.34883 C:-2.97476
+slot_fanlge2tcp_mark_point_received index: 3
+point x:534.536 y:-194.891 z:801.871 A:3.14157 B:0.422747 C:0.000603763
+slot_tracker2tcp_mark_point
+point3 x:174.987 y:-529.812 z:-1397.85 A:2.00716 B:-1.12422 C:1.88851
+slot_fanlge2tcp_mark_point_received index: 4
+point x:651.395 y:-194.783 z:881.828 A:3.14159 B:0.000223969 C:0.000346633
+slot_tracker2tcp_mark_point
+point4 x:286.792 y:-517.432 z:-1408.12 A:-3.11157 B:-1.40383 C:3.13036
+slot_fanlge2tcp_mark_point_received index: 5
+point x:610.523 y:-194.773 z:881.837 A:3.14159 B:0.000259608 C:0.000383004
+slot_tracker2tcp_mark_point
+point5 x:246.619 y:-518.317 z:-1405.76 A:-3.11038 B:-1.40386 C:3.13112
+slot_fanlge2tcp_mark_point_received index: 6
+point x:610.503 y:-143.419 z:881.83 A:-3.14159 B:0.000290293 C:0.000464937
+slot_tracker2tcp_mark_point
+point6 x:241.145 y:-516.841 z:-1456.54 A:-3.11312 B:-1.4031 C:3.12944
+Sphere
+x1: 651.383 *px: 779.782 x1-*px: -128.4
+y1: -194.77 *py: -263.553 y1-*py: 68.7834
+z1: 881.835 *pz: 568.964 z1-*pz: 312.871
+tool_calculate_7points ox: 779.782 oy: -263.553 oz: 568.964
+flange2tcp calibrate success
+flange2tcp calib matrix:
+          -1  -9.0336e-05 -0.000432113      128.369
+ 9.02792e-05           -1  0.000131396      68.7371
+-0.000432125  0.000131357            1      312.893
+           0            0            0            1
+Sphere
+x1: 287.008 *px: 251.157 x1-*px: 35.8502
+y1: -517.712 *py: -735.036 y1-*py: 217.324
+z1: -1408.81 *pz: -1430.52 z1-*pz: 21.7191
+tool_calculate_7points ox: 251.157 oy: -735.036 oz: -1430.52
+tracker2tcp calibrate success
+tcp2tracker_vec: [-6.7675, -217.96, 37.8714]

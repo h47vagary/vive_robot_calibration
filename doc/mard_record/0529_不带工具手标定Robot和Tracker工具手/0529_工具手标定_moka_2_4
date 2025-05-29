@@ -1,0 +1,53 @@
+PS E:\vive_robot_calibration\build> ."E:/vive_robot_calibration/build/vive_robot_calibration.exe"
+MainWindow constructed
+CSVParserWindow
+CSVParserWindow
+slot_connect_ctr
+[MessageHandler] Thread started.
+[MessageHandler] Connected to controller
+slot_fanlge2tcp_mark_point_received index: 0
+point x:651.383 y:-194.768 z:881.834 A:-3.14158 B:0.000178678 C:0.000398183
+slot_tracker2tcp_mark_point
+point0 x:286.901 y:-517.737 z:-1408.82 A:-3.11084 B:-1.40343 C:3.1324
+slot_fanlge2tcp_mark_point_received index: 1
+point x:651.34 y:-80.9786 z:832.166 A:2.75131 B:0.000147824 C:0.00032251
+slot_tracker2tcp_mark_point
+point1 x:276.931 y:-532.41 z:-1516.57 A:2.54693 B:-1.38718 C:2.89338
+slot_fanlge2tcp_mark_point_received index: 2
+point x:651.411 y:-394.512 z:861.331 A:-2.50446 B:0.000294899 C:0.000562881
+slot_tracker2tcp_mark_point
+point2 x:309.469 y:-590.95 z:-1272.52 A:-2.30275 B:-1.3499 C:-2.97081
+slot_fanlge2tcp_mark_point_received index: 3
+point x:534.537 y:-194.904 z:801.873 A:3.14155 B:0.422781 C:0.000554864
+slot_tracker2tcp_mark_point
+point3 x:174.588 y:-528.528 z:-1395.33 A:2.01281 B:-1.13039 C:1.89303
+slot_fanlge2tcp_mark_point_received index: 4
+point x:651.401 y:-194.788 z:881.809 A:3.14158 B:0.00026227 C:0.000334762
+slot_tracker2tcp_mark_point
+point4 x:286.948 y:-517.698 z:-1408.76 A:-3.11146 B:-1.4036 C:3.13116
+slot_fanlge2tcp_mark_point_received index: 5
+point x:610.542 y:-194.773 z:881.818 A:3.14157 B:0.000354528 C:0.000447332
+slot_tracker2tcp_mark_point
+point5 x:246.396 y:-518.017 z:-1404.89 A:-3.11034 B:-1.40402 C:3.1314
+slot_fanlge2tcp_mark_point_received index: 6
+point x:610.502 y:-143.419 z:881.828 A:-3.14159 B:0.000283003 C:0.000469158
+slot_tracker2tcp_mark_point
+point6 x:241.011 y:-516.628 z:-1456.06 A:-3.11177 B:-1.40337 C:3.13073
+Sphere
+x1: 651.383 *px: 779.799 x1-*px: -128.416
+y1: -194.768 *py: -263.557 y1-*py: 68.7892
+z1: 881.834 *pz: 568.946 z1-*pz: 312.888
+tool_calculate_7points ox: 779.799 oy: -263.557 oz: 568.946
+flange2tcp calibrate success
+flange2tcp calib matrix:
+          -1  4.69012e-05 -0.000487785      128.387
+-4.68032e-05           -1  -0.00020088      68.7428
+-0.000487794 -0.000200857            1       312.91
+           0            0            0            1
+Sphere
+x1: 286.901 *px: 247.896 x1-*px: 39.0054
+y1: -517.737 *py: -737.343 y1-*py: 219.606
+z1: -1408.82 *pz: -1430.64 z1-*pz: 21.8194
+tool_calculate_7points ox: 247.896 oy: -737.343 oz: -1430.64
+tracker2tcp calibrate success
+tcp2tracker_vec: [-6.32326, -220.24, 40.9684]

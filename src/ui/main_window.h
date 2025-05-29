@@ -12,6 +12,7 @@
 #include "vive_tracker_reader.h"
 #include "calibration.h"
 #include "csv_parser.h" 
+#include "filter.h"
 
 namespace Ui {
     class MainWindow;
@@ -111,6 +112,7 @@ private:
     double linear_error_ = 0.0; // 线性误差
 
     void init_test_calib();    // 模拟数据测试标定
+    void device_poses_to_robot_poses(const std::vector<CartesianPose>& device_poses, std::vector<CartesianPose>& robot_poses);
 
     CSVParserWindow* csv_parser_window_vive;
     CSVParserWindow* csv_parser_window_vive2robot;

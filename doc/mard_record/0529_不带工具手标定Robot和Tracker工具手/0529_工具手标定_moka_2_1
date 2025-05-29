@@ -1,0 +1,46 @@
+slot_fanlge2tcp_mark_point_received index: 0
+point x:651.387 y:-194.772 z:881.833 A:3.14159 B:0.000190199 C:0.000381691
+slot_tracker2tcp_mark_point
+point0 x:309.832 y:-524.222 z:-1411.56 A:3.06437 B:-1.39428 C:3.02936
+slot_fanlge2tcp_mark_point_received index: 1
+point x:651.341 y:-80.9781 z:832.166 A:2.75131 B:0.000164015 C:0.000320495
+slot_tracker2tcp_mark_point
+point1 x:301.417 y:-540.343 z:-1520.43 A:2.49855 B:-1.37206 C:2.85266
+slot_fanlge2tcp_mark_point_received index: 2
+point x:651.394 y:-394.517 z:861.348 A:-2.50445 B:0.000302003 C:0.000470414
+slot_tracker2tcp_mark_point
+point2 x:310.145 y:-585.425 z:-1258.19 A:-2.2508 B:-1.37855 C:-2.91885
+slot_fanlge2tcp_mark_point_received index: 3
+point x:534.531 y:-194.897 z:801.879 A:3.14156 B:0.422791 C:0.000521787
+slot_tracker2tcp_mark_point
+point3 x:174.731 y:-528.771 z:-1395.79 A:2.01015 B:-1.12658 C:1.89072
+slot_fanlge2tcp_mark_point_received index: 4
+point x:651.387 y:-194.785 z:881.833 A:3.14159 B:0.000241042 C:0.000335231
+slot_tracker2tcp_mark_point
+point4 x:287.001 y:-517.808 z:-1408.79 A:-3.11185 B:-1.40369 C:3.13122
+slot_fanlge2tcp_mark_point_received index: 5
+point x:610.517 y:-194.781 z:881.831 A:3.14159 B:0.000274799 C:0.000391101
+slot_tracker2tcp_mark_point
+point5 x:246.524 y:-518.137 z:-1405.07 A:-3.10979 B:-1.40367 C:3.13172
+slot_fanlge2tcp_mark_point_received index: 6
+point x:610.511 y:-143.413 z:881.83 A:3.14159 B:0.000296089 C:0.000453481
+slot_tracker2tcp_mark_point
+point6 x:241.007 y:-516.583 z:-1455.7 A:-3.11092 B:-1.4031 C:3.13182
+Sphere
+x1: 309.832 *px: 248.367 x1-*px: 61.4647
+y1: -524.222 *py: -780.515 y1-*py: 256.293
+z1: -1411.56 *pz: -1424.82 z1-*pz: 13.255
+tool_calculate_7points ox: 248.367 oy: -780.515 oz: -1424.82
+tracker2tcp calibrate success
+tcp2tracker_vec: [6.95834, -255.334, 66.3022]
+Sphere
+x1: 651.387 *px: 779.826 x1-*px: -128.439
+y1: -194.772 *py: -263.592 y1-*py: 68.8197
+z1: 881.833 *pz: 568.847 z1-*pz: 312.986
+tool_calculate_7points ox: 779.826 oy: -263.592 oz: 568.847
+flange2tcp calibrate success
+flange2tcp calib matrix:
+          -1 -0.000237082 -0.000204205      128.406
+  0.00023708           -1  1.00442e-05      68.7698
+-0.000204207   9.9958e-06            1       313.01
+           0            0            0            1
