@@ -2168,6 +2168,19 @@
       <string>结束回放</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_parse_chart">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>150</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>选择绘图</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
     <property name="geometry">

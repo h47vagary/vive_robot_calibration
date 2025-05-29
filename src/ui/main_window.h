@@ -63,6 +63,7 @@ private slots:
     void slot_continue_get(bool);
 
     void slot_vive_tracker_reader_interval();
+    void slot_parse_chart();
 
 public slots:
     void slot_handle_message(const QString& msg);
@@ -116,5 +117,6 @@ private:
 
     CSVParserWindow* csv_parser_window_vive;
     CSVParserWindow* csv_parser_window_vive2robot;
+    CSVParserWindow* csv_parser_window_select;
 };
 

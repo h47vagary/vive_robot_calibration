@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QCoreApplication>
 #include <QMetaType>
+#include <QFile>
 #include <iostream>
 
 #include "vive_wrapper.h"
@@ -34,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     csv_parser_window_vive = new CSVParserWindow(this);
     csv_parser_window_vive2robot = new CSVParserWindow(this);
+
+    csv_parser_window_select = new CSVParserWindow(this);
 
     init_connect();
     init_style();
@@ -216,6 +219,7 @@ void MainWindow::init_connect()
     connect(ui->checkBox_continue_get, SIGNAL(toggled(bool)), this, SLOT(slot_continue_get(bool)));
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
+    connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -855,4 +859,15 @@ void MainWindow::slot_vive_tracker_reader_interval()
         interval_ms = 4;
     }
     vive_tracker_reader_->set_loop_interval_ms(interval_ms);
+}
+
+void MainWindow::slot_parse_chart()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("选择CSV文件"), "", tr("CSV Files (*.csv);;All Files (*.*)"));
+    if (!filename.isEmpty()) 
+    {
+        csv_parser_window_select->loadData(filename);
+        csv_parser_window_select->plotData();
+        csv_parser_window_select->show();  // 显示绘图窗口
+    }
 }
