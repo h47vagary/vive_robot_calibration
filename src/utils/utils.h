@@ -109,3 +109,4 @@ namespace TimeDealUtils
     uint64_t get_time_difference(uint64_t start, uint64_t end);
     std::string timestamp_to_string(uint64_t timestamp);
 }
+

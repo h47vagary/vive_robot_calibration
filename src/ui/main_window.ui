@@ -1836,7 +1836,7 @@
      <rect>
       <x>10</x>
       <y>490</y>
-      <width>521</width>
+      <width>531</width>
       <height>271</height>
      </rect>
     </property>
@@ -2171,7 +2171,7 @@
     <widget class="QPushButton" name="pushButton_parse_chart">
      <property name="geometry">
       <rect>
-       <x>280</x>
+       <x>260</x>
        <y>150</y>
        <width>91</width>
        <height>31</height>
@@ -2184,14 +2184,73 @@
     <widget class="QCheckBox" name="checkBox_filtering">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>150</y>
+       <x>440</x>
+       <y>190</y>
        <width>81</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>滤波</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_filter_window_size">
+     <property name="geometry">
+      <rect>
+       <x>268</x>
+       <y>190</y>
+       <width>41</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>窗口</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_polynomial_order">
+     <property name="geometry">
+      <rect>
+       <x>268</x>
+       <y>230</y>
+       <width>41</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>系数</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_filter_window_size">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>190</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_polynomial_order">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>230</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_traj_filtering">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>150</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>轨迹滤波</string>
      </property>
     </widget>
    </widget>

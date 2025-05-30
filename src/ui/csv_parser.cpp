@@ -133,6 +133,7 @@ void CSVParserWindow::loadData(const QString &filename)
 
 void CSVParserWindow::loadData(const std::string &filename, bool is_filtering)
 {
+    std::cout << __FUNCTION__ << std::endl;
     std::ifstream file(filename);
     if (!file.is_open())
     {
@@ -148,7 +149,7 @@ void CSVParserWindow::loadData(const std::string &filename, bool is_filtering)
     c.clear();
 
     std::string line;
-    std::getline(file, line); // 跳过标题行
+    std::getline(file, line);
 
     while (std::getline(file, line))
     {
@@ -187,6 +188,7 @@ void CSVParserWindow::loadData(const std::string &filename, bool is_filtering)
     if (is_filtering)
     {
         PoseFilter pose_filter(11, 2);
+        pose_filter.set_filter_param(filter_window_size_, filter_polynomial_order_, MovingAverage);
         pose_filter.filter_xyzabc(x, y, z, a, b, c);
     }
 }
@@ -196,4 +198,33 @@ bool CSVParserWindow::parse_double(const std::string &str, double &value)
     char* endptr = nullptr;
     value = std::strtod(str.c_str(), &endptr);
     return endptr != str.c_str() && *endptr == '\0';
+}
+
+void CSVParserWindow::set_filter_param(int filter_window_size, int filter_polynomial_order, FilterType type)
+{
+    filter_window_size_ = filter_window_size;
+    filter_polynomial_order_ = filter_polynomial_order;
+    filter_type_ = type;
+}
+
+void CSVParserWindow::save_data_to_file(const std::string &filename)
+{
+    std::cout << __FUNCTION__ << " filename: " << filename << std::endl;
+    std::ofstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    file << "x,y,z,A,B,C\n";
+    for (size_t i = 0; i < x.size(); ++i)
+    {
+        file << x[i] << ","
+            << y[i] << ","
+            << z[i] << ","
+            << a[i] << ","
+            << b[i] << ","
+            << c[i] << "\n";
+    }
 }

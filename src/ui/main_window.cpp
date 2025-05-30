@@ -36,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent)
     csv_parser_window_vive = new CSVParserWindow(this);
     csv_parser_window_vive2robot = new CSVParserWindow(this);
 
-    csv_parser_window_select = new CSVParserWindow(this);
-
     init_connect();
     init_style();
     init_label_maps();
@@ -54,6 +52,9 @@ MainWindow::~MainWindow()
 void MainWindow::init_style()
 {
     ui->lineEdit_reciver_window->setDisabled(true);
+    ui->lineEdit_filter_window_size->setText("11");
+    ui->lineEdit_polynomial_order->setText("2");
+
 }
 
 void MainWindow::init_label_maps()
@@ -153,7 +154,7 @@ void MainWindow::init_test_calib()
 
 }
 
-void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &device_poses, std::vector<CartesianPose> &robot_poses)
+void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &device_poses, std::vector<CartesianPose> &robot_poses, bool is_filtering)
 {
     // TCP 相对于追踪器的位置变换
     Eigen::Vector4d pos_vec;
@@ -190,9 +191,15 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
 
         robot_poses.push_back(robot_tcp_pose);
     }
-    PoseFilter pose_filter(11, 2);
-    pose_filter.filter_position(robot_poses);
-    pose_filter.filter_orientation(robot_poses);
+    if (is_filtering)
+    {
+        PoseFilter pose_filter(11, 2);
+        int window_size = ui->lineEdit_filter_window_size->text().toInt();
+        int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
+        pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
+        pose_filter.filter_position(robot_poses);
+        pose_filter.filter_orientation(robot_poses);
+    }
 }
 
 void MainWindow::init_connect()
@@ -220,6 +227,7 @@ void MainWindow::init_connect()
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
     connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
+    connect(ui->pushButton_traj_filtering, SIGNAL(clicked()), this, SLOT(slot_traj_filtering()));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -546,7 +554,8 @@ void MainWindow::slot_end_record()
     std::vector<CartesianPose> poses_tcp2rb;
     poses_tcp2rb.clear();
 
-    device_poses_to_robot_poses(poses, poses_tcp2rb);
+    bool is_filtering = ui->checkBox_filtering->isChecked();
+    device_poses_to_robot_poses(poses, poses_tcp2rb, is_filtering);
 
     std::cout << "recorded poses size: " << poses.size() << std::endl;
     std::cout << "poses_tcp2rb size: " << poses_tcp2rb.size() << std::endl;
@@ -867,8 +876,39 @@ void MainWindow::slot_parse_chart()
     if (!filename.isEmpty()) 
     {
         bool is_filtering = ui->checkBox_filtering->isChecked();
-        csv_parser_window_select->loadData(filename.toStdString(), is_filtering);
-        csv_parser_window_select->plotData();
-        csv_parser_window_select->show();  // 显示绘图窗口
+        int window_size = ui->lineEdit_filter_window_size->text().toInt();
+        int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
+
+        CSVParserWindow* csv_parser_window = new CSVParserWindow();
+        csv_parser_window->setAttribute(Qt::WA_DeleteOnClose);
+        csv_parser_window->set_filter_param(window_size, polynomial_order, MovingAverage);
+        csv_parser_window->loadData(filename.toStdString(), is_filtering);
+        csv_parser_window->plotData();
+        csv_parser_window->show();
+    }
+}
+
+void MainWindow::slot_traj_filtering()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("选择CSV文件"), "", tr("CSV Files (*.csv);;All Files (*.*)"));
+    if (!filename.isEmpty())
+    {
+        QFileInfo fileInfo(filename);
+        QString baseName = fileInfo.completeBaseName();
+        QString suffix = fileInfo.completeSuffix();
+        QString dir = fileInfo.absolutePath();
+        QString filename_filter = dir + "/" + baseName + "_filtered." + suffix;
+
+        bool is_filtering = ui->checkBox_filtering->isChecked();
+        int window_size = ui->lineEdit_filter_window_size->text().toInt();
+        int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
+        CSVParserWindow* csv_parser_window = new CSVParserWindow();
+        csv_parser_window->setAttribute(Qt::WA_DeleteOnClose);
+        csv_parser_window->set_filter_param(window_size, polynomial_order, MovingAverage);
+        csv_parser_window->loadData(filename.toStdString(), is_filtering);
+        csv_parser_window->save_data_to_file(filename_filter.toStdString());
+        csv_parser_window->plotData();
+        csv_parser_window->show();
+
     }
 }
