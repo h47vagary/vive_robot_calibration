@@ -63,3 +63,9 @@ struct CartesianPose
     {
     }
 };
+
+struct TimestampePose
+{
+    CartesianPose pose;
+    uint64_t timestamp_us;
+};
