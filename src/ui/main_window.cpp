@@ -835,7 +835,7 @@ void MainWindow::slot_use_tracker2tcp(bool)
         use_track2tcp_ = true;
         //Eigen::Vector4d tcp2tracker_pos_vec(1.77239, -22.9953, 245.185, 1);
         //Eigen::Vector4d tcp2tracker_pos_vec(0, -35, 270, 1);
-        Eigen::Vector4d tcp2tracker_pos_vec(-6.32326, -220.24, 40.9684, 1);
+        Eigen::Vector4d tcp2tracker_pos_vec(-6.32326, 37.9684, -264.24, 1);
         tracker2tcp_calibration_->set_calibration_pos_vec(tcp2tracker_pos_vec);
     }
     else
