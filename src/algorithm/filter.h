@@ -12,6 +12,10 @@
 #include <vector>
 #include <deque>
 #include <numeric>
+#include <cmath>
+#include <cstdint>
+#include <chrono>
+#include <iostream>
 #include "common_header.h"
 #include "gram_savitzky_golay.h"
 #include "spatial_filters.h"

@@ -7,3 +7,24 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include <vector>
+#include <cstdint>
+#include "common_header.h"
+
+/**
+ * @brief 以固定时间间隔，递推进行线式插补。等时间间隔生成新数据点
+ * 
+ */
+class LinearPoseInterpolator
+{
+public:
+    explicit LinearPoseInterpolator(uint64_t interval_us);
+    void set_interval_us(uint64_t interval_us);
+    bool interpolate(const std::vector<TimestampePose> &input, std::vector<TimestampePose> &output);
+    bool interpolate_with_quaternion(const std::vector<TimestampePose> &input, std::vector<TimestampePose> &output);
+
+
+private:
+    uint64_t interval_us_;
+};

@@ -1836,7 +1836,7 @@
      <rect>
       <x>10</x>
       <y>490</y>
-      <width>531</width>
+      <width>791</width>
       <height>271</height>
      </rect>
     </property>
@@ -2253,14 +2253,50 @@
       <string>轨迹滤波</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBox_label_interpolation_interval">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>230</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>按时间步距插补</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_label_interpolation_interval">
+     <property name="geometry">
+      <rect>
+       <x>670</x>
+       <y>190</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_interpolation_interval">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>190</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>时间步距 ms</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>490</y>
+      <x>860</x>
+      <y>630</y>
       <width>301</width>
-      <height>141</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
@@ -2328,7 +2364,7 @@
       <x>860</x>
       <y>490</y>
       <width>301</width>
-      <height>141</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">

@@ -115,6 +115,7 @@ private:
 
     void init_test_calib();    // 模拟数据测试标定
     void device_poses_to_robot_poses(const std::vector<CartesianPose>& device_poses, std::vector<CartesianPose>& robot_poses, bool is_filtering);
+    void extract_pose_vector(const std::vector<TimestampePose>& timestampe_poses, std::vector<CartesianPose>& poses_only);
 
     CSVParserWindow* csv_parser_window_vive;
     CSVParserWindow* csv_parser_window_vive2robot;

@@ -1,5 +1,6 @@
 #include "vive_tracker_reader.h"
 #include "vive_wrapper.h"
+#include "interpolation.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,7 +30,8 @@ bool ViveTrackerReader::start()
 
     running_ = true;
     paused_ = false;
-    reader_thread_ = std::thread(&ViveTrackerReader::read_loop, this);
+    //reader_thread_ = std::thread(&ViveTrackerReader::read_loop, this);
+    reader_thread_timestampe_ = std::thread(&ViveTrackerReader::read_timestamped_loop, this);
     return true;
 }
 
@@ -54,9 +56,15 @@ void ViveTrackerReader::resume()
 
 CartesianPose ViveTrackerReader::get_latest_pose()
 {
+    #if 0
     int index = active_index_.load(std::memory_order_acquire);
     const CartesianPose& cartesian_pose = pose_buf_[index];
     return cartesian_pose;
+    #else
+    int index = active_index_.load(std::memory_order_acquire);
+    const TimestampePose& timestampe_cartesian_pose = timestampe_pose_buf_[index];
+    return timestampe_cartesian_pose.pose;
+    #endif
 }
 
 TimestampePose ViveTrackerReader::get_lastest_timepose()
@@ -85,17 +93,31 @@ bool ViveTrackerReader::save_record_timestamped_poses_to_file(const std::string 
         return false;
     }
 
-    file << "x,y,z,A,B,C,T\n";
+    file << "x,y,z,A,B,C,T,delta_ms\n";
+
+    uint64_t last_timestamp = 0;
+
     for (size_t i = 0; i < poses.size(); ++i)
     {
         const auto& timestampe_pose = poses[i];
+
+        uint64_t curr_timestamp = timestampe_pose.timestamp_us;
+        uint64_t delta_ms = 0;
+        if (i > 0)
+        {
+            delta_ms = curr_timestamp - last_timestamp;
+        }
+
         file << timestampe_pose.pose.position.x << ","
-            << timestampe_pose.pose.position.y << ","
-            << timestampe_pose.pose.position.z << ","
-            << timestampe_pose.pose.orientation.A << ","
-            << timestampe_pose.pose.orientation.B << ","
-            << timestampe_pose.pose.orientation.C << ","
-            << timestampe_pose.timestamp_us << "\n";
+             << timestampe_pose.pose.position.y << ","
+             << timestampe_pose.pose.position.z << ","
+             << timestampe_pose.pose.orientation.A << ","
+             << timestampe_pose.pose.orientation.B << ","
+             << timestampe_pose.pose.orientation.C << ","
+             << curr_timestamp << ","
+             << delta_ms << "\n";
+
+        last_timestamp = curr_timestamp;
     }
 
     return true;
@@ -107,6 +129,8 @@ void ViveTrackerReader::enable_record(size_t max_size)
     max_record_size_ = max_size;
     recorded_poses_.clear();
     recorded_poses_.resize(max_record_size_);      // 预分配内存以提高性能
+    recorded_timestampe_poses_.clear();
+    recorded_timestampe_poses_.resize(max_record_size_);
     record_count_ = 0;
     record_enabled_ = true;
 }
@@ -225,7 +249,7 @@ void ViveTrackerReader::read_timestamped_loop()
             uint64_t button_mask = 0;
             bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
 
-            CartesianPose& pose = pose_buf_[write_index];
+            CartesianPose& pose = timestampe_pose_buf_[write_index].pose;
             pose.position.x = x;
             pose.position.y = y;
             pose.position.z = z;

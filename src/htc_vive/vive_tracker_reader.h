@@ -48,6 +48,7 @@ private:
     void read_timestamped_loop();
 
     std::thread reader_thread_;
+    std::thread reader_thread_timestampe_;
     std::atomic<bool> running_;
     std::atomic<bool> paused_;
 

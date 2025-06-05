@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "vive_wrapper.h"
+#include "interpolation.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -199,6 +200,15 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
         pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
         pose_filter.filter_position(robot_poses);
         pose_filter.filter_orientation(robot_poses);
+    }
+}
+
+void MainWindow::extract_pose_vector(const std::vector<TimestampePose> &timestampe_poses, std::vector<CartesianPose> &poses_only)
+{
+    poses_only.clear();
+    for (const auto& tp : timestampe_poses)
+    {
+        poses_only.push_back(tp.pose);
     }
 }
 
@@ -550,19 +560,58 @@ void MainWindow::slot_end_record()
     std::cout << __FUNCTION__ << std::endl;
     emit signal_end_record();
     vive_tracker_reader_->disable_record();
+    
+    // 滤波
+    #if 0
     std::vector<CartesianPose> poses = vive_tracker_reader_->get_recorded_poses();
     std::vector<CartesianPose> poses_tcp2rb;
     poses_tcp2rb.clear();
+    bool is_filtering = ui->checkBox_filtering->isChecked();
+    device_poses_to_robot_poses(poses, poses_tcp2rb, is_filtering);
+    #else
+    std::vector<TimestampePose> poses_timestampe = vive_tracker_reader_->get_recorded_timestamped_poses();
+    std::vector<CartesianPose> poses;
+    std::vector<TimestampePose> poses_tcp2rb_timestampe;
+    std::vector<CartesianPose> poses_tcp2rb;
+    extract_pose_vector(poses_timestampe, poses);
 
     bool is_filtering = ui->checkBox_filtering->isChecked();
     device_poses_to_robot_poses(poses, poses_tcp2rb, is_filtering);
 
+    poses_tcp2rb_timestampe.clear();
+    for (size_t i = 0; i < poses.size(); ++i)
+    {
+        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_us});
+    }
+    #endif
+
     std::cout << "recorded poses size: " << poses.size() << std::endl;
     std::cout << "poses_tcp2rb size: " << poses_tcp2rb.size() << std::endl;
 
+    // 插补
+    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
+    poses_tcp2rb_timestampe_interpolation.clear();
+    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    {
+        uint64_t interval_us = ui->lineEdit_label_interpolation_interval->text().toUInt();
+        LinearPoseInterpolator polator(interval_us);
+        polator.interpolate_with_quaternion(poses_tcp2rb_timestampe, poses_tcp2rb_timestampe_interpolation);
+        std::cout << "poses_tcp2rb_timestampe_interpolation size: " << poses_tcp2rb_timestampe_interpolation.size() << std::endl;
+    }
+
+    
+    // 保存文件
+    #if 0
     vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses);
     vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb);
+    #else
+    vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj.csv", poses_timestampe);
+    vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
+    if (ui->checkBox_label_interpolation_interval->isCheckable())
+        vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
+    #endif
 
+    // 显示图像
     csv_parser_window_vive->loadData("vive_traj.csv");
     csv_parser_window_vive->show();
     csv_parser_window_vive->plotData();
@@ -573,9 +622,17 @@ void MainWindow::slot_end_record()
     csv_parser_window_vive2robot->plotData();
     csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
 
+    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    {
+        csv_parser_window_vive2robot->loadData("vive_traj2robot_interpolation.csv");
+        csv_parser_window_vive2robot->show();
+        csv_parser_window_vive2robot->plotData();
+        csv_parser_window_vive2robot->setWindowTitle("vive2robot_插补_数据曲线");
+    }
+    
+    // 清理点容器
     vive_tracker_reader_->clear_recorded_poses();
     poses_tcp2rb.clear();
-
 }
 
 void MainWindow::slot_start_playback()
