@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     csv_parser_window_vive = new CSVParserWindow(this);
     csv_parser_window_vive2robot = new CSVParserWindow(this);
+    csv_parser_window_vive2robot_inter = new CSVParserWindow(this);
+    csv_parser_window_vive2robot_inter_filter = new CSVParserWindow(this);
 
     init_connect();
     init_style();
@@ -599,6 +601,21 @@ void MainWindow::slot_end_record()
         std::cout << "poses_tcp2rb_timestampe_interpolation size: " << poses_tcp2rb_timestampe_interpolation.size() << std::endl;
     }
 
+    // 插补后二次滤波
+    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation_filter;
+    poses_tcp2rb_timestampe_interpolation_filter.clear();
+    std::vector<CartesianPose> poses_filted;
+    extract_pose_vector(poses_tcp2rb_timestampe_interpolation, poses_filted);
+    int window_size = ui->lineEdit_filter_window_size->text().toInt();
+    int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
+    PoseFilter pose_filter(11, 2);
+    pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
+    pose_filter.filter_position(poses_filted);
+    pose_filter.filter_orientation(poses_filted);
+    for (size_t i = 0; i < poses_filted.size(); ++i)
+    {
+        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_us});
+    }
     
     // 保存文件
     #if 0
@@ -608,7 +625,11 @@ void MainWindow::slot_end_record()
     vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj.csv", poses_timestampe);
     vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
     if (ui->checkBox_label_interpolation_interval->isCheckable())
+    {
         vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
+        vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
+    }
+        
     #endif
 
     // 显示图像
@@ -624,10 +645,15 @@ void MainWindow::slot_end_record()
 
     if (ui->checkBox_label_interpolation_interval->isCheckable())
     {
-        csv_parser_window_vive2robot->loadData("vive_traj2robot_interpolation.csv");
-        csv_parser_window_vive2robot->show();
-        csv_parser_window_vive2robot->plotData();
-        csv_parser_window_vive2robot->setWindowTitle("vive2robot_插补_数据曲线");
+        csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
+        csv_parser_window_vive2robot_inter->show();
+        csv_parser_window_vive2robot_inter->plotData();
+        csv_parser_window_vive2robot_inter->setWindowTitle("vive2robot_插补_数据曲线");
+
+        csv_parser_window_vive2robot_inter_filter->loadData("vive_traj2robot_interpolation_filted.csv");
+        csv_parser_window_vive2robot_inter_filter->show();
+        csv_parser_window_vive2robot_inter_filter->plotData();
+        csv_parser_window_vive2robot_inter_filter->setWindowTitle("vive2robot_插补_二次滤波_数据曲线");
     }
     
     // 清理点容器

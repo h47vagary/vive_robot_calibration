@@ -119,5 +119,7 @@ private:
 
     CSVParserWindow* csv_parser_window_vive;
     CSVParserWindow* csv_parser_window_vive2robot;
+    CSVParserWindow* csv_parser_window_vive2robot_inter;
+    CSVParserWindow* csv_parser_window_vive2robot_inter_filter;
 };
 
