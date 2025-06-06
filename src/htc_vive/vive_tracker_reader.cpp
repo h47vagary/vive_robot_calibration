@@ -123,6 +123,11 @@ bool ViveTrackerReader::save_record_timestamped_poses_to_file(const std::string 
     return true;
 }
 
+double ViveTrackerReader::get_record_duration_seconds() const
+{
+    return record_duration_us_ / 1e3;
+}
+
 void ViveTrackerReader::enable_record(size_t max_size)
 {
     // std::lock_guard<std::mutex> lock(record_mutex_);
@@ -132,6 +137,8 @@ void ViveTrackerReader::enable_record(size_t max_size)
     recorded_timestampe_poses_.clear();
     recorded_timestampe_poses_.resize(max_record_size_);
     record_count_ = 0;
+    record_start_timestamp_us_ = TimeDealUtils::get_timestamp();
+    record_duration_us_ = 0;
     record_enabled_ = true;
 }
 
@@ -139,6 +146,8 @@ void ViveTrackerReader::disable_record()
 {
     // std::lock_guard<std::mutex> lock(record_mutex_);
     record_enabled_ = false;
+    uint64_t end_timestamp = TimeDealUtils::get_timestamp();
+    record_duration_us_ = end_timestamp - record_start_timestamp_us_;
 }
 
 std::vector<CartesianPose> ViveTrackerReader::get_recorded_poses()

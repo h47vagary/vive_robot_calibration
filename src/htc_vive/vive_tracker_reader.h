@@ -42,6 +42,8 @@ public:
     void clear_recorded_timestamped_poses();
     bool save_record_timestamped_poses_to_file(const std::string& filename, std::vector<TimestampePose> poses);
 
+    double get_record_duration_seconds() const;
+
 
 private:
     void read_loop();
@@ -64,4 +66,6 @@ private:
     size_t record_count_;                                       // 当前缓存的轨迹数量
 
     std::atomic<int> loop_interval_ms_;                         // 读取间隔时间(ms)
+    uint64_t record_start_timestamp_us_ = 0;
+    uint64_t record_duration_us_ = 0;       
 };
