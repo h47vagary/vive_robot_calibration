@@ -136,44 +136,6 @@ void Utils::print_matrix(const Eigen::Matrix4d &mat)
     }
 }
 
-std::string extract_trajectory_strings(const std::string& file_path)
-{
-    std::string result = "";
-    std::ifstream file(file_path);
-
-    // 检查文件是否成功打开
-    if (!file.is_open())
-    {
-        std::cerr << "Unable to open file: " << file_path << std::endl;
-        return result;
-    }
-
-    std::string line;
-    std::string content;
-
-    // 读取整个文件内容
-    while (std::getline(file, line))
-    {
-        content += line + "\n";
-    }
-
-    // 查找 [$trajectory: 和 $] 之间的内容
-    size_t start_pos = 0;
-    while ((start_pos = content.find("[$trajectory:", start_pos)) != std::string::npos)
-    {
-        size_t end_pos = content.find("$]", start_pos);
-        if (end_pos != std::string::npos)
-        {
-            // 提取 [$trajectory: 和 $] 之间的内容
-            start_pos += 13;  // 跳过 "[$trajectory:"
-            std::string trajectory = content.substr(start_pos, end_pos - start_pos);
-            result = trajectory;
-            break;
-        }
-    }
-
-    return result;
-}
 
 uint64_t TimeDealUtils::get_timestamp()
 {

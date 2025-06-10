@@ -12,13 +12,10 @@ public:
 
     RealtimeTester(int period_ms, int test_duration_ms);
 
-    // 设置任务函数（替换默认Sleep）
     void set_task_function(TaskFunction func);
 
-    // 设置高优先级线程（默认true）
     void enable_high_priority(bool enable);
-
-    // 开始测试
+    
     void run_test();
 
 private:

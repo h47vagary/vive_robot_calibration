@@ -6,7 +6,7 @@ RealtimeTester::RealtimeTester(int period_ms, int test_duration_ms)
     : period_ms_(period_ms),
       test_duration_ms_(test_duration_ms),
       use_high_priority_(true),
-      task_func_([]() { Sleep(4); }) // 默认任务：Sleep 4ms
+      task_func_([]() { Sleep(4); })
 {
     QueryPerformanceFrequency(&frequency_);
 }
@@ -42,9 +42,28 @@ void RealtimeTester::run_test()
     QueryPerformanceCounter(&start_time);
     LONGLONG expected_time = start_time.QuadPart;
 
+    // for (int i = 0; i < iterations; ++i)
+    // {
+    //     if (task_func_) task_func_();  // 调用自定义函数
+
+    //     QueryPerformanceCounter(&now);
+    //     LONGLONG delay_ticks = now.QuadPart - expected_time;
+    //     double delay_ms = (delay_ticks * 1000.0) / frequency_.QuadPart;
+    //     delays_.push_back(delay_ms);
+
+    //     expected_time += (period_ms_ * frequency_.QuadPart) / 1000;
+    // }
     for (int i = 0; i < iterations; ++i)
     {
-        if (task_func_) task_func_();  // 调用自定义函数
+        // 等待直到 expected_time
+        while (true) {
+            QueryPerformanceCounter(&now);
+            if (now.QuadPart >= expected_time)
+                break;
+            Sleep(0);  // 让出CPU，避免过度占用
+        }
+
+        if (task_func_) task_func_();
 
         QueryPerformanceCounter(&now);
         LONGLONG delay_ticks = now.QuadPart - expected_time;
@@ -53,6 +72,7 @@ void RealtimeTester::run_test()
 
         expected_time += (period_ms_ * frequency_.QuadPart) / 1000;
     }
+
 
     report_result();
 }

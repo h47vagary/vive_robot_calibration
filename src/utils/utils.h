@@ -13,6 +13,15 @@
 #define RAD_TO_DEG(r) ((r)*180.0/PI)
 #define DEG_TO_RAD(d) ((d)*PI/180.0)
 
+#define TIMER(Run) [&](){\
+    auto t1 = std::chrono::system_clock::now();\
+    auto res = Run;\
+    auto t2 = std::chrono::system_clock::now();\
+    auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();\
+    std::cout << #Run << " elapsed time: " << dt << "ms" << std::endl;\
+    return res;\
+}()
+
 // 四元数类定义
 class Quaternion
 {

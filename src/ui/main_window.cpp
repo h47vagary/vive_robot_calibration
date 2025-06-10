@@ -8,6 +8,7 @@
 
 #include "vive_wrapper.h"
 #include "interpolation.h"
+#include "realtime_tester.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -43,7 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
     init_style();
     init_label_maps();
 
-    //init_test_calib();
+    RealtimeTester tester(4, 2000);
+    tester.enable_high_priority(true);
+    tester.run_test();
 }
 
 
