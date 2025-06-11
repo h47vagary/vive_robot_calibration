@@ -38,17 +38,16 @@ signals:
     
 
 public slots:
-    void slot_handler_start();                                  // 启动
-    void slot_handler_stop();                                   // 停止
-    void slot_handler_mark_point(int index);                    // 标定点
-    void slot_handler_send_message(QString msg);                // 发送信息给控制器
-    void slot_handler_start_record();                           // 开始录制
-    void slot_handler_end_record();                             // 结束录制
-    void slot_handler_start_playback();                         // 开始回放
-    void slot_handler_end_playback();                           // 结束回放
-    void slot_handler_flang2tcp_mark_point(int index);          // 法兰盘2TCP的标定点 
-    void slot_handler_tracker2tcp_mark_rotation_use_robotpose();          // 标定追踪器到tcp点需要一次机器人姿态
-    void slot_linear_error_acquire();                           // 获取线性误差（需要一次机器人姿态）
+    void slot_handler_start();                                      // 启动
+    void slot_handler_stop();                                       // 停止
+    void slot_handler_mark_point(int index);                        // 标定点
+    void slot_handler_start_record();                               // 开始录制
+    void slot_handler_end_record();                                 // 结束录制
+    void slot_handler_start_playback();                             // 开始回放
+    void slot_handler_end_playback();                               // 结束回放
+    void slot_handler_flang2tcp_mark_point(int index);              // 法兰盘2TCP的标定点 
+    void slot_handler_tracker2tcp_mark_rotation_use_robotpose();    // 标定追踪器到tcp点需要一次机器人姿态
+    void slot_linear_error_acquire();                               // 获取线性误差（需要一次机器人姿态）
 
 private:
     void thread_loop();  // 后台线程处理

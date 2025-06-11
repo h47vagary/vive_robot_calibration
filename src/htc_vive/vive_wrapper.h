@@ -1,6 +1,6 @@
 /**
  * @file vive_wrapper.h
- * @brief 封装了 VIVE Tracker 功能接口，可直接调用此接口使用对应功能
+ * @brief 封装了 VIVE Tracker 功能接口，开发者可直接使用对应功能接口
  * @version 0.1
  * @date 2025-05-15
  * 
@@ -109,19 +109,6 @@ bool vive_get_pose_abc(double* x, double* y, double* z,
 bool vive_get_relative_pose(float* x, float* y, float* z,
                             float* qx, float* qy, float* qz, float* qw,
                             uint64_t* button_mask);
-
-
-/**
- * @brief 开始记录轨迹数据到 CSV 文件。
- *
- * @param filename 输出文件名（UTF-8 编码）
- */
-void vive_start_logging(const char* filename);
-
-/**
- * @brief 停止数据记录并关闭文件。
- */
-void vive_stop_logging();
 
 #ifdef __cplusplus
 }

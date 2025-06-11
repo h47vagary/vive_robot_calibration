@@ -231,12 +231,6 @@ void MessageHandler::slot_handler_mark_point(int index)
     comm_.nrc_send_message(0x9206, json_str_out);
 }
 
-void MessageHandler::slot_handler_send_message(QString msg)
-{
-    if (!running_) return;
-    std::cout << __FUNCTION__ << " msg: " << msg.toStdString() << std::endl;
-    comm_.nrc_send_message(0x9206, msg.toStdString());
-}
 
 void MessageHandler::slot_handler_start_record()
 {

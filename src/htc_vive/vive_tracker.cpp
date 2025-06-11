@@ -139,44 +139,7 @@ bool ViveTracker::get_relative_pose(float& x, float& y, float& z,
                   abs_qx, abs_qy, abs_qz, abs_qw,
                   qx, qy, qz, qw);
 
-    if (recording_)
-    {
-        PoseData pose_tmp(x, y, z, qx, qy, qz, qw, button_mask);
-        pose_vector_.push_back(pose_tmp);
-    }
-
     return true;
-}
-
-void ViveTracker::start_logging(const std::string& filename)
-{
-    if (recording_)
-    {
-        std::cout << "please stop during the recording first" << std::endl;
-        return;
-    }
-    pose_vector_.clear();
-    recording_ = true;
-    filename_ = filename;
-}
-
-void ViveTracker::stop_logging()
-{
-    log_file_.open(filename_);
-    if (!log_file_.is_open()) return;
-
-    std::cout << "pose size: " << pose_vector_.size() << std::endl;
-    log_file_ << "X(mm),Y(mm),Z(mm),Qx,Qy,Qz,Qw,ButtonPressed" << std::endl;
-    for (auto iter : pose_vector_)
-    {
-        log_file_ << iter.x << "," << iter.y << "," << iter.z << ","
-                  << iter.qx << "," << iter.qy << "," << iter.qz << "," << iter.qw << ","
-                  << iter.button_mask << std::endl;
-    }
-    pose_vector_.clear();
-    log_file_.close();
-
-    recording_ = false; 
 }
 
 void ViveTracker::quat_inverse(float qx, float qy, float qz, float qw,

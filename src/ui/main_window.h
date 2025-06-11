@@ -41,9 +41,6 @@ private slots:
     
     void slot_mark_point();
 
-    void slot_send();
-    void slot_clear();
-
     void slot_tracker2tcp_mark_point();
     void slot_tracker2tcp_calibrate();
     void slot_tracker2tcp_clear_point();
@@ -53,14 +50,12 @@ private slots:
     void slot_flange2tcp_clear_point();
     
     void slot_track_pose_timeout();
-    void slot_linear_error_cotinue_acquire();
     void slot_start_update_track_pose();
     void slot_stop_update_track_pose();
     void slot_tracker2tcp_mark_rotation_use_robotpose();
 
     void slot_use_robot_toolhand(bool);
     void slot_use_tracker2tcp(bool);
-    void slot_continue_get(bool);
 
     void slot_vive_tracker_reader_interval();
     void slot_parse_chart();
@@ -73,12 +68,11 @@ public slots:
     void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
     void slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
 
-    void slot_get_linear_error_use_robot_pose(CartesianPose pose);      // 感觉会比较大，因为多一个网络传输的时间
+    void slot_get_linear_error_use_robot_pose(CartesianPose pose);      // 多一个网络传输时间，稳定后获取才准
 
 signals:
     void signal_connect_ctr();
     void signal_disconnect_ctr();
-    void signal_send_message(QString msg);
     void signal_mark_point(int point_index);
     void signal_start_record();
     void signal_end_record();
@@ -91,16 +85,12 @@ signals:
 private:
     void init_connect();
     void init_style();
-    void init_label_maps(); // 初始化绑定
 
     Eigen::Matrix4d get_tracker2tcp_rotation_matrix();
 
     Ui::MainWindow *ui;
     QTimer* track_pose_timer_;
-    QTimer* linear_error_continue_acquire_;
     QList<QPushButton*> mark_buttons_;
-    QMap<int, QVector<QLabel*>> v_labels_map;  // label_v1_x ~ label_v6_C
-    QMap<int, QVector<QLabel*>> r_labels_map;  // label_r1_x ~ label_r6_C
 
     MessageHandler* msg_handler_;
     ViveTrackerReader* vive_tracker_reader_;
@@ -113,7 +103,6 @@ private:
     bool use_track2tcp_ = false;
     double linear_error_ = 0.0; // 线性误差
 
-    void init_test_calib();    // 模拟数据测试标定
     void device_poses_to_robot_poses(const std::vector<CartesianPose>& device_poses, std::vector<CartesianPose>& robot_poses, bool is_filtering);
     void extract_pose_vector(const std::vector<TimestampePose>& timestampe_poses, std::vector<CartesianPose>& poses_only);
 

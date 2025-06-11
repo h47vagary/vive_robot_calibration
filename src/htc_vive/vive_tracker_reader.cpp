@@ -30,8 +30,7 @@ bool ViveTrackerReader::start()
 
     running_ = true;
     paused_ = false;
-    //reader_thread_ = std::thread(&ViveTrackerReader::read_loop, this);
-    reader_thread_timestampe_ = std::thread(&ViveTrackerReader::read_timestamped_loop, this);
+    reader_thread_ = std::thread(&ViveTrackerReader::read_loop, this);
     return true;
 }
 
@@ -56,35 +55,22 @@ void ViveTrackerReader::resume()
 
 CartesianPose ViveTrackerReader::get_latest_pose()
 {
-    #if 0
     int index = active_index_.load(std::memory_order_acquire);
-    const CartesianPose& cartesian_pose = pose_buf_[index];
-    return cartesian_pose;
-    #else
-    int index = active_index_.load(std::memory_order_acquire);
-    const TimestampePose& timestampe_cartesian_pose = timestampe_pose_buf_[index];
-    return timestampe_cartesian_pose.pose;
-    #endif
+    const TimestampePose& cartesian_pose = pose_buf_[index];
+    return cartesian_pose.pose;
 }
 
-TimestampePose ViveTrackerReader::get_lastest_timepose()
+std::vector<TimestampePose> ViveTrackerReader::get_recorded_poses()
 {
-    int index = active_index_.load(std::memory_order_acquire);
-    const TimestampePose& timestampe_cartesian_pose = timestampe_pose_buf_[index];
-    return timestampe_cartesian_pose;
+    return std::vector<TimestampePose>(recorded_poses_.begin(), recorded_poses_.begin() + record_count_);
 }
 
-std::vector<TimestampePose> ViveTrackerReader::get_recorded_timestamped_poses()
+void ViveTrackerReader::clear_recorded_poses()
 {
-    return std::vector<TimestampePose>(recorded_timestampe_poses_.begin(), recorded_timestampe_poses_.begin() + record_count_);
+    recorded_poses_.clear();
 }
 
-void ViveTrackerReader::clear_recorded_timestamped_poses()
-{
-    recorded_timestampe_poses_.clear();
-}
-
-bool ViveTrackerReader::save_record_timestamped_poses_to_file(const std::string &filename, std::vector<TimestampePose> poses)
+bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, std::vector<TimestampePose> poses)
 {
     std::ofstream file(filename);
     if (!file.is_open()) 
@@ -130,12 +116,11 @@ double ViveTrackerReader::get_record_duration_seconds() const
 
 void ViveTrackerReader::enable_record(size_t max_size)
 {
-    // std::lock_guard<std::mutex> lock(record_mutex_);
     max_record_size_ = max_size;
     recorded_poses_.clear();
     recorded_poses_.resize(max_record_size_);      // 预分配内存以提高性能
-    recorded_timestampe_poses_.clear();
-    recorded_timestampe_poses_.resize(max_record_size_);
+    recorded_poses_.clear();
+    recorded_poses_.resize(max_record_size_);
     record_count_ = 0;
     record_start_timestamp_us_ = TimeDealUtils::get_timestamp();
     record_duration_us_ = 0;
@@ -144,46 +129,9 @@ void ViveTrackerReader::enable_record(size_t max_size)
 
 void ViveTrackerReader::disable_record()
 {
-    // std::lock_guard<std::mutex> lock(record_mutex_);
     record_enabled_ = false;
     uint64_t end_timestamp = TimeDealUtils::get_timestamp();
     record_duration_us_ = end_timestamp - record_start_timestamp_us_;
-}
-
-std::vector<CartesianPose> ViveTrackerReader::get_recorded_poses()
-{
-    // std::lock_guard<std::mutex> lock(record_mutex_); 
-    return std::vector<CartesianPose>(recorded_poses_.begin(), recorded_poses_.begin() + record_count_);
-}
-
-void ViveTrackerReader::clear_recorded_poses()
-{
-    // std::lock_guard<std::mutex> lock(record_mutex_);
-    recorded_poses_.clear();
-}
-
-bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, std::vector<CartesianPose> poses)
-{
-    std::ofstream file(filename);
-    if (!file.is_open()) 
-    {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return false;
-    }
-
-    file << "x,y,z,A,B,C\n";
-    for (size_t i = 0; i < poses.size(); ++i)
-    {
-        const auto& pose = poses[i];
-        file << pose.position.x << ","
-            << pose.position.y << ","
-            << pose.position.z << ","
-            << pose.orientation.A << ","
-            << pose.orientation.B << ","
-            << pose.orientation.C << "\n";
-    }
-
-    return true;
 }
 
 void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
@@ -198,53 +146,8 @@ void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
     }
 }
 
+
 void ViveTrackerReader::read_loop()
-{
-    int write_index = 0;
-
-    while (running_) 
-    {
-        if (!paused_) 
-        {
-            double x, y, z, A, B, C;
-            uint64_t button_mask = 0;
-            bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
-
-            CartesianPose& pose = pose_buf_[write_index];
-            pose.position.x = x;
-            pose.position.y = y;
-            pose.position.z = z;
-            pose.orientation.A = A;
-            pose.orientation.B = B;
-            pose.orientation.C = C;
-
-            // 切换可读索引
-            active_index_.store(write_index, std::memory_order_release);
-            write_index = 1 - write_index;
-
-            if (ok && record_enabled_)
-            {
-                // TODO: 暂时无锁写入，后续如有稳定性问题，需改为无锁缓冲或双缓冲
-                // std::lock_guard<std::mutex> lock(record_mutex_);
-                if (record_count_ >= max_record_size_)
-                {
-                    record_enabled_ = false;
-                    std::cerr << "Recording buffer is full. Stopping recording." << std::endl;
-                }
-                else
-                {
-                    recorded_poses_[record_count_] = pose;
-                    record_count_++;
-                }
-                
-            }
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(loop_interval_ms_));
-    }
-}
-
-void ViveTrackerReader::read_timestamped_loop()
 {
     int write_index = 0;
 
@@ -258,7 +161,7 @@ void ViveTrackerReader::read_timestamped_loop()
             uint64_t button_mask = 0;
             bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
 
-            CartesianPose& pose = timestampe_pose_buf_[write_index].pose;
+            CartesianPose& pose = pose_buf_[write_index].pose;
             pose.position.x = x;
             pose.position.y = y;
             pose.position.z = z;
@@ -272,8 +175,6 @@ void ViveTrackerReader::read_timestamped_loop()
 
             if (ok && record_enabled_)
             {
-                // TODO: 暂时无锁写入，后续如有稳定性问题，需改为无锁缓冲或双缓冲
-                // std::lock_guard<std::mutex> lock(record_mutex_);
                 if (record_count_ >= max_record_size_)
                 {
                     record_enabled_ = false;
@@ -281,8 +182,8 @@ void ViveTrackerReader::read_timestamped_loop()
                 }
                 else
                 {
-                    recorded_timestampe_poses_[record_count_].pose = pose;
-                    recorded_timestampe_poses_[record_count_].timestamp_us = now_us;
+                    recorded_poses_[record_count_].pose = pose;
+                    recorded_poses_[record_count_].timestamp_us = now_us;
                     record_count_++;
                 }
                 

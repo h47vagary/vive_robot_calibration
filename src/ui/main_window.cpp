@@ -30,9 +30,6 @@ MainWindow::MainWindow(QWidget *parent)
     track_pose_timer_ = new QTimer(this);
     track_pose_timer_->setInterval(5);
 
-    linear_error_continue_acquire_ = new QTimer(this);
-    linear_error_continue_acquire_->setInterval(5);
-
     tcp2tracker_rotation_matrix_ = new Eigen::Matrix4d();
 
     csv_parser_window_vive = new CSVParserWindow(this);
@@ -42,13 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     init_connect();
     init_style();
-    init_label_maps();
-
-    RealtimeTester tester(4, 2000);
-    tester.enable_high_priority(true);
-    tester.run_test();
 }
-
 
 MainWindow::~MainWindow()
 {
@@ -57,107 +48,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::init_style()
 {
-    ui->lineEdit_reciver_window->setDisabled(true);
     ui->lineEdit_filter_window_size->setText("11");
     ui->lineEdit_polynomial_order->setText("2");
-
-}
-
-void MainWindow::init_label_maps()
-{
-    QStringList suffixes = {"x", "y", "z", "A", "B", "C"};
-
-    for (int i = 1; i <= 6; ++i)
-    {
-        QVector<QLabel*> v_labels, r_labels;
-
-        for (const QString& suffix : suffixes)
-        {
-            QString v_name = QString("label_v%1_%2").arg(i).arg(suffix);
-            QString r_name = QString("label_r%1_%2").arg(i).arg(suffix);
-
-            QLabel* v_label = this->findChild<QLabel*>(v_name);
-            QLabel* r_label = this->findChild<QLabel*>(r_name);
-
-            if (v_label) v_labels.append(v_label);
-            if (r_label) r_labels.append(r_label);
-        }
-
-        v_labels_map.insert(i, v_labels);
-        r_labels_map.insert(i, r_labels);
-    }
+    ui->lineEdit_label_interpolation_interval->setText("4");
+    ui->lineEdit_refresh_rate->setText("4");
+    ui->checkBox_end_with_chart->setCheckable(true);
 }
 
 Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
 {
     return *tcp2tracker_rotation_matrix_;
-}
-
-void MainWindow::init_test_calib()
-{
-    std::vector<CartesianPose> flange_test_poses_1_;
-    std::vector<CartesianPose> tracker_test_poses_1_;
-    std::vector<CartesianPose> flange_test_poses_2_;
-    std::vector<CartesianPose> tracker_test_poses_2_;
-
-    // 测试数据
-    flange_test_poses_1_.push_back({{483.188, 42.6536, 382.135}, {-3.1357, -0.0229753, 1.16085}});
-    flange_test_poses_1_.push_back({{477.357, 118.771, 350.244}, {2.9074, -0.00475082, 1.15924}});
-    flange_test_poses_1_.push_back({{478.981, -64.6805, 389.427}, {-2.81605, -0.00831388, 1.16014}});
-    flange_test_poses_1_.push_back({{608.515, 31.062, 400.169}, {-3.10181, -0.408744, 1.16181}});
-    flange_test_poses_1_.push_back({{535.759, 37.478, 386.652}, {-3.1242, -0.0525343, 1.14832}});
-    flange_test_poses_1_.push_back({{535.734, -1.01173, 386.581}, {-3.12425, -0.0528958, 1.14867}});
-    
-    tracker_test_poses_1_.push_back({{226.026, 681.279, -1862.37}, {1.59869, -0.0326651, -0.70241}});
-    tracker_test_poses_1_.push_back({{271.676, 669.992, -1915.5}, {1.40636, -0.202555, -0.712652}});
-    tracker_test_poses_1_.push_back({{161.133, 668.07, -1808.86}, {1.82494, 0.223285, -0.74037}});
-    tracker_test_poses_1_.push_back({{282.832, 655.727, -1782.55}, {1.91891, -0.261512, -0.662689}});
-    tracker_test_poses_1_.push_back({{224.368, 685.254, -1854.23}, {1.63115, -0.0349263, -0.713315}});
-    tracker_test_poses_1_.push_back({{252.988, 686.764, -1821.67}, {1.63128, -0.0354317, -0.712291}});
-    tracker_test_poses_1_.push_back({{225.273, 686.95, -1797.8}, {1.6349, -0.0337237, -0.712568}});
-
-    flange_test_poses_2_.push_back({{490.554, 22.8642, 389.293}, {-3.1194, -0.0864863, 1.03751}});
-    flange_test_poses_2_.push_back({{490.492, -109.683, 383.988}, {-2.73236, -0.0875694, 1.0378}});
-    flange_test_poses_2_.push_back({{481.507, 178.453, 314.034}, {2.65889, -0.0877801, 1.03728}});
-    flange_test_poses_2_.push_back({{659.687, 1.73947, 391.887}, {-3.03688, -0.607033, 1.09382}});
-    flange_test_poses_2_.push_back({{489.778, 22.8312, 389.359}, {-3.11965, -0.0986332, 1.03719}});
-    flange_test_poses_2_.push_back({{533.272, 22.8465, 389.304}, {-3.11963, -0.0988659, 1.03601}});
-    flange_test_poses_2_.push_back({{533.257, -21.4563, 389.229}, {-3.1196, -0.0991147, 1.03609}});
-
-    tracker_test_poses_2_.push_back({{834.229, -173.308, -3082.86}, {1.66904, -0.0240478, -0.482847}});
-    tracker_test_poses_2_.push_back({{738.664, -208.484, -3028.29}, {1.8428, 0.344454, -0.563848}});
-    tracker_test_poses_2_.push_back({{948.358, -271.747, -3120.06}, {1.42867, -0.506664, -0.493362}});
-    tracker_test_poses_2_.push_back({{865.582, -213.73, -2961.71}, {2.18897, -0.155467, -0.407141}});
-    tracker_test_poses_2_.push_back({{835.817, -177.911, -3085.96}, {1.68325, -0.0250073, -0.483887}});
-    tracker_test_poses_2_.push_back({{854.306, -206.823, -3047.61}, {1.67553, -0.0276747, -0.481855}});
-    tracker_test_poses_2_.push_back({{813.337, -155.399, -3029.74}, {1.69072, -0.0218522, -0.479085}});
-
-    for (int i = 0; i < tracker_test_poses_2_.size(); i++)
-    {
-        tracker2tcp_calibration_->set_calibration_pose(i, tracker_test_poses_2_[i]);
-    }
-    for (int i = 0; i < flange_test_poses_2_.size(); i++)
-    {
-        flange2tcp_calibration_->set_calibration_pose(i, flange_test_poses_2_[i]);
-    }
-
-    tracker2tcp_calibration_->calibrate();
-    bool pos_calibrated;
-    tracker2tcp_calibration_->get_calibrated(pos_calibrated);
-    if (!pos_calibrated)
-    {
-        std::cout << __FUNCTION__ << "tracker2tcp calibrate fail" << std::endl;
-        return;
-    }
-    Eigen::Vector4d tcp2tracker_vec;
-    tracker2tcp_calibration_->get_calibration_pos_vec(tcp2tracker_vec);
-    std::cout << "tcp2tracker_vec: ["
-          << tcp2tracker_vec.x() << ", "
-          << tcp2tracker_vec.y() << ", "
-          << tcp2tracker_vec.z() << "]" << std::endl;
-
-
-
 }
 
 void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &device_poses, std::vector<CartesianPose> &robot_poses, bool is_filtering)
@@ -238,7 +138,6 @@ void MainWindow::init_connect()
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
     connect(ui->checkBox_use_toolhand, SIGNAL(toggled(bool)), this, SLOT(slot_use_robot_toolhand(bool)));
     connect(ui->checkBox_use_track2tcp, SIGNAL(toggled(bool)), this, SLOT(slot_use_tracker2tcp(bool)));
-    connect(ui->checkBox_continue_get, SIGNAL(toggled(bool)), this, SLOT(slot_continue_get(bool)));
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
     connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
@@ -246,13 +145,9 @@ void MainWindow::init_connect()
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
-                    << ui->pushButton_mark_point4 << ui->pushButton_mark_point5 << ui->pushButton_mark_point6
-                        << ui->pushButton_mark_point7 << ui->pushButton_mark_point8 << ui->pushButton_mark_point9;
+                    << ui->pushButton_mark_point4 << ui->pushButton_mark_point5 << ui->pushButton_mark_point6;
     for (auto iter : mark_buttons_)
         connect(iter, SIGNAL(clicked()), this, SLOT(slot_mark_point()));
-
-    connect(ui->pushButton_send, SIGNAL(clicked()), this, SLOT(slot_send()));
-    connect(ui->pushButton_clear, SIGNAL(clicked()), this, SLOT(slot_clear()));
 
     connect(msg_handler_, &MessageHandler::signal_message_received, this, &MainWindow::slot_handle_message);
     connect(msg_handler_, &MessageHandler::signal_mark_point_received, this, &MainWindow::slot_mark_point_received);
@@ -261,10 +156,8 @@ void MainWindow::init_connect()
     connect(msg_handler_, &MessageHandler::signal_tracker2tcp_mark_use_robot_pose, this, &MainWindow::slot_tracker2tcp_mark_use_robot_pose);
     connect(msg_handler_, &MessageHandler::signal_get_linear_error_use_robot_pose, this, &MainWindow::slot_get_linear_error_use_robot_pose);
     connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
-    connect(linear_error_continue_acquire_, &QTimer::timeout, this, &MainWindow::slot_linear_error_cotinue_acquire);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
-    connect(this, &MainWindow::signal_send_message, msg_handler_, &MessageHandler::slot_handler_send_message);
     connect(this, &MainWindow::signal_mark_point, msg_handler_, &MessageHandler::slot_handler_mark_point);
     connect(this, &MainWindow::signal_start_record, msg_handler_, &MessageHandler::slot_handler_start_record);
     connect(this, &MainWindow::signal_end_record, msg_handler_, &MessageHandler::slot_handler_end_record);
@@ -279,7 +172,7 @@ void MainWindow::init_connect()
 void MainWindow::slot_handle_message(const QString& msg)
 {
     std::cout << __FUNCTION__ << " msg: " << msg.toStdString() << std::endl;
-    ui->lineEdit_reciver_window->setText(msg);
+
 }
 
 void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose)
@@ -294,8 +187,6 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
 
     if (type == E_POSE_TYPE_ROBOT)
     {
-        if (!r_labels_map.contains(index)) return;
-        labels = &r_labels_map[index];
         int index_real = index - 1;
         if (use_toolhand_)
         {
@@ -325,40 +216,9 @@ void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, Cartesian
             calibration_manager_->set_robot_calibration_positon(index_real, pose_tcp.position);
             calibration_manager_->set_robot_calibration_orientation(index_real, pose_tcp.orientation);
         }
-        
-    }
-    else if (type == E_POSE_TYPE_VIVE)
-    {
-        if (!v_labels_map.contains(index)) return;
-        labels = &v_labels_map[index];
-    }
-    else
-    {
-        return;
     }
 
-    static QMap<QString, int> suffix_to_idx = {
-        {"x", 0}, {"y", 1}, {"z", 2},
-        {"A", 3}, {"B", 4}, {"C", 5}
-    };
-
-    QMap<QString, double> values = {
-        {"x", pose.position.x},
-        {"y", pose.position.y},
-        {"z", pose.position.z},
-        {"A", pose.orientation.A},
-        {"B", pose.orientation.B},
-        {"C", pose.orientation.C}
-    };
-
-    for (auto it = values.begin(); it != values.end(); ++it)
-    {
-        int idx = suffix_to_idx.value(it.key(), -1);
-        if (labels && idx >= 0 && idx < labels->size())
-        {
-            (*labels)[idx]->setText(QString::number(it.value(), 'f', 2));
-        }
-    }
+    return;
 }
 
 void MainWindow::slot_compute_result_received(double result)
@@ -671,7 +531,7 @@ void MainWindow::slot_end_record()
 
 #if INTERPOLATE_FILTER
     // track pose -> robot pose
-    std::vector<TimestampePose> poses_timestampe = vive_tracker_reader_->get_recorded_timestamped_poses();
+    std::vector<TimestampePose> poses_timestampe = vive_tracker_reader_->get_recorded_poses();
     std::vector<CartesianPose> poses;
     std::vector<TimestampePose> poses_tcp2rb_timestampe;
     std::vector<CartesianPose> poses_tcp2rb;
@@ -711,12 +571,12 @@ void MainWindow::slot_end_record()
         poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_us});
     }
     // save to file
-    vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj.csv", poses_timestampe);
-    vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_timestampe);
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
     if (ui->checkBox_label_interpolation_interval->isCheckable())
     {
-        vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
-        vive_tracker_reader_->save_record_timestamped_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
+        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
+        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
     }
 
     // clear cache
@@ -791,15 +651,6 @@ void MainWindow::slot_compute()
 
     calibration_manager_->set_calibration_algorithm(2);
     int ret = calibration_manager_->calibrate(0, max_error);
-    if (!ret)
-    {
-        ui->label_connect_state->setText("calib success");
-    }
-    else
-    {
-        ui->label_connect_state->setText("calib fail");
-    }
-
     ui->label_calibration_error->setText(QString::number(max_error));
 
 }
@@ -861,19 +712,6 @@ void MainWindow::slot_mark_point()
     }
     else
         std::cout << "not found in mark button list" << std::endl;
-}
-
-void MainWindow::slot_send()
-{
-    QString send_text = ui->lineEdit_sender_window->text();
-    emit signal_send_message(send_text);
-}
-
-void MainWindow::slot_clear()
-{
-    std::cout << __FUNCTION__ << std::endl;
-
-    ui->lineEdit_reciver_window->clear();
 }
 
 void MainWindow::slot_tracker2tcp_mark_point()
@@ -953,11 +791,6 @@ void MainWindow::slot_track_pose_timeout()
     ui->label_vive_z->setText(QString::number(pose.position.z));
 }
 
-void MainWindow::slot_linear_error_cotinue_acquire()
-{
-    emit signal_linear_error_acquire();
-}
-
 void MainWindow::slot_start_update_track_pose()
 {
     track_pose_timer_->start();
@@ -1016,20 +849,6 @@ void MainWindow::slot_use_tracker2tcp(bool)
     {
         std::cout << "use_track2tcp_ is_checked false" << std::endl;
         use_track2tcp_ = false;
-    }
-}
-
-void MainWindow::slot_continue_get(bool state)
-{
-    if (ui->checkBox_continue_get->isChecked())
-    {
-        std::cout << "is_checked true" << std::endl;
-        linear_error_continue_acquire_->start();
-    }
-    else
-    {
-        std::cout << "is_checked false" << std::endl;
-        linear_error_continue_acquire_->stop();
     }
 }
 

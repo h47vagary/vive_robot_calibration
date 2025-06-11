@@ -44,8 +44,6 @@ public:
                            float& qx, float& qy, float& qz, float& qw,
                            uint64_t& button_mask);
 
-    void start_logging(const std::string& filename);
-    void stop_logging();
 
 private:
     void quat_inverse(float qx, float qy, float qz, float qw,
@@ -70,22 +68,6 @@ private:
     vr::TrackedDeviceIndex_t tracker_index_;
     float origin_x_, origin_y_, origin_z_;
     float origin_qx_, origin_qy_, origin_qz_, origin_qw_;
-
-    bool recording_;
-    std::string filename_;
-    struct PoseData
-    {
-        float x, y, z, qx, qy, qz, qw;
-        uint64_t button_mask;
-        PoseData(float x_, float y_,float z_, 
-                 float qx_, float qy_, float qz_, float qw_,
-                 uint64_t button_mask_)
-                : x(x_), y(y_), z(z_), qx(qx_), qy(qy_), qz(qz_), qw(qw_), button_mask(button_mask_) {}   
-    };
-    std::vector<PoseData> pose_vector_;
-    size_t max_pose_size_;
-    std::ofstream log_file_;
-    std::chrono::steady_clock::time_point start_time_;
 };
 
 } // namespace htc_vive

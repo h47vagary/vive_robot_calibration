@@ -53,16 +53,3 @@ bool vive_get_relative_pose(float* x, float* y, float* z,
 
     return g_tracker.get_relative_pose(*x, *y, *z, *qx, *qy, *qz, *qw, *button_mask);
 }
-
-void vive_start_logging(const char* filename)
-{
-    if (filename)
-    {
-        g_tracker.start_logging(filename);
-    }
-}
-
-void vive_stop_logging()
-{
-    g_tracker.stop_logging();
-}
