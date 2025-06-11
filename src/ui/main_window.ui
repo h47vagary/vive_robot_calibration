@@ -2171,7 +2171,7 @@
     <widget class="QPushButton" name="pushButton_parse_chart">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>270</x>
        <y>150</y>
        <width>91</width>
        <height>31</height>
@@ -2243,7 +2243,7 @@
     <widget class="QPushButton" name="pushButton_traj_filtering">
      <property name="geometry">
       <rect>
-       <x>390</x>
+       <x>400</x>
        <y>150</y>
        <width>91</width>
        <height>31</height>
@@ -2287,6 +2287,19 @@
      </property>
      <property name="text">
       <string>时间步距 ms</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_end_with_chart">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>120</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>结束时绘图</string>
      </property>
     </widget>
    </widget>
