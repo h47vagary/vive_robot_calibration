@@ -17,6 +17,11 @@
 #include "comm_manager.h"
 #include "common_header.h"
 
+#define CONTROLLER_IP "192.168.1.13"
+#define CONTROLLER_PORT "6001"
+#define CONTROLLER_SERIAL_ID 0x9206
+#define CONTROLLER_RECEIVE_ID 0x9208
+
 class MessageHandler : public QObject
 {
     Q_OBJECT
@@ -29,7 +34,6 @@ public:
     void stop();               // 停止线程和通信
 
 signals:
-    void signal_message_received(QString msg);
     void signal_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
     void signal_flange2tcp_mark_point_received(int index, CartesianPose pose);
     void signal_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
@@ -50,6 +54,7 @@ public slots:
     void slot_linear_error_acquire();                               // 获取线性误差（需要一次机器人姿态）
 
 private:
+    bool handle_pose_with_point(const std::string& msg, std::function<void(int, const CartesianPose&)> emitter);
     void thread_loop();  // 后台线程处理
     void handle_message(int msg_id, const std::string& msg);
     int serial_id_send_;

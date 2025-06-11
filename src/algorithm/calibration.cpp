@@ -443,13 +443,6 @@ int CalibrationManager::calculate_orientation_offset_matrix()
     Utils::matrix_to_eular_ABC(*orientation_offset_matrix_, A, B, C);
     std::cout << "*orientation_offset_matrix_->A " << A << " B " << B << " C " << C << std::endl;
 
-    // std::cout << __FUNCTION__ << " manual set value: " << std::endl;
-    // *orientation_offset_matrix_ << 0.0007963, 0.9999997, 0.000000,
-    //                                -0.9999997, 0.0007963, 0.000000,
-    //                                0.0000000, 0.0000000, 1.000000;
-    // std::cout << "manual value *orientation_offset_matrix_:" << std::endl;
-    // std::cout << *orientation_offset_matrix_ << std::endl;
-
     return 0;
 }
 
@@ -636,13 +629,6 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
     vecSphereCentre(3) = 1.0;
     std::cout << __FUNCTION__ << " ox: " << ox << " oy: " << oy << " oz: " << oz << std::endl;
 
-    // tcp1(0) = tcpPos1.x;
-    // tcp1(1) = tcpPos1.y;
-    // tcp1(2) = tcpPos1.z;
-    // tcp1(3) = deg2rad(tcpPos1.A);
-    // tcp1(4) = deg2rad(tcpPos1.B);
-    // tcp1(5) = deg2rad(tcpPos1.C);
-    // matPos1 = rpy2tr(tcp1);
     matPos1 = Utils::pose_to_matrix(poses[0]);
     vecTool2Flange = matPos1.inverse()*vecSphereCentre;     //P(Px Py Pz) in the tool coordinate system
     pos_vec = vecTool2Flange;
@@ -662,13 +648,6 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
     vecTemp2.normalize();
     vecTemp3.normalize();
     //3.在Pos5处创建TCP点在基坐标系下的齐次变换矩阵bTt
-    // tcp5(0) = tcpPos5.x;
-    // tcp5(1) = tcpPos5.y;
-    // tcp5(2) = tcpPos5.z;
-    // tcp5(3) = deg2rad(tcpPos5.A);
-    // tcp5(4) = deg2rad(tcpPos5.B);
-    // tcp5(5) = deg2rad(tcpPos5.C);
-    // matPos5 = rpy2tr(tcp5);
     matPos5 = Utils::pose_to_matrix(poses[4]);
     vecPos5ToBase = matPos5*vecTool2Flange; //position5 P(Px Py Pz)in the base coordinate system
     matTool2Base(0,0) = vecTemp1(0);
@@ -691,20 +670,6 @@ int ToolCalibration7Points::tool_calculate_7points(const std::vector<CartesianPo
 
     calib_matrix = matTool2Flange;
 
-    // tcpFlange = tr2MCS(matTool2Flange);
-    // for (AXIS_REFS_INDEX ai=0; ai<6; ++ai)
-    // {
-    //     if (fabs(tcpFlange[ai]) < 10e-4)
-    //     {
-    //         tcpFlange[ai] = 0;
-    //     }
-    // }
-    // tcpToFlange->x = tcpFlange(0);
-    // tcpToFlange->y = tcpFlange(1);
-    // tcpToFlange->z = tcpFlange(2);
-    // tcpToFlange->A = tcpFlange(3);
-    // tcpToFlange->B = tcpFlange(4);
-    // tcpToFlange->C = tcpFlange(5);
     return 0;
 }
 int ToolCalibration7Points::Sphere(double x1, double y1, double z1, double x2, double y2, double z2,

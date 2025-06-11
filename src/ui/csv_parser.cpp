@@ -187,9 +187,9 @@ void CSVParserWindow::loadData(const std::string &filename, bool is_filtering)
 
     if (is_filtering)
     {
-        PoseFilter pose_filter(11, 2);
-        pose_filter.set_filter_param(filter_window_size_, filter_polynomial_order_, MovingAverage);
-        pose_filter.filter_xyzabc(x, y, z, a, b, c);
+        std::unique_ptr<IPoseFilter> pose_filter = std::make_unique<MovingAverageFilter>(filter_window_size_);
+        pose_filter->set_filter_param(11);
+        pose_filter->filter_xyzabc(x, y, z, a, b, c);
     }
 }
 
@@ -200,11 +200,9 @@ bool CSVParserWindow::parse_double(const std::string &str, double &value)
     return endptr != str.c_str() && *endptr == '\0';
 }
 
-void CSVParserWindow::set_filter_param(int filter_window_size, int filter_polynomial_order, FilterType type)
+void CSVParserWindow::set_filter_param(int filter_window_size)
 {
     filter_window_size_ = filter_window_size;
-    filter_polynomial_order_ = filter_polynomial_order;
-    filter_type_ = type;
 }
 
 void CSVParserWindow::save_data_to_file(const std::string &filename)

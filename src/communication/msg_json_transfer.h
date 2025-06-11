@@ -19,26 +19,25 @@ enum E_JSON_COMMAND
     E_JSON_COMMAND_GET_ALL_INFO_ = 300,
     E_JSON_COMMAND_RECEIVE_ALL_INFO_,
 
-    E_JSON_COMMAND_SET_MARK_CALIB_POINT_ = 400,         // 标定点
-    E_JSON_COMMAND_SET_COMPUTE_,                        // 开始计算
-    E_JSON_COMMAND_SET_DELETE_CALIB_RESULT_,            // 删除标定结果
-    E_JSON_COMMAND_SET_SAVE_CALIB_RESULT_,              // 保存标定结果
-    E_JSON_COMMAND_SET_SEND_DIY_,                       // 发送自定义命令
-    E_JSON_COMMAND_SET_START_RECORD_,                   // 开始录制
-    E_JSON_COMMAND_SET_END_RECORD_,                     // 结束录制
-    E_JSON_COMMAND_SET_START_PLAYBACK_,                 // 开始回放
-    E_JSON_COMMAND_SET_CEASE_PLAYBACK_,                 // 暂停回放
-    E_JSON_COMMAND_SET_END_PLAYBACK_,                   // 结束回放
-    E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_,           // 标定法兰盘2TCP点
-    E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_,           // 标定追踪器到TCP点（需要取一次当前机器人法兰盘点位）
-    E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_,    // 计算线性误差（需要取一次当前机器人位置）
+    E_JSON_COMMAND_SET_MARK_CALIB_POINT_ = 400,             // 标定点
+    E_JSON_COMMAND_SET_COMPUTE_,                            // 开始计算
+    E_JSON_COMMAND_SET_DELETE_CALIB_RESULT_,                // 删除标定结果
+    E_JSON_COMMAND_SET_SAVE_CALIB_RESULT_,                  // 保存标定结果
+    E_JSON_COMMAND_SET_SEND_DIY_,                           // 发送自定义命令
+    E_JSON_COMMAND_SET_START_RECORD_,                       // 开始录制
+    E_JSON_COMMAND_SET_END_RECORD_,                         // 结束录制
+    E_JSON_COMMAND_SET_START_PLAYBACK_,                     // 开始回放
+    E_JSON_COMMAND_SET_CEASE_PLAYBACK_,                     // 暂停回放
+    E_JSON_COMMAND_SET_END_PLAYBACK_,                       // 结束回放
+    E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_,               // 标定法兰盘2TCP点
+    E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_,               // 标定追踪器到TCP点（需要取一次当前机器人法兰盘点位）
+    E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_,        // 计算线性误差（需要取一次当前机器人位置）
     
-    E_JSON_COMMAND_RECEIVE_MES_,                        // 接受控制器消息
-    E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_,           // 接受控制器标定点 
-    E_JSON_COMMAND_RECEIVE_ROBOT_COMPUTE_RESULT_,       // 接受控制器计算结果
-    E_JSON_COMMAND_RECEIVE_FLANG2TCP_MARK_POINT_,       // 接收法兰盘2TCP点
-    E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_,       // 接收用于标定追踪器到TCP点的当前机器人点位
-    E_JOSN_COMMAND_RECEIVE_LINEAR_ERROR_USE_ROBOT_POSE_, // 接收用于计算线性误差的当前机器人点位
+    E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_,               // 接受控制器标定点 
+    E_JSON_COMMAND_RECEIVE_ROBOT_COMPUTE_RESULT_,           // 接受控制器计算结果
+    E_JSON_COMMAND_RECEIVE_FLANG2TCP_MARK_POINT_,           // 接收法兰盘2TCP点
+    E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_,           // 接收用于标定追踪器到TCP点的当前机器人点位
+    E_JSON_COMMAND_RECEIVE_LINEAR_ERROR_USE_ROBOT_POSE_,    // 接收用于计算线性误差的当前机器人点位
 };
 
 

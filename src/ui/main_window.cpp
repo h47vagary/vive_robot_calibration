@@ -5,6 +5,7 @@
 #include <QMetaType>
 #include <QFile>
 #include <iostream>
+#include <memory>
 
 #include "vive_wrapper.h"
 #include "interpolation.h"
@@ -99,12 +100,18 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
     }
     if (is_filtering)
     {
-        PoseFilter pose_filter(11, 2);
         int window_size = ui->lineEdit_filter_window_size->text().toInt();
-        int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
-        pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
-        pose_filter.filter_position(robot_poses);
-        pose_filter.filter_orientation(robot_poses);
+        std::unique_ptr<IPoseFilter> pose_filter = std::make_unique<MovingAverageFilter>(window_size);
+        pose_filter->set_filter_param(window_size);
+        pose_filter->filter_position(robot_poses);
+        pose_filter->filter_orientation(robot_poses);
+
+        // PoseFilter pose_filter(11, 2);
+        // int window_size = ui->lineEdit_filter_window_size->text().toInt();
+        // int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
+        // pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
+        // pose_filter.filter_position(robot_poses);
+        // pose_filter.filter_orientation(robot_poses);
     }
 }
 
@@ -149,7 +156,6 @@ void MainWindow::init_connect()
     for (auto iter : mark_buttons_)
         connect(iter, SIGNAL(clicked()), this, SLOT(slot_mark_point()));
 
-    connect(msg_handler_, &MessageHandler::signal_message_received, this, &MainWindow::slot_handle_message);
     connect(msg_handler_, &MessageHandler::signal_mark_point_received, this, &MainWindow::slot_mark_point_received);
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
     connect(msg_handler_, &MessageHandler::signal_flange2tcp_mark_point_received, this, &MainWindow::slot_fanlge2tcp_mark_point_received);
@@ -167,12 +173,6 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_handler_tracker2tcp_mark_rotation_use_robotpose, 
                 msg_handler_, &MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose);
     connect(this, &MainWindow::signal_linear_error_acquire, msg_handler_, &MessageHandler::slot_linear_error_acquire);
-}
-
-void MainWindow::slot_handle_message(const QString& msg)
-{
-    std::cout << __FUNCTION__ << " msg: " << msg.toStdString() << std::endl;
-
 }
 
 void MainWindow::slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose)
@@ -560,12 +560,12 @@ void MainWindow::slot_end_record()
     poses_tcp2rb_timestampe_interpolation_filter.clear();
     std::vector<CartesianPose> poses_filted;
     extract_pose_vector(poses_tcp2rb_timestampe_interpolation, poses_filted);
+
     int window_size = ui->lineEdit_filter_window_size->text().toInt();
-    int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
-    PoseFilter pose_filter(11, 2);
-    pose_filter.set_filter_param(window_size, polynomial_order, MovingAverage);
-    pose_filter.filter_position(poses_filted);
-    pose_filter.filter_orientation(poses_filted);
+    std::unique_ptr<IPoseFilter> pose_filter = std::make_unique<MovingAverageFilter>(window_size);
+    pose_filter->set_filter_param(window_size);
+    pose_filter->filter_position(poses_filted);
+    pose_filter->filter_orientation(poses_filted);
     for (size_t i = 0; i < poses_filted.size(); ++i)
     {
         poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_us});
@@ -874,7 +874,7 @@ void MainWindow::slot_parse_chart()
 
         CSVParserWindow* csv_parser_window = new CSVParserWindow();
         csv_parser_window->setAttribute(Qt::WA_DeleteOnClose);
-        csv_parser_window->set_filter_param(window_size, polynomial_order, MovingAverage);
+        csv_parser_window->set_filter_param(window_size);
         csv_parser_window->loadData(filename.toStdString(), is_filtering);
         csv_parser_window->plotData();
         csv_parser_window->show();
@@ -897,7 +897,7 @@ void MainWindow::slot_traj_filtering()
         int polynomial_order = ui->lineEdit_polynomial_order->text().toInt();
         CSVParserWindow* csv_parser_window = new CSVParserWindow();
         csv_parser_window->setAttribute(Qt::WA_DeleteOnClose);
-        csv_parser_window->set_filter_param(window_size, polynomial_order, MovingAverage);
+        csv_parser_window->set_filter_param(window_size);
         csv_parser_window->loadData(filename.toStdString(), is_filtering);
         csv_parser_window->save_data_to_file(filename_filter.toStdString());
         csv_parser_window->plotData();

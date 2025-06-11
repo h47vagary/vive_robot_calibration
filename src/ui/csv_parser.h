@@ -19,7 +19,7 @@ public:
     
     void loadData(const QString &filename);
     void loadData(const std::string &filename, bool is_filtering);
-    void set_filter_param(int filter_window_size, int filter_polynomial_order, FilterType type);
+    void set_filter_param(int filter_window_size);
     void save_data_to_file(const std::string &filename);
     void plotData();
 
@@ -36,6 +36,4 @@ private:
     std::vector<double> x, y, z;
     std::vector<double> a, b, c;
     int filter_window_size_ = 11;
-    int filter_polynomial_order_ = 2;
-    FilterType filter_type_ = MovingAverage;
 };
