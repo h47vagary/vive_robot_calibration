@@ -109,7 +109,7 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
     case E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_:
     {
         handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
-            emit signal_mark_point_received(E_POSE_TYPE_ROBOT, index, pose);
+            emit signal_mark_point_received(index, pose);
         });
         break;
     }

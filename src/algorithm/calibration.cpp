@@ -435,8 +435,8 @@ int CalibrationManager::calculate_orientation_offset_matrix()
     std::cout << device_orientation_matrix << std::endl;
 
     if(fabs(device_orientation_matrix.determinant()) < EPSILON) return -1;
-    // *orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();
-    *orientation_offset_matrix_ = device_orientation_matrix.transpose() * robot_orientation_matrix;
+    // *orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();       // 补偿方向：设备坐标变换到robot坐标
+    *orientation_offset_matrix_ = device_orientation_matrix.transpose() * robot_orientation_matrix;          // 补偿方向：robot坐标变换到设备坐标
     std::cout << __FUNCTION__ << " *orientation_offset_matrix_:" << std::endl;
     std::cout << *orientation_offset_matrix_ << std::endl;
     double A, B, C;

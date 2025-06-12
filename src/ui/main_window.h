@@ -62,7 +62,7 @@ private slots:
     void slot_traj_filtering();
 
 public slots:
-    void slot_mark_point_received(E_POSE_TYPE type, int index, CartesianPose pose);
+    void slot_mark_point_received(int index, CartesianPose pose);
     void slot_compute_result_received(double result);
     void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
     void slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
