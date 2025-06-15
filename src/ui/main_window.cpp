@@ -584,21 +584,7 @@ void MainWindow::slot_save_calib_result()
 }
 void MainWindow::slot_compute()
 {
-    std::cout << __FUNCTION__ << std::endl;
     double max_error = -1000.0;
-    int rz = 0;
-    std::vector<CartesianPosition> robot_calib_positions;
-    std::vector<CartesianPosition> tracker_calib_positions;
-    calibration_manager_->get_calibration_positions(robot_calib_positions, tracker_calib_positions);
-    std::cout << "robot_calib_position.size(): " << robot_calib_positions.size() << " devie_calib_position.size(): " <<
-                    tracker_calib_positions.size() << std::endl;
-    for (int i = 1; i <= robot_calib_positions.size(); i++)
-    {
-        std::cout << "position[" << i << "] robot.x=" << robot_calib_positions[i].x << " robot.y=" << robot_calib_positions[i].y
-                  << " robot.z=" << robot_calib_positions[i].z << " tracker.x=" << tracker_calib_positions[i].x
-                  << " trakcer.y=" << tracker_calib_positions[i].y << " tracker.z=" << tracker_calib_positions[i].z << std::endl;
-    }
-
     calibration_manager_->set_calibration_algorithm(2);
     int ret = calibration_manager_->calibrate(0, max_error);
     ui->label_calibration_error->setText(QString::number(max_error));
@@ -664,7 +650,6 @@ void MainWindow::slot_mark_point()
 
 void MainWindow::slot_tracker2tcp_mark_point()
 {
-    std::cout << __FUNCTION__ << std::endl;
     CartesianPose pose = vive_tracker_reader_->get_latest_pose();
     std::vector<CartesianPose> mark_poses;
     tracker2tcp_calibration_->get_calibration_poses(mark_poses);
@@ -801,7 +786,7 @@ void MainWindow::slot_vive_tracker_reader_interval()
     int interval_ms = ui->lineEdit_refresh_rate->text().toInt();
     if (interval_ms <= 0)
     {
-        std::cout << "interval too small, set to 10ms" << std::endl;
+        std::cout << "interval too small, set to 4ms" << std::endl;
         interval_ms = 4;
     }
     vive_tracker_reader_->set_loop_interval_ms(interval_ms);
