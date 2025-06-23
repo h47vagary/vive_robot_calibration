@@ -1,13 +1,31 @@
 #pragma once
 
-#include <thread>
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <memory>
+#include <thread>
 #include <vector>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <mmsystem.h>
+#endif
 
 #include "common_header.h"
 #include "utils.h"
+
+class TimerPrecisionGuard
+{
+public:
+#ifdef _WIN32
+    TimerPrecisionGuard(unsigned int ms = 1) { timeBeginPeriod(ms); }   // 提高系统定时器精度到 1ms
+    ~TimerPrecisionGuard() { timeEndPeriod(1); }                        // 恢复系统定时器粒度
+#else
+    TimerPrecisionGuard(unsigned int ms = 1) {}
+    ~TimerPrecisionGuard() {}
+#endif
+};
 
 class ViveTrackerReader
 {
@@ -50,4 +68,8 @@ private:
     std::atomic<int> loop_interval_ms_;                         // 读取间隔时间(ms)
     uint64_t record_start_timestamp_us_ = 0;
     uint64_t record_duration_us_ = 0;       
+
+#ifdef _WIN32
+    std::unique_ptr<TimerPrecisionGuard> timer_guard_;
+#endif
 };

@@ -35,12 +35,17 @@ add_executable(vive_robot_calibration src/main.cpp)
 
 # 链接各模块静态库
 target_link_libraries(vive_robot_calibration
-    algorithm
-    communication
-    htc_vive
-    utils
-    ui
+    PRIVATE
+        algorithm
+        communication
+        htc_vive
+        utils
+        ui
 )
+
+if (WIN32)
+    target_link_libraries(vive_robot_calibration PRIVATE winmm)
+endif()
 
 # OpenVR SDK 路径
 set(OPENVR_ROOT "${PROJECT_SOURCE_DIR}/lib/openvr")

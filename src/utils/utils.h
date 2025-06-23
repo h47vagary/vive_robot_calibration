@@ -6,6 +6,10 @@
 #include <chrono>
 #include <iostream>
 
+#if _WIN32
+#include <windows.h>
+#endif
+
 #include "common_header.h"
 
 #define PI 3.14159265358979323846
@@ -119,3 +123,35 @@ namespace TimeDealUtils
     std::string timestamp_to_string(uint64_t timestamp);
 }
 
+#ifdef _WIN32
+/**
+ * @brief 设置进程为最高优先级
+ */
+bool set_process_high_priority();
+
+/**
+ * @brief 设置线程为最高优先级
+ */
+bool set_thread_high_priority();
+
+/**
+ * @brief 将线程绑定 CPU 核心
+ */
+bool bind_thread_to_cpu(int cpu_index);
+
+/**
+ * @brief 锁定内存页
+ * 
+ * @param ptr   起始地址
+ * @param size  锁定内存大小
+ */
+bool lock_memory_region(void* ptr, size_t size);
+
+/**
+ * @brief 解锁内存页
+ * 
+ * @param ptr   起始地址
+ * @param size  解锁内存的大小
+ */
+void unlock_memory_region(void* ptr, size_t size);
+#endif

@@ -176,3 +176,47 @@ std::string TimeDealUtils::timestamp_to_string(uint64_t timestamp)
 
     return std::string(buffer);
 }
+
+#ifdef _WIN32
+bool set_process_high_priority()
+{
+    HANDLE h_process = GetCurrentProcess();
+    if (!SetPriorityClass(h_process, REALTIME_PRIORITY_CLASS))
+    {
+        std::cerr << "Failed to set process priority. Error: " << GetLastError() << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool set_thread_high_priority()
+{
+    HANDLE h_thread = GetCurrentThread();
+    if (!SetThreadPriority(h_thread, THREAD_PRIORITY_TIME_CRITICAL))
+    {
+        std::cerr << "Failed to set thread priority. Error: " << GetLastError() << std::endl;
+        return false;
+    }
+    return true;
+}
+bool bind_thread_to_cpu(int cpu_index)
+{
+    DWORD_PTR mask = 1ull << cpu_index;
+    HANDLE thread = GetCurrentThread();
+    if ( !SetThreadAffinityMask(thread, mask))
+    {
+        std::cerr << "Failed to bind thread to cpu. Error: " << GetLastError() << std::endl;
+        return false;
+    }
+    return true;
+}
+bool lock_memory_region(void *ptr, size_t size)
+{
+    return VirtualLock(ptr, size);
+}
+
+void unlock_memory_region(void *ptr, size_t size)
+{
+    VirtualUnlock(ptr, size);
+}
+#endif

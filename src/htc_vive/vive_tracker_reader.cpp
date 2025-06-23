@@ -6,6 +6,7 @@
 #include <fstream>
 #include <chrono>
 
+
 ViveTrackerReader::ViveTrackerReader()
     : running_(false), paused_(false), active_index_(0), 
     record_enabled_(false), max_record_size_(8000), loop_interval_ms_(4)
@@ -23,24 +24,62 @@ bool ViveTrackerReader::start()
     if (!vive_initialize())
         return false;
 
-    if (!vive_find_tracker()) {
+#ifdef _WIN32
+    //timer_guard_ = std::make_unique<TimerPrecisionGuard>();
+#endif
+
+    if (!vive_find_tracker()) 
+    {
+#ifdef _WIN32
+        //timer_guard_.reset();
+#endif
         vive_shutdown();
         return false;
     }
 
     running_ = true;
     paused_ = false;
-    reader_thread_ = std::thread(&ViveTrackerReader::read_loop, this);
+
+    reader_thread_ = std::thread([this]() {
+
+    //#ifdef _WIN32
+    #if     0
+        if (!set_process_high_priority())
+        {
+            std::cerr << "set process hig priority fail!" << std::endl;
+        }
+        if (!set_thread_high_priority())
+        {
+            std::cerr << "thread high priority fail!" << std::endl;
+        }
+        if (!bind_thread_to_cpu(2))
+        {
+            std::cerr << "bind thread to cpu fail!" << std::endl;
+        }
+    #endif
+
+        std::cout << "Thread priority is: " << GetThreadPriority(GetCurrentThread()) << std::endl;
+
+        this->read_loop();
+
+    });
+
     return true;
 }
 
 void ViveTrackerReader::stop()
 {
     running_ = false;
-    if (reader_thread_.joinable()) {
+    if (reader_thread_.joinable()) 
+    {
         reader_thread_.join();
     }
     vive_shutdown();
+
+#ifdef _WIN32
+    //timer_guard_.reset();
+#endif
+
 }
 
 void ViveTrackerReader::pause()
@@ -119,8 +158,13 @@ void ViveTrackerReader::enable_record(size_t max_size)
     max_record_size_ = max_size;
     recorded_poses_.clear();
     recorded_poses_.resize(max_record_size_);      // 预分配内存以提高性能
-    recorded_poses_.clear();
-    recorded_poses_.resize(max_record_size_);
+
+    // // 内存锁定防止分页
+    // if (!lock_memory_region(recorded_poses_.data(), recorded_poses_.size() * sizeof(TimestampePose)))
+    // {
+    //     std::cerr << "Failed to lock memory for recorded_poses_" << std::endl;
+    // }
+
     record_count_ = 0;
     record_start_timestamp_us_ = TimeDealUtils::get_timestamp();
     record_duration_us_ = 0;
@@ -132,6 +176,8 @@ void ViveTrackerReader::disable_record()
     record_enabled_ = false;
     uint64_t end_timestamp = TimeDealUtils::get_timestamp();
     record_duration_us_ = end_timestamp - record_start_timestamp_us_;
+
+    //unlock_memory_region(recorded_poses_.data(), recorded_poses_.size() * sizeof(TimestampePose));
 }
 
 void ViveTrackerReader::set_loop_interval_ms(int interval_ms)

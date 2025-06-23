@@ -25,3 +25,7 @@ target_link_libraries(htc_vive PRIVATE
                         ${OPENVR_LIB}
                         utils                         
 )
+
+if (WIN32)
+    target_link_libraries(htc_vive PRIVATE winmm)
+endif()
