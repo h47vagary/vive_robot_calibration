@@ -22,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     msg_handler_ = new MessageHandler(this);
     vive_tracker_reader_ = new ViveTrackerReader();
-    vive_tracker_reader_->start();
+    //vive_tracker_reader_->start();
+    vive_tracker_reader_->start_for_timer();
     calibration_manager_ = new CalibrationManager();
     flange2tcp_calibration_ = new ToolCalibration7Points();
     tracker2tcp_calibration_ = new ToolCalibration7Points();

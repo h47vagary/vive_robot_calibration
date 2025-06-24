@@ -67,6 +67,87 @@ bool ViveTrackerReader::start()
     return true;
 }
 
+
+void ViveTrackerReader::on_timer_tick()
+{
+    if (!running_ || paused_) return;
+
+    uint64_t now_us = TimeDealUtils::get_timestamp();
+
+    double x, y, z, A, B, C;
+    uint64_t button_mask = 0;
+    bool ok = vive_get_pose_abc(&x, &y, &z, &A, &B, &C, &button_mask);
+
+    static int write_index = 0;
+    CartesianPose& pose = pose_buf_[write_index].pose;
+
+    pose.position.x = x;
+    pose.position.y = y;
+    pose.position.z = z;
+    pose.orientation.A = A;
+    pose.orientation.B = B;
+    pose.orientation.C = C;
+
+    active_index_.store(write_index, std::memory_order_release);
+    write_index = 1 - write_index;
+
+    if (ok && record_enabled_)
+    {
+        if (record_count_ >= max_record_size_)
+        {
+            record_enabled_ = false;
+            std::cerr << "Recording buffer full, stopping." << std::endl;
+        }
+        else
+        {
+            recorded_poses_[record_count_].pose = pose;
+            recorded_poses_[record_count_].timestamp_us = now_us;
+            record_count_++;
+        }
+    }
+}
+
+
+void CALLBACK ViveTrackerReader::timer_callback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
+{
+    ViveTrackerReader* self = reinterpret_cast<ViveTrackerReader*>(dwUser);
+    if (self) self->on_timer_tick();
+}
+
+bool ViveTrackerReader::start_for_timer()
+{
+    if (!vive_initialize())
+        return false;
+
+    if (!vive_find_tracker())
+    {
+        vive_shutdown();
+        return false;
+    }
+
+    running_ = true;
+    paused_ = false;
+
+    timeBeginPeriod(1);     // 设置全局定时器精度
+
+    timer_id_ = timeSetEvent (
+        loop_interval_ms_,      // 周期(ms)
+        0,                      // 精度
+        timer_callback,         // 回调函数
+        (DWORD_PTR)this,        // 传入(this 指针)
+        TIME_PERIODIC           // 周期模式
+    );
+
+    if (timer_id_ == 0)
+    {
+        std::cerr << "Failed to create high-precision timer." << std::endl;
+        timeEndPeriod(1);
+        return false;
+    }
+
+    return true;
+}
+
 void ViveTrackerReader::stop()
 {
     running_ = false;
@@ -80,6 +161,20 @@ void ViveTrackerReader::stop()
     //timer_guard_.reset();
 #endif
 
+}
+
+void ViveTrackerReader::stop_for_timer()
+{
+    running_ = false;
+
+    if (timer_id_ != 0)
+    {
+        timeKillEvent(timer_id_);
+        timer_id_ = 0;
+        timeEndPeriod(1);
+    }
+
+    vive_shutdown();
 }
 
 void ViveTrackerReader::pause()

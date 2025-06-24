@@ -34,7 +34,9 @@ public:
     ~ViveTrackerReader();
 
     bool start();                                                                                   // 启动读取线程
+    bool start_for_timer();                                                                         // 注册定时器方式进行读取点位
     void stop();                                                                                    // 停止读取线程
+    void stop_for_timer();                                                                          // 停止注册定时器方式读取点位
     void pause();                                                                                   // 暂停读取
     void resume();                                                                                  // 恢复读取
 
@@ -49,9 +51,11 @@ public:
 
     double get_record_duration_seconds() const;
 
+    static void CALLBACK timer_callback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
 private:
     void read_loop();
+    void on_timer_tick();
 
     std::thread reader_thread_;
     std::atomic<bool> running_;
@@ -68,6 +72,8 @@ private:
     std::atomic<int> loop_interval_ms_;                         // 读取间隔时间(ms)
     uint64_t record_start_timestamp_us_ = 0;
     uint64_t record_duration_us_ = 0;       
+
+    MMRESULT timer_id_ = 0;                                     // 定时器句柄
 
 #ifdef _WIN32
     std::unique_ptr<TimerPrecisionGuard> timer_guard_;
