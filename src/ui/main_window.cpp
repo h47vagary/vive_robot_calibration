@@ -9,7 +9,6 @@
 
 #include "vive_wrapper.h"
 #include "interpolation.h"
-#include "realtime_tester.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
