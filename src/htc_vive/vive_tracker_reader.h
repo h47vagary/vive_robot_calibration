@@ -15,21 +15,14 @@
 #include "common_header.h"
 #include "utils.h"
 
-class TimerPrecisionGuard
-{
-public:
-#ifdef _WIN32
-    TimerPrecisionGuard(unsigned int ms = 1) { timeBeginPeriod(ms); }   // 提高系统定时器精度到 1ms
-    ~TimerPrecisionGuard() { timeEndPeriod(1); }                        // 恢复系统定时器粒度
-#else
-    TimerPrecisionGuard(unsigned int ms = 1) {}
-    ~TimerPrecisionGuard() {}
-#endif
-};
-
 class ViveTrackerReader
 {
 public:
+    enum class PoseFetchMode {
+        Blocking,               // 阻塞式接口（vive_get_pose_euler）
+        NonBlocking,            // 非阻塞式接口（vive_get_pose_euler_non_blocking）
+    };
+
     ViveTrackerReader();
     ~ViveTrackerReader();
 
@@ -43,13 +36,12 @@ public:
     void enable_record(size_t max_size = 8000);                                                     // 开启轨迹缓存
     void disable_record();                                                                          // 停止轨迹缓存
     void set_loop_interval_ms(int interval_ms);                                                     // 设置读取间隔时间(ms) 
+    void set_pose_fetch_mode(PoseFetchMode mode);                                                   // 设置获取点位的方式
     
     CartesianPose get_latest_pose();                                                                // 获取最新点位
-    std::vector<TimestampePose> get_recorded_poses();                                               // 获取缓存的带时间戳轨迹
+    std::vector<TimestampePose> get_recorded_poses();                                               // 获取缓存轨迹
     void clear_recorded_poses();                                                                    // 清空缓存的轨迹 
     bool save_record_poses_to_file(const std::string& filename, std::vector<TimestampePose> poses); // 保存缓存的轨迹到文件(CSV格式)
-
-    double get_record_duration_seconds() const;
 
     static void CALLBACK timer_callback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
@@ -60,6 +52,7 @@ private:
     std::thread reader_thread_;
     std::atomic<bool> running_;
     std::atomic<bool> paused_;
+    std::atomic<PoseFetchMode> pose_fetch_mode_;                // 点位获取方式
    
     TimestampePose pose_buf_[2];                                // 双缓冲区
     std::atomic<int> active_index_;                             // 当前可读缓冲区索引（0或1）
@@ -70,12 +63,7 @@ private:
     size_t record_count_;                                       // 当前缓存的轨迹数量
 
     std::atomic<int> loop_interval_ms_;                         // 读取间隔时间(ms)
-    uint64_t record_start_timestamp_us_ = 0;
-    uint64_t record_duration_us_ = 0;       
+    uint64_t record_start_timestamp_us_ = 0;    
 
     MMRESULT timer_id_ = 0;                                     // 定时器句柄
-
-#ifdef _WIN32
-    std::unique_ptr<TimerPrecisionGuard> timer_guard_;
-#endif
 };

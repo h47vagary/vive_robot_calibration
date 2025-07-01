@@ -42,23 +42,48 @@ void vive_shutdown();
 bool vive_find_tracker();
 
 /**
- * @brief 设置当前 Tracker 的原点位姿。
+ * @brief 阻塞式获取当前 Tracker 的全局位置与姿态（四元数表示）。
  *
- * 后续调用 `vive_get_relative_pose` 获取的是相对于该原点的相对姿态。
+ * 使用 WaitGetPoses() 会等待下一帧数据
+ * 
+ * @param[out] x 位置 X（单位：米）
+ * @param[out] y 位置 Y（单位：米）
+ * @param[out] z 位置 Z（单位：米）
+ * @param[out] qx 姿态四元数 X 分量
+ * @param[out] qy 姿态四元数 Y 分量
+ * @param[out] qz 姿态四元数 Z 分量
+ * @param[out] qw 姿态四元数 W 分量
+ * @param[out] button_mask 当前按键状态（bitmask）
  *
- * @param x 原点位置 X（单位：米）
- * @param y 原点位置 Y（单位：米）
- * @param z 原点位置 Z（单位：米）
- * @param qx 四元数 X 分量
- * @param qy 四元数 Y 分量
- * @param qz 四元数 Z 分量
- * @param qw 四元数 W 分量
+ * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
  */
-void vive_set_origin(float x, float y, float z,
-                     float qx, float qy, float qz, float qw);
+bool vive_get_pose_quaternion(float* x, float* y, float* z,
+                   float* qx, float* qy, float* qz, float* qw,
+                   uint64_t* button_mask);
 
 /**
- * @brief 获取当前 Tracker 的全局位置与姿态。
+ * @brief 阻塞式获取当前 Tracker 的全局位置与姿态（欧拉角表示）。
+ *
+ * 使用 WaitGetPoses() 会等待下一帧数据
+ * 
+ * @param[out] x 位置 X（单位：米）
+ * @param[out] y 位置 Y（单位：米）
+ * @param[out] z 位置 Z（单位：米）
+ * @param[out] A 姿态四元数 X 分量
+ * @param[out] B 姿态四元数 Y 分量
+ * @param[out] C 姿态四元数 Z 分量
+ * @param[out] button_mask 当前按键状态（bitmask）
+ *
+ * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
+ */
+bool vive_get_pose_euler(double* x, double* y, double* z,
+                   double* A, double* B, double* C,
+                   uint64_t* button_mask);
+
+/**
+ * @brief 非阻塞式获取当前 Tracker 的全局位置与姿态（四元数表示）。
+ *
+ * 使用 GetDeviceToAbsoluteTrackingPose() 立即返回当前数据
  *
  * @param[out] x 位置 X（单位：米）
  * @param[out] y 位置 Y（单位：米）
@@ -71,44 +96,29 @@ void vive_set_origin(float x, float y, float z,
  *
  * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
  */
-bool vive_get_pose(float* x, float* y, float* z,
-                   float* qx, float* qy, float* qz, float* qw,
-                   uint64_t* button_mask);
+bool vive_get_pose_quaternion_non_blocking(float* x, float* y, float* z,
+                               float* qx, float* qy, float* qz, float* qw,
+                               uint64_t* button_mask);
 
 /**
- * @brief 获取当前 Tracker 的全局位置与姿态。
+ * @brief 非阻塞式获取当前 Tracker 的全局位置与姿态（欧拉角表示）。
+ *
+ * 使用 GetDeviceToAbsoluteTrackingPose() 立即返回当前数据
  *
  * @param[out] x 位置 X（单位：米）
  * @param[out] y 位置 Y（单位：米）
  * @param[out] z 位置 Z（单位：米）
- * @param[out] A 姿态四元数 X 分量
- * @param[out] B 姿态四元数 Y 分量
- * @param[out] C 姿态四元数 Z 分量
+ * @param[out] A 姿态欧拉角 A（弧度）
+ * @param[out] B 姿态欧拉角 B（弧度）
+ * @param[out] C 姿态欧拉角 C（弧度）
  * @param[out] button_mask 当前按键状态（bitmask）
  *
  * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
  */
-bool vive_get_pose_abc(double* x, double* y, double* z,
-                   double* A, double* B, double* C,
-                   uint64_t* button_mask);
+bool vive_get_pose_euler_non_blocking(double* x, double* y, double* z,
+                                   double* A, double* B, double* C,
+                                   uint64_t* button_mask);
 
-/**
- * @brief 获取 Tracker 相对于设置原点的相对位置与姿态。
- *
- * @param[out] x 相对位置 X（单位：毫米）
- * @param[out] y 相对位置 Y（单位：毫米）
- * @param[out] z 相对位置 Z（单位：毫米）
- * @param[out] qx 相对姿态四元数 X 分量
- * @param[out] qy 相对姿态四元数 Y 分量
- * @param[out] qz 相对姿态四元数 Z 分量
- * @param[out] qw 相对姿态四元数 W 分量
- * @param[out] button_mask 当前按键状态（bitmask）
- *
- * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
- */
-bool vive_get_relative_pose(float* x, float* y, float* z,
-                            float* qx, float* qy, float* qz, float* qw,
-                            uint64_t* button_mask);
 
 #ifdef __cplusplus
 }
