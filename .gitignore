@@ -1,0 +1,18 @@
+# VSCode 配置目录
+.vscode/
+
+# 构建输出目录
+build/
+
+# 外部依赖库（建议用 git submodule 或包管理器管理，不纳入版本控制）
+lib/Eigen/
+lib/JsonCpp/
+lib/nrc_host/
+lib/openvr/
+
+# other
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
