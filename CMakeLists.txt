@@ -14,6 +14,7 @@ set(CMAKE_AUTORCC ON)
 # 头文件路径
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/configfile
     ${PROJECT_SOURCE_DIR}/src/htc_vive
     ${PROJECT_SOURCE_DIR}/src/algorithm
     ${PROJECT_SOURCE_DIR}/src/utils
@@ -28,7 +29,9 @@ add_subdirectory(src/algorithm)
 add_subdirectory(src/communication)
 add_subdirectory(src/htc_vive)
 add_subdirectory(src/utils)
+add_subdirectory(src/configfile)
 add_subdirectory(src/ui)
+
 
 # 添加主程序
 add_executable(vive_robot_calibration src/main.cpp)
@@ -40,6 +43,7 @@ target_link_libraries(vive_robot_calibration
         communication
         htc_vive
         utils
+        configfile
         ui
 )
 
