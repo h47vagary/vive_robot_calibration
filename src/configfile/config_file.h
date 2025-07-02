@@ -12,7 +12,7 @@
 #include <string>
 #include "json/json.h"
 
-#define D_CONFIG_CALIBRATION_PATH               "calibration.json"
+#define D_CONFIG_CALIBRATION_PATH               "../config/calibration.json"
 
 #define READ_IF_MEMBER(json, key, var, type) if (json.isMember(key)) var = json[key].as##type()
 
