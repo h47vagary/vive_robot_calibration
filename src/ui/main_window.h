@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget  *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -91,6 +91,7 @@ private:
     QTimer* track_pose_timer_;
     QList<QPushButton*> mark_buttons_;
 
+    std::shared_ptr<CommManager> comm_;
     MessageHandler* msg_handler_;
     ViveTrackerReader* vive_tracker_reader_;
     CalibrationManager* calibration_manager_;

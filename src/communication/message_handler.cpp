@@ -2,11 +2,9 @@
 #include <iostream>
 #include "msg_json_transfer.h"
 
-MessageHandler::MessageHandler(QObject* parent)
-    : QObject(parent)
+MessageHandler::MessageHandler(std::shared_ptr<CommManager> comm, QObject* parent)
+    : QObject(parent), comm_(std::move(comm)), serial_id_send_(0), running_(false)
 {
-    serial_id_send_ = 0;
-    running_ = false;
 }
 
 MessageHandler::~MessageHandler()
@@ -44,7 +42,7 @@ void MessageHandler::stop()
     }
 
     running_ = false;
-    comm_.nrc_shutdown();
+    comm_->nrc_shutdown();
 
     if (thread_.joinable())
     {
@@ -72,7 +70,7 @@ bool MessageHandler::handle_pose_with_point(const std::string &msg, std::functio
 
 void MessageHandler::thread_loop()
 {
-    if (!comm_.nrc_init(CONTROLLER_IP, CONTROLLER_PORT))
+    if (!comm_->nrc_init(CONTROLLER_IP, CONTROLLER_PORT))
     {
         std::cout << "[MessageHandler] Failed to connect to controller" << std::endl;
         return;
@@ -80,7 +78,7 @@ void MessageHandler::thread_loop()
     std::cout << "[MessageHandler] Connected to controller" << std::endl;
 
     // 注册消息接收回调
-    comm_.nrc_register_callback([this](int msg_id, const std::string& msg){
+    comm_->nrc_register_callback([this](int msg_id, const std::string& msg){
         this->handle_message(msg_id, msg);
     });
 
@@ -171,7 +169,7 @@ void MessageHandler::slot_handler_mark_point(int index)
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_MARK_CALIB_POINT_, ++serial_id_send_, index, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_start_record()
@@ -179,7 +177,7 @@ void MessageHandler::slot_handler_start_record()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_START_RECORD_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_end_record()
@@ -187,7 +185,7 @@ void MessageHandler::slot_handler_end_record()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_END_RECORD_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_start_playback()
@@ -195,7 +193,7 @@ void MessageHandler::slot_handler_start_playback()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_START_PLAYBACK_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_end_playback()
@@ -203,7 +201,7 @@ void MessageHandler::slot_handler_end_playback()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_END_PLAYBACK_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
@@ -211,7 +209,7 @@ void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_, ++serial_id_send_, index, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose()
@@ -219,7 +217,7 @@ void MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_linear_error_acquire()
@@ -227,5 +225,5 @@ void MessageHandler::slot_linear_error_acquire()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_, ++serial_id_send_, json_str_out);
-    comm_.nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
+    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }

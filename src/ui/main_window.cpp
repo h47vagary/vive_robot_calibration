@@ -9,9 +9,10 @@
 
 #include "vive_wrapper.h"
 #include "interpolation.h"
+#include "comm_manager.h"
 
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget  *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -19,7 +20,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     qRegisterMetaType<CartesianPose>("CartesianPose");
 
-    msg_handler_ = new MessageHandler(this);
+    comm_ = std::make_shared<CommManager>();
+    msg_handler_ = new MessageHandler(comm_, this);
     vive_tracker_reader_ = new ViveTrackerReader();
     //vive_tracker_reader_->start();
     vive_tracker_reader_->start_for_timer();
@@ -167,6 +169,7 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_linear_error_acquire, msg_handler_, &MessageHandler::slot_linear_error_acquire);
 }
 
+// abandon
 void MainWindow::slot_mark_point_received(int index, CartesianPose pose)
 {
     std::cout << __FUNCTION__ << " index: " << index << std::endl;
@@ -609,8 +612,18 @@ void MainWindow::slot_mark_point()
     int index = mark_buttons_.indexOf(btn) + 1;
     if (index != -1)
     {
-        // 发送获取当前机器人点位的信号
-        emit signal_mark_point(index);
+        // // 发送获取当前机器人点位的信号
+        // emit signal_mark_point(index);
+        // 获取机器人当前点位
+        std::vector<double> cur_rob_pos;
+        if (!comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
+        {
+            // 卡工具手标定完，才能标坐标系之间的关系
+            CartesianPosition position(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2));
+            CartesianOrientation orientation(cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
+            calibration_manager_->set_robot_calibration_positon(index, position);
+            calibration_manager_->set_robot_calibration_orientation(index, orientation);
+        }
         
         // 获取 Tracker 当前位姿
         CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();

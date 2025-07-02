@@ -31,6 +31,7 @@ public:
     bool send(int messageId, const std::string& message);
 
     void set_callback(MessageCallback cb);
+    int nrc_get_current_position_robot(int robot_num, int corrd, std::vector<double>& pos);
 
 private:
     static void recv_callback_wrapper(int messageID, const char* message);
