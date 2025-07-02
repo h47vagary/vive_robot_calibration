@@ -11,9 +11,12 @@
 #pragma once
 
 #include <QObject>
-#include <thread>
+
 #include <atomic>
+#include <memory>
+#include <thread>
 #include <string>
+
 #include "comm_manager.h"
 #include "common_header.h"
 
@@ -25,9 +28,9 @@
 class MessageHandler : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit MessageHandler(QObject* parent = nullptr);
+    //explicit MessageHandler(QObject* parent = nullptr);
+    explicit MessageHandler(std::shared_ptr<CommManager> comm, QObject* parent = nullptr);
     ~MessageHandler();
 
     void start();              // 启动线程并连接控制器
@@ -61,6 +64,7 @@ private:
 
     std::thread thread_;
     std::atomic_bool running_{false};
-    CommManager comm_;  // 控制器通信管理类
+    //CommManager comm_;  // 
+    std::shared_ptr<CommManager> comm_; // 控制器通信管理类
 
 };

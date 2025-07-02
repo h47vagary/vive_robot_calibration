@@ -61,6 +61,14 @@ void NrcComm::set_callback(MessageCallback cb)
     callback_ = std::move(cb);
 }
 
+int NrcComm::nrc_get_current_position_robot(int robot_num, int coord, std::vector<double> &pos)
+{
+    if (!connected_)
+        return -1;
+
+    return get_current_position_robot(socket_fd_, robot_num, coord, pos);
+}
+
 void NrcComm::recv_callback_wrapper(int messageID, const char* message)
 {
     if (instance_)

@@ -22,6 +22,11 @@ public:
         nrc_comm.set_callback(callback);
     }
 
+    int nrc_get_current_position_robot(int robot_numm, int coord, std::vector<double>& pos)
+    {
+        return nrc_comm.nrc_get_current_position_robot(robot_numm, coord, pos);
+    }
+
     void shutdown()
     {
         nrc_comm.disconnect();
@@ -48,6 +53,11 @@ bool CommManager::nrc_send_message(int message_id, const std::string& message)
 void CommManager::nrc_register_callback(MessageCallback callback)
 {
     impl_->nrc_register_callback(callback);
+}
+
+int CommManager::nrc_get_current_position_robot(int robot_num, int coord, std::vector<double> &pos)
+{
+    return impl_->nrc_get_current_position_robot(robot_num, coord, pos);
 }
 
 void CommManager::nrc_shutdown()

@@ -9,9 +9,10 @@
  */
 #pragma once 
 
-#include <string>
 #include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 class CommManager
 {
@@ -25,6 +26,7 @@ public:
     bool nrc_init(const std::string& ip, const std::string& port);              // 初始化NRC通讯
     bool nrc_send_message(int message_id, const std::string& message);          // 往NRC发送消息
     void nrc_register_callback(MessageCallback callback);                       // 注册NRC回调
+    int nrc_get_current_position_robot(int robot_num, int coord, std::vector<double>& pos);     // 获取机器人当前位置
     void nrc_shutdown();                                                        // 断开NRC连接
 
 private:

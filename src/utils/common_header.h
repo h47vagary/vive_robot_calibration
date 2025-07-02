@@ -63,3 +63,35 @@ struct TimestampePose
     CartesianPose pose;
     uint64_t timestamp_us;
 };
+
+
+
+/**
+ * @brief 操作模式
+ */
+enum NRC_OperationMode
+{
+	NRC_TEACH_ = 0,     ///< 示教模式
+	NRC_REMOTE_ = 1,     ///< 远程模式
+	NRC_RUN_ = 2     ///< 运行模式
+};
+
+/**
+ * @brief 机器人坐标系
+ */
+enum NRC_COORD
+{
+	NRC_ACS = 0,     ///< 关节坐标
+	NRC_MCS = 1,     ///< 世界坐标
+	NRC_PCS = 2,     ///< 工具坐标
+	NRC_UCS = 3      ///< 用户坐标
+};
+
+enum NRC_ROBOT
+{
+    NRC_FIRST_ROBOT=1,
+    NRC_ROLLER_ROBOT=2,
+    NRC_THIRD_ROBOT=3,
+    NRC_FOUR_ROBOT=4,
+    NRC_ROBOT_END
+};
