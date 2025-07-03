@@ -18,9 +18,17 @@
 class ViveTrackerReader
 {
 public:
+    // 点位采集
     enum class PoseFetchMode {
-        Blocking,               // 阻塞式接口（vive_get_pose_euler）
-        NonBlocking,            // 非阻塞式接口（vive_get_pose_euler_non_blocking）
+        Blocking,               // 阻塞式接口   vive_get_pose_euler
+        NonBlocking,            // 非阻塞式接口 vive_get_pose_euler_non_blocking
+    };
+
+    // 追踪器按钮
+    enum class TrackerButton {
+        Trigger,                // 扳机按钮     k_EButton_SteamVR_Trigger
+        Grip,                   // 握持按钮     k_EButton_Grip
+        Touchpad,               // 触摸板       k_EButton_SteamVR_Touchpad
     };
 
     ViveTrackerReader();
@@ -45,6 +53,9 @@ public:
 
     static void CALLBACK timer_callback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
+    using ButtonCallback = std::function<void(TrackerButton button, bool pressed)>;
+    void register_button_callback(ButtonCallback cb);
+
 private:
     void read_loop();
     void on_timer_tick();
@@ -66,4 +77,7 @@ private:
     uint64_t record_start_timestamp_us_ = 0;    
 
     MMRESULT timer_id_ = 0;                                     // 定时器句柄
+
+    std::vector<ButtonCallback> button_callbacks_;              // 按钮回调函数列表
+    uint64_t last_button_mask_ = 0;                             // 上一次的按钮状态掩码
 };

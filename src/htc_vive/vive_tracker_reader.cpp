@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include "openvr.h"
 
 
 ViveTrackerReader::ViveTrackerReader()
@@ -11,6 +12,7 @@ ViveTrackerReader::ViveTrackerReader()
     record_enabled_(false), max_record_size_(8000), loop_interval_ms_(8),
     pose_fetch_mode_(PoseFetchMode::Blocking), record_count_(0)
 {
+
 }
 
 ViveTrackerReader::~ViveTrackerReader()
@@ -114,6 +116,11 @@ void CALLBACK ViveTrackerReader::timer_callback(UINT uTimerID, UINT uMsg, DWORD_
 {
     ViveTrackerReader* self = reinterpret_cast<ViveTrackerReader*>(dwUser);
     if (self) self->on_timer_tick();
+}
+
+void ViveTrackerReader::register_button_callback(ButtonCallback cb)
+{
+    button_callbacks_.push_back(cb);
 }
 
 bool ViveTrackerReader::start_for_timer()
@@ -314,6 +321,29 @@ void ViveTrackerReader::read_loop()
             // << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
             // << " | OK: " << ok << " | x: " << x << " | y: " << y << " | z: " << z << " | A: " << A << " | B: " << B << " | C: " << C << std::endl;
 
+
+            // 处理按钮状态变化
+            uint64_t changed_mask = button_mask ^ last_button_mask_;
+            if (changed_mask != 0) 
+            {
+                auto invoke_callbacks = [&] (TrackerButton btn, uint64_t bit) {
+                    bool now_pressed = (button_mask & bit) != 0;
+                    if (changed_mask & bit) 
+                    {
+                        for (auto& cb : button_callbacks_) 
+                        {
+                            cb(btn, now_pressed);
+                        }
+                    }
+                };
+
+                invoke_callbacks(TrackerButton::Trigger,    vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Trigger));
+                invoke_callbacks(TrackerButton::Grip,       vr::ButtonMaskFromId(vr::k_EButton_Grip));
+                invoke_callbacks(TrackerButton::Touchpad,   vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad));
+
+                // 最后更新上一帧的按键状态
+                last_button_mask_ = button_mask;
+            }
 
             // 更新姿态缓冲区
             CartesianPose& pose = pose_buf_[write_index].pose;

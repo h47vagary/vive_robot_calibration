@@ -41,6 +41,13 @@ MainWindow::MainWindow(QWidget  *parent)
     csv_parser_window_vive2robot_inter = new CSVParserWindow(this);
     csv_parser_window_vive2robot_inter_filter = new CSVParserWindow(this);
 
+    vive_tracker_reader_->register_button_callback([](ViveTrackerReader::TrackerButton btn, bool pressed) 
+    {
+        std::string btn_name = (btn == ViveTrackerReader::TrackerButton::Trigger ? "Trigger" :
+                            btn == ViveTrackerReader::TrackerButton::Grip ? "Grip" : "Touchpad");
+        std::cout << "Button " << btn_name << (pressed ? " pressed" : " released") << std::endl;
+    });
+
     init_connect();
     init_style();
 }
