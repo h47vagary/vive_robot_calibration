@@ -310,9 +310,9 @@ void ViveTrackerReader::read_loop()
             }
             auto fetch_end = std::chrono::steady_clock::now();
             auto fetch_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(fetch_end - fetch_start).count();
-            std::cout << "[POSE FETCH] Duration: " << fetch_duration_us << " us"
-            << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
-            << " | OK: " << ok << std::endl;
+            // std::cout << "[POSE FETCH] Duration: " << fetch_duration_us << " us"
+            // << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
+            // << " | OK: " << ok << " | x: " << x << " | y: " << y << " | z: " << z << " | A: " << A << " | B: " << B << " | C: " << C << std::endl;
 
 
             // 更新姿态缓冲区
@@ -347,7 +347,7 @@ void ViveTrackerReader::read_loop()
             }
 
             // 定期输出统计信息
-            #if 1
+            #if 0
             if (frame_count % STATS_INTERVAL == 0)
             {
                 auto now = std::chrono::steady_clock::now();

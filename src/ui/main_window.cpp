@@ -23,8 +23,10 @@ MainWindow::MainWindow(QWidget  *parent)
     comm_ = std::make_shared<CommManager>();
     msg_handler_ = new MessageHandler(comm_, this);
     vive_tracker_reader_ = new ViveTrackerReader();
-    //vive_tracker_reader_->start();
-    vive_tracker_reader_->start_for_timer();
+    vive_tracker_reader_->start();
+    vive_tracker_reader_->set_pose_fetch_mode(ViveTrackerReader::PoseFetchMode::NonBlocking);
+    //vive_tracker_reader_->start_for_timer();
+
     calibration_manager_ = new CalibrationManager();
     flange2tcp_calibration_ = new ToolCalibration7Points();
     tracker2tcp_calibration_ = new ToolCalibration7Points();
@@ -169,7 +171,6 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_linear_error_acquire, msg_handler_, &MessageHandler::slot_linear_error_acquire);
 }
 
-// abandon
 // abandon
 void MainWindow::slot_mark_point_received(int index, CartesianPose pose)
 {

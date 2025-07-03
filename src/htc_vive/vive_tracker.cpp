@@ -142,9 +142,23 @@ bool ViveTracker::get_pose_non_blocking(float &x, float &y, float &z, float &qx,
         return false;
     }
 
-    vr::TrackedDevicePose_t pose;
-    vr_system_->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0, &pose, 1);
-    
+    float prediction = 0.0f;
+    if (vr_system_->IsTrackedDeviceConnected(vr::k_unTrackedDeviceIndex_Hmd)) {
+        prediction = vr_system_->GetFloatTrackedDeviceProperty(
+            vr::k_unTrackedDeviceIndex_Hmd,
+            vr::Prop_SecondsFromVsyncToPhotons_Float
+        );
+    }
+
+    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount] = {};
+    vr_system_->GetDeviceToAbsoluteTrackingPose(
+        vr::TrackingUniverseStanding,
+        prediction,
+        poses,
+        vr::k_unMaxTrackedDeviceCount
+    );
+
+    const vr::TrackedDevicePose_t& pose = poses[tracker_index_];
     if (!pose.bPoseIsValid) 
     {
         std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
@@ -152,8 +166,8 @@ bool ViveTracker::get_pose_non_blocking(float &x, float &y, float &z, float &qx,
     }
 
     get_position_and_rotation(pose, x, y, z, qx, qy, qz, qw);
-    
-    // Convert from meters to millimeters
+
+    // Convert to millimeters
     x *= 1000.0f;
     y *= 1000.0f;
     z *= 1000.0f;
@@ -161,6 +175,7 @@ bool ViveTracker::get_pose_non_blocking(float &x, float &y, float &z, float &qx,
     button_mask = get_button_mask();
     return true;
 }
+
 
 bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double &A, double &B, double &C, uint64_t &button_mask)
 {
@@ -176,9 +191,23 @@ bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double 
         return false;
     }
 
-    vr::TrackedDevicePose_t pose;
-    vr_system_->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0, &pose, 1);
-    
+    float prediction = 0.0f;
+    if (vr_system_->IsTrackedDeviceConnected(vr::k_unTrackedDeviceIndex_Hmd)) {
+        prediction = vr_system_->GetFloatTrackedDeviceProperty(
+            vr::k_unTrackedDeviceIndex_Hmd,
+            vr::Prop_SecondsFromVsyncToPhotons_Float
+        );
+    }
+
+    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount] = {};
+    vr_system_->GetDeviceToAbsoluteTrackingPose(
+        vr::TrackingUniverseStanding,
+        prediction,
+        poses,
+        vr::k_unMaxTrackedDeviceCount
+    );
+
+    const vr::TrackedDevicePose_t& pose = poses[tracker_index_];
     if (!pose.bPoseIsValid) 
     {
         std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
@@ -186,8 +215,8 @@ bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double 
     }
 
     get_position_and_rotation(pose, x, y, z, A, B, C);
-    
-    // Convert from meters to millimeters
+
+    // Convert to millimeters
     x *= 1000.0;
     y *= 1000.0;
     z *= 1000.0;
