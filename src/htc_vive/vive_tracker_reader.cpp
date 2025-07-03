@@ -263,11 +263,11 @@ void ViveTrackerReader::disable_record()
 
 void ViveTrackerReader::set_loop_interval_ms(int interval_ms)
 {
-    if (interval_ms > 0) 
+    if (interval_ms > 0)
     {
         loop_interval_ms_.store(interval_ms, std::memory_order_relaxed);
-    } 
-    else 
+    }
+    else
     {
         std::cerr << "Invalid loop interval: " << interval_ms << " ms" << std::endl;
     }
