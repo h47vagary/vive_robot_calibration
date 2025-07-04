@@ -54,7 +54,6 @@ private slots:
     void slot_stop_update_track_pose();
     void slot_tracker2tcp_mark_rotation_use_robotpose();
 
-    void slot_use_robot_toolhand(bool);
     void slot_use_tracker2tcp(bool);
 
     void slot_vive_tracker_reader_interval();
@@ -62,23 +61,19 @@ private slots:
     void slot_traj_filtering();
 
 public slots:
-    void slot_mark_point_received(int index, CartesianPose pose);
     void slot_compute_result_received(double result);
     void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
-    void slot_tracker2tcp_mark_use_robot_pose(CartesianPose pose);
 
     void slot_get_linear_error_use_robot_pose(CartesianPose pose);      // 多一个网络传输时间，稳定后获取才准
 
 signals:
     void signal_connect_ctr();
     void signal_disconnect_ctr();
-    void signal_mark_point(int point_index);
     void signal_start_record();
     void signal_end_record();
     void signal_start_playback();
     void signal_end_playback();
     void signal_flang2tcp_mark_point(int point_index);
-    void signal_handler_tracker2tcp_mark_rotation_use_robotpose();
     void signal_linear_error_acquire();
 
 private:
@@ -99,11 +94,11 @@ private:
     ToolCalibration7Points* tracker2tcp_calibration_;
     Eigen::Matrix4d* tcp2tracker_rotation_matrix_;
 
-    bool use_toolhand_ = false;
     bool use_track2tcp_ = false;
     double linear_error_ = 0.0; // 线性误差
 
-    void device_poses_to_robot_poses(const std::vector<CartesianPose>& device_poses, std::vector<CartesianPose>& robot_poses, bool is_filtering);
+    void device_poses_to_robot_poses(const std::vector<CartesianPose>& device_poses, std::vector<CartesianPose>& robot_poses);
+    void filter_poses(std::vector<CartesianPose>& poses, bool is_filtering);
     void extract_pose_vector(const std::vector<TimestampePose>& timestampe_poses, std::vector<CartesianPose>& poses_only);
 
     CSVParserWindow* csv_parser_window_vive;

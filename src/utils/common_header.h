@@ -62,6 +62,7 @@ struct TimestampePose
 {
     CartesianPose pose;
     uint64_t timestamp_us;
+    uint64_t button_mask;
 };
 
 

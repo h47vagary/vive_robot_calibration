@@ -104,13 +104,6 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
 
     switch (command_out)
     {
-    case E_JSON_COMMAND_RECEIVE_ROBOT_MARK_POINT_:
-    {
-        handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
-            emit signal_mark_point_received(index, pose);
-        });
-        break;
-    }
     case E_JSON_COMMAND_RECEIVE_ROBOT_COMPUTE_RESULT_:
     {
         double result_out;
@@ -127,13 +120,6 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
     {
         handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
             emit signal_flange2tcp_mark_point_received(index, pose);
-        });
-        break;
-    }
-    case E_JSON_COMMAND_RECEIVE_TRACKER2TCP_ROTATION_:
-    {
-        handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
-            emit signal_tracker2tcp_mark_use_robot_pose(pose);
         });
         break;
     }
@@ -162,14 +148,6 @@ void MessageHandler::slot_handler_start()
 void MessageHandler::slot_handler_stop()
 {
     this->stop();
-}
-
-void MessageHandler::slot_handler_mark_point(int index)
-{
-    if (!running_) return;
-    std::string json_str_out;
-    MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_MARK_CALIB_POINT_, ++serial_id_send_, index, json_str_out);
-    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 
 void MessageHandler::slot_handler_start_record()
@@ -209,14 +187,6 @@ void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_, ++serial_id_send_, index, json_str_out);
-    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
-}
-
-void MessageHandler::slot_handler_tracker2tcp_mark_rotation_use_robotpose()
-{
-    if (!running_) return;
-    std::string json_str_out;
-    MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_TRACKER2TCP_ROTATION_, ++serial_id_send_, json_str_out);
     comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 

@@ -11,7 +11,7 @@ void LinearPoseInterpolator::set_interval_us(uint64_t interval_us)
     interval_us = interval_us_;
 }
 
-bool LinearPoseInterpolator::interpolate(const std::vector<TimestampePose> &input, std::vector<TimestampePose> &output)
+bool LinearPoseInterpolator::interpolate_with_eular(const std::vector<TimestampePose> &input, std::vector<TimestampePose> &output)
 {
     if (input.size() < 2) return false;
 
@@ -44,9 +44,12 @@ bool LinearPoseInterpolator::interpolate(const std::vector<TimestampePose> &inpu
         ori.B = p1.pose.orientation.B + ratio * (p2.pose.orientation.B - p1.pose.orientation.B);
         ori.C = p1.pose.orientation.C + ratio * (p2.pose.orientation.C - p1.pose.orientation.C);
 
-        output.push_back(TimestampePose{CartesianPose(pos, ori), next_time});
+        output.push_back(TimestampePose{
+            CartesianPose(pos, ori), 
+            next_time,
+            p1.button_mask      // 沿用当前段起点的 button_mask
+        });
     }
-
     return true;
 }
 
@@ -92,7 +95,11 @@ bool LinearPoseInterpolator::interpolate_with_quaternion(const std::vector<Times
         Utils::quaternion_to_euler_ABC(q_t, ori.A, ori.B, ori.C);
 
         // 输出插值后的姿态
-        output.push_back(TimestampePose{CartesianPose(pos, ori), next_time});
+        output.push_back(TimestampePose{
+            CartesianPose(pos, ori), 
+            next_time,
+            p1.button_mask      // 沿用当前段起点的 button_mask
+        });
     }
 
     return true;

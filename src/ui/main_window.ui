@@ -100,13 +100,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
-           <widget class="QCheckBox" name="checkBox_use_toolhand">
-            <property name="text">
-             <string>机器人使用工具手</string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="2" colspan="2">
            <widget class="QCheckBox" name="checkBox_use_track2tcp">
             <property name="layoutDirection">

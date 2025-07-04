@@ -220,8 +220,8 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, s
     if (poses.empty())
         return true;
 
-    file << "x,y,z,A,B,C,T,delta_ms\n";
-    
+    file << "x,y,z,A,B,C,button,T,delta_ms\n";
+
     uint64_t last_timestamp = poses[0].timestamp_us;
 
     for (size_t i = 0; i < poses.size(); ++i)
@@ -241,6 +241,7 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, s
              << timestampe_pose.pose.orientation.A << ","
              << timestampe_pose.pose.orientation.B << ","
              << timestampe_pose.pose.orientation.C << ","
+             << timestampe_pose.button_mask << ","
              << curr_timestamp << ","
              << delta_ms << "\n";
 
@@ -372,6 +373,7 @@ void ViveTrackerReader::read_loop()
                     recorded_poses_[record_count_].timestamp_us = 
                         std::chrono::duration_cast<std::chrono::microseconds>(
                             loop_start.time_since_epoch()).count();
+                    recorded_poses_[record_count_].button_mask = button_mask;
                     record_count_++;
                 }
             }
