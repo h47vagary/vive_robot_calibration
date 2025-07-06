@@ -10,7 +10,7 @@
 #include "vive_wrapper.h"
 #include "interpolation.h"
 #include "comm_manager.h"
-
+#include "calibration_config.h"
 
 MainWindow::MainWindow(QWidget  *parent)
     : QMainWindow(parent)
@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget  *parent)
 
     init_connect();
     init_style();
+    init_config_file();
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +65,37 @@ void MainWindow::init_style()
     ui->lineEdit_label_interpolation_interval->setText("4");
     ui->lineEdit_refresh_rate->setText("4");
     ui->checkBox_end_with_chart->setCheckable(true);
+}
+
+void MainWindow::init_config_file()
+{
+    calibration_config_ = std::make_unique<CalibrationConfig>();
+    if (!CalibrationConfig::from_file(D_CONFIG_CALIBRATION_PATH, *calibration_config_))
+    {
+        std::cerr << "Failed to load calibration config file: " << D_CONFIG_CALIBRATION_PATH << std::endl;
+        std::cerr << "Creating default empty config file..." << std::endl;
+        // 保存一个默认空配置，自动创建文件和目录
+        calibration_config_->to_file(D_CONFIG_CALIBRATION_PATH);
+        return;
+    }
+    else
+    {
+        // flange2tcp_calibration_->init(calibration_config_->flange2tcp.calibrated,
+        //                             calibration_config_->flange2tcp.alg_type,
+        //                             calibration_config_->flange2tcp.calibration_matrix);
+
+        // tracker2tcp_calibration_->init(calibration_config_->tracker2tcp.calibrated,
+        //                             calibration_config_->tracker2tcp.alg_type,
+        //                             calibration_config_->tracker2tcp.position_calibration_matrix,
+        //                             calibration_config_->tracker2tcp.orientation_calibration_matrix);
+
+        calibration_manager_->init(calibration_config_->root2tracker.calibrated,
+                                calibration_config_->root2tracker.alg_type,
+                                *calibration_config_->root2tracker.position_calibration_matrix,
+                                *calibration_config_->root2tracker.orientation_offset_matrix);
+    }
+    std::cout << "Calibration config loaded successfully." << std::endl;
+
 }
 
 Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()

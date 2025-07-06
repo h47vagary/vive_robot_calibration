@@ -2,24 +2,25 @@
 #include "config_file.h"
 #include "json_utils.h"
 
-CalibrationConfig CalibrationConfig::from_file(const std::string& path)
+bool CalibrationConfig::from_file(const std::string& path, CalibrationConfig& calbration_config)
 {
     ConfigFile file;
     if (!file.load(path))
+    {
         std::cerr << "Failed to load calibration config file: " << path << std::endl;
+        return false;
+    }
 
-    CalibrationConfig config;
-    config.root2tracker.from_json(file.root()["root2tracker"]);
-    config.flange2tcp.from_json(file.root()["flange2tcp"]);
-    config.tracker2tcp.from_json(file.root()["tracker2tcp"]);
+    calbration_config.root2tracker.from_json(file.root()["root2tracker"]);
+    calbration_config.flange2tcp.from_json(file.root()["flange2tcp"]);
+    calbration_config.tracker2tcp.from_json(file.root()["tracker2tcp"]);
 
-    return config;
+    return true;
 }
 
 void CalibrationConfig::to_file(const std::string& path) const
 {
     ConfigFile file;
-
     file.root()["root2tracker"] = root2tracker.to_json();
     file.root()["flange2tcp"] = flange2tcp.to_json();
     file.root()["tracker2tcp"] = tracker2tcp.to_json();

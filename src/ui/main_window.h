@@ -13,6 +13,8 @@
 #include "calibration.h"
 #include "csv_parser.h" 
 #include "filter.h"
+#include "calibration_config.h"
+#include "config_file.h"
 
 namespace Ui {
     class MainWindow;
@@ -79,6 +81,7 @@ signals:
 private:
     void init_connect();
     void init_style();
+    void init_config_file();
 
     Eigen::Matrix4d get_tracker2tcp_rotation_matrix();
 
@@ -105,5 +108,7 @@ private:
     CSVParserWindow* csv_parser_window_vive2robot;
     CSVParserWindow* csv_parser_window_vive2robot_inter;
     CSVParserWindow* csv_parser_window_vive2robot_inter_filter;
+
+    std::unique_ptr<CalibrationConfig> calibration_config_;
 };
 

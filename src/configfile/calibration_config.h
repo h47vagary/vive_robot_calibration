@@ -177,7 +177,6 @@ struct CalibrationConfig
     Calibration_flange_2_tcp flange2tcp;
     Calibration_tracker_2_tcp tracker2tcp;
 
-
-    static CalibrationConfig from_file(const std::string& path);
+    static bool from_file(const std::string& path, CalibrationConfig& calbration_config);
     void to_file(const std::string& path) const;
 };

@@ -32,6 +32,7 @@ target_include_directories(ui PUBLIC
             ${PROJECT_SOURCE_DIR}/src/algorithm
             ${PROJECT_SOURCE_DIR}/src/htc_vive
             ${PROJECT_SOURCE_DIR}/src/utils
+            ${PROJECT_SOURCE_DIR}/src/configfile
             ${PROJECT_SOURCE_DIR}/lib/qcustomplot/
 )
 
@@ -42,4 +43,5 @@ target_link_libraries(ui
         communication
         htc_vive
         algorithm
+        configfile
 )

@@ -20,9 +20,18 @@ bool ConfigFile::load(const std::string& file_path)
 
 bool ConfigFile::save(const std::string& file_path) const
 {
+    if (!ensure_directory_exists(D_CONFIG_BASE_PATH))
+    {
+        std::cerr << "Failed to create directory: " << D_CONFIG_BASE_PATH << std::endl;
+        return false;
+    }
+
     std::ofstream ofs(file_path);
     if (!ofs.is_open())
+    {
+        std::cerr << "Failed to is_open" << std::endl;
         return false;
+    }
 
     Json::StreamWriterBuilder writer;
     writer["indentation"] = "  ";
@@ -53,4 +62,14 @@ Json::Value& ConfigFile::root()
 const Json::Value& ConfigFile::root() const
 {
     return root_;
+}
+
+bool ConfigFile::ensure_directory_exists(const std::string &dir)
+{
+    if (dir.empty()) return true;  // 当前目录默认存在
+#ifdef _WIN32
+    return _mkdir(dir.c_str()) == 0 || errno == EEXIST;
+#else
+    return mkdir(dir.c_str(), 0755) == 0 || errno == EEXIST;
+#endif
 }
