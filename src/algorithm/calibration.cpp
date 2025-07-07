@@ -483,14 +483,21 @@ int ToolCalibration7Points::calibrate()
     }
 }
 
+void ToolCalibration7Points::init(const bool &calibrated, const Eigen::Matrix4d &position_calibration_matrix, const Eigen::Vector4d &calibration_pos_vec)
+{
+    calibrated_ = calibrated;
+    *calibration_matrix_ = position_calibration_matrix;
+    *calibration_pos_vec_ = calibration_pos_vec;
+}
+
 void ToolCalibration7Points::get_calibrated(bool &calibrated)
 {
     calibrated = calibrated_;
 }
 
-void ToolCalibration7Points::get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix)
+void ToolCalibration7Points::get_ori_calibration_matrix(Eigen::Matrix4d &ori_calibration_matrix)
 {
-    pose_calibration_matrix = *calibration_matrix_;
+    ori_calibration_matrix = *calibration_matrix_;
 }
 
 void ToolCalibration7Points::get_calibration_poses(std::vector<CartesianPose> &calibration_poses)
@@ -503,9 +510,9 @@ void ToolCalibration7Points::get_calibration_pos_vec(Eigen::Vector4d &pos_calibr
     pos_calibration_vec = *calibration_pos_vec_;
 }
 
-void ToolCalibration7Points::set_pose_calibration_matrix(const Eigen::Matrix4d &pose_calibration_matrix)
+void ToolCalibration7Points::set_ori_calibration_matrix(const Eigen::Matrix4d &ori_calibration_matrix)
 {
-    *calibration_matrix_ = pose_calibration_matrix;
+    *calibration_matrix_ = ori_calibration_matrix;
 }
 
 void ToolCalibration7Points::set_calibration_pos_vec(const Eigen::Vector4d &calibration_pos_vec)

@@ -64,3 +64,27 @@ CartesianOrientation json_to_cartesian_orientation(const Json::Value& val)
     ori.C = val["C"].asDouble();
     return ori;
 }
+
+Json::Value eigen_vector_to_json(const Eigen::VectorXd& vec)
+{
+    Json::Value json_array(Json::arrayValue);
+    for (int i = 0; i < vec.size(); ++i)
+    {
+        json_array.append(vec(i));
+    }
+    return json_array;
+}
+
+Eigen::VectorXd json_to_eigen_vector(const Json::Value& val)
+{
+    if (!val.isArray())
+        return Eigen::VectorXd();
+
+    int size = val.size();
+    Eigen::VectorXd vec(size);
+    for (int i = 0; i < size; ++i)
+    {
+        vec(i) = val[i].asDouble();
+    }
+    return vec;
+}

@@ -1,4 +1,5 @@
 #include "calibration_config.h"
+#include "calibration_config_async.h"
 #include "config_file.h"
 #include "json_utils.h"
 
@@ -123,8 +124,8 @@ Json::Value Calibration_tracker_2_tcp::to_json() const
     for (const auto& p : calibration_position)
         val["calibration_position"].append(cartesian_position_to_json(p));
 
-    val["position_calibration_matrix"] = eigen_matrix_to_json(*position_calibration_matrix);
     val["orientation_calibration_matrix"] = eigen_matrix_to_json(*orientation_calibration_matrix);
+    val["position_calibration_vector"] = eigen_vector_to_json(*position_calibration_vector);
     return val;
 }
 
@@ -137,6 +138,6 @@ void Calibration_tracker_2_tcp::from_json(const Json::Value &val)
     for (const auto& p : val["calibration_position"])
         calibration_position.push_back(json_to_cartesian_position(p));
 
-    *position_calibration_matrix = json_to_eigen_matrix(val["position_calibration_matrix"]);
     *orientation_calibration_matrix = json_to_eigen_matrix(val["orientation_calibration_matrix"]);
+    *position_calibration_vector = json_to_eigen_vector(val["position_calibration_vector"]);
 }

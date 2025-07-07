@@ -48,7 +48,6 @@ public slots:
     void slot_handler_end_record();                                 // 结束录制
     void slot_handler_start_playback();                             // 开始回放
     void slot_handler_end_playback();                               // 结束回放
-    void slot_handler_flang2tcp_mark_point(int index);              // 法兰盘2TCP的标定点 
     void slot_linear_error_acquire();                               // 获取线性误差（需要一次机器人姿态）
 
 private:

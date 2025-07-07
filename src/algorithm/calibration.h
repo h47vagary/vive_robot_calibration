@@ -87,15 +87,19 @@ public:
     ~ToolCalibration7Points();
 
     int calibrate();
+    void init(const bool &calibrated,
+              const Eigen::Matrix4d &position_calibration_matrix = Eigen::Matrix4d::Identity(),
+              const Eigen::Vector4d &calibration_pos_vec = Eigen::Vector4d::Zero());
 
     void get_calibrated(bool &calibrated);
-    void get_pose_calibration_matrix(Eigen::Matrix4d &pose_calibration_matrix);
     void get_calibration_poses(std::vector<CartesianPose> &calibration_poses);
+    void get_ori_calibration_matrix(Eigen::Matrix4d &ori_calibration_matrix);
     void get_calibration_pos_vec(Eigen::Vector4d &pos_calibration_vec);
-    void set_pose_calibration_matrix(const Eigen::Matrix4d &pose_calibration_matrix);
-    void set_calibration_pos_vec(const Eigen::Vector4d &calibration_pos_vec);
 
+    void set_ori_calibration_matrix(const Eigen::Matrix4d &ori_calibration_matrix);
+    void set_calibration_pos_vec(const Eigen::Vector4d &calibration_pos_vec);
     void set_calibration_pose(const int &index, const CartesianPose &pose);
+
     int clear_calibration_pose();
 
 private:

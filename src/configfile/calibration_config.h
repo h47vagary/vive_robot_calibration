@@ -31,8 +31,8 @@ struct Calibration_robotbase_2_trackerbase
 
     Calibration_robotbase_2_trackerbase()
         :   calibrated(false), max_error(0.00), alg_type(0),
-            position_calibration_matrix(new Eigen::Matrix4d()),
-            orientation_offset_matrix(new Eigen::Matrix3d())
+            position_calibration_matrix(new Eigen::Matrix4d(Eigen::Matrix4d::Identity())),
+            orientation_offset_matrix(new Eigen::Matrix3d(Eigen::Matrix3d::Identity()))
     {
         robot_calibration_position.clear();
         tracker_calibration_position.clear();
@@ -89,7 +89,7 @@ struct Calibration_flange_2_tcp
 
     Calibration_flange_2_tcp()
      :  calibrated(false), alg_type(0),
-        calibration_matrix(new Eigen::Matrix4d())
+        calibration_matrix(new Eigen::Matrix4d(Eigen::Matrix4d::Identity()))
     {
         flange_calibration_pose.clear();
     }
@@ -126,16 +126,16 @@ struct Calibration_tracker_2_tcp
     bool calibrated;
     int alg_type;
     std::vector<CartesianPosition> calibration_position;        // 追踪器标定点
-    Eigen::Matrix4d* position_calibration_matrix;
-    Eigen::Matrix3d* orientation_calibration_matrix;
+    Eigen::Matrix4d* orientation_calibration_matrix;            // 追踪器2TCP的姿态补偿
+    Eigen::Vector4d* position_calibration_vector;               // 追踪器2TCP的位置偏移
 
     Json::Value to_json() const;
     void from_json(const Json::Value& val);
 
     Calibration_tracker_2_tcp()
      :  calibrated(false), alg_type(0),
-        position_calibration_matrix(new Eigen::Matrix4d()),
-        orientation_calibration_matrix(new Eigen::Matrix3d())
+        orientation_calibration_matrix(new Eigen::Matrix4d(Eigen::Matrix4d::Identity())),
+        position_calibration_vector(new Eigen::Vector4d(Eigen::Vector4d::Zero()))
     {
         calibration_position.clear();
     }
@@ -144,30 +144,30 @@ struct Calibration_tracker_2_tcp
      :  calibrated(other.calibrated),
         alg_type(other.alg_type),
         calibration_position(other.calibration_position),
-        position_calibration_matrix(new Eigen::Matrix4d(*other.position_calibration_matrix)),
-        orientation_calibration_matrix(new Eigen::Matrix3d(*other.orientation_calibration_matrix)) {}
+        orientation_calibration_matrix(new Eigen::Matrix4d(*other.orientation_calibration_matrix)),
+        position_calibration_vector(new Eigen::Vector4d(*other.position_calibration_vector)) {}
 
     Calibration_tracker_2_tcp& operator=(const Calibration_tracker_2_tcp& other)
     {
         if (this == &other)
             return *this;
         
-        delete position_calibration_matrix;
         delete orientation_calibration_matrix;
+        delete position_calibration_vector;
 
         calibrated = other.calibrated;
         alg_type = other.alg_type;
         calibration_position = other.calibration_position;
-        position_calibration_matrix = new Eigen::Matrix4d(*other.position_calibration_matrix);
-        orientation_calibration_matrix = new Eigen::Matrix3d(*other.orientation_calibration_matrix);
+        orientation_calibration_matrix = new Eigen::Matrix4d(*other.orientation_calibration_matrix);
+        position_calibration_vector = new Eigen::Vector4d(*other.position_calibration_vector);
 
         return *this;
     }
 
     ~Calibration_tracker_2_tcp()
     {
-        delete position_calibration_matrix;
         delete orientation_calibration_matrix;
+        delete position_calibration_vector;
     }
 };
 

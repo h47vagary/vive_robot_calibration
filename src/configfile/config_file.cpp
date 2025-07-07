@@ -1,6 +1,7 @@
 #include "config_file.h"
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 ConfigFile::ConfigFile()
 {

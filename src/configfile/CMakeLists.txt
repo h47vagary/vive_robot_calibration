@@ -1,4 +1,5 @@
 file(GLOB COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+message(STATUS "configfile sources: ${COMMON_SRC}")
 
 add_library(configfile STATIC ${COMMON_SRC})
 

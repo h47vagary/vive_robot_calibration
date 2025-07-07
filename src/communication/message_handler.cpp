@@ -116,13 +116,6 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
             std::cout << "transfer_robot_compute_result fail !" << std::endl;
         break;
     }
-    case E_JSON_COMMAND_RECEIVE_FLANG2TCP_MARK_POINT_:
-    {
-        handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
-            emit signal_flange2tcp_mark_point_received(index, pose);
-        });
-        break;
-    }
     case E_JSON_COMMAND_RECEIVE_LINEAR_ERROR_USE_ROBOT_POSE_:
     {
         handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
@@ -179,14 +172,6 @@ void MessageHandler::slot_handler_end_playback()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_END_PLAYBACK_, ++serial_id_send_, json_str_out);
-    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
-}
-
-void MessageHandler::slot_handler_flang2tcp_mark_point(int index)
-{
-    if (!running_) return;
-    std::string json_str_out;
-    MsgStructTransfer::transfer_mark_point(E_JSON_COMMAND_SET_FLANG2TCP_MARK_POINT_, ++serial_id_send_, index, json_str_out);
     comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }
 

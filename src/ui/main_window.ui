@@ -436,13 +436,23 @@
          <x>750</x>
          <y>20</y>
          <width>391</width>
-         <height>141</height>
+         <height>171</height>
         </rect>
        </property>
        <property name="title">
         <string>Tracker &lt;-&gt; TCP 标定</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
+       <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,1,1" columnstretch="1,1,1">
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="label_tracker2tcp_marked_num">
+          <property name="text">
+           <string>需6个点,已记录点数: 0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_tracker2tcp_markpoint">
           <property name="minimumSize">
@@ -456,18 +466,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QLabel" name="label_tracker2tcp_marked_num">
-          <property name="text">
-           <string>需6个点,已记录点数: 0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_tracker2tcp_clear_point">
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton_tracker2tcp_clear_result">
           <property name="minimumSize">
            <size>
             <width>96</width>
@@ -475,11 +475,37 @@
            </size>
           </property>
           <property name="text">
-           <string>清除所有点</string>
+           <string>清除标定结果</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="2" column="1">
+         <widget class="QPushButton" name="pushButton_tracker2tcp_save_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>保存标定结果</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <spacer name="horizontalSpacer_16">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
          <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_ori">
           <property name="minimumSize">
            <size>
@@ -492,7 +518,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
+        <item row="1" column="1">
          <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_pos">
           <property name="minimumSize">
            <size>
@@ -505,21 +531,57 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer_19">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
        <property name="geometry">
         <rect>
          <x>750</x>
-         <y>180</y>
+         <y>200</y>
          <width>391</width>
-         <height>131</height>
+         <height>171</height>
         </rect>
        </property>
        <property name="title">
         <string>法兰盘 &lt;-&gt; TCP 标定</string>
        </property>
        <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1">
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="label_flange2tcp_marked_num">
+          <property name="text">
+           <string>需6个点,已记录点数: 0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton_flange2tcp_clear_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>清除标定结果</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_flange2tcp_markpoint">
           <property name="minimumSize">
@@ -533,33 +595,20 @@
           </property>
          </widget>
         </item>
+        <item row="3" column="2">
+         <spacer name="horizontalSpacer_17">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton_flange2tcp_calibrate">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_flange2tcp_clear_point">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>清除所有点</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
          <spacer name="horizontalSpacer_15">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -572,55 +621,46 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QLabel" name="label_flange2tcp_marked_num">
-          <property name="text">
-           <string>需6个点,已记录点数: 0</string>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="pushButton_flange2tcp_save_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+          <property name="text">
+           <string>保存标定结果</string>
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_flange2tcp_calibrate">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <spacer name="horizontalSpacer_18">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
-      </widget>
-      <widget class="QPushButton" name="pushButton_connect_ctr">
-       <property name="geometry">
-        <rect>
-         <x>820</x>
-         <y>320</y>
-         <width>96</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>96</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>连接控制器</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_disconnect_ctr">
-       <property name="geometry">
-        <rect>
-         <x>980</x>
-         <y>320</y>
-         <width>96</width>
-         <height>40</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>96</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>断开控制器</string>
-       </property>
       </widget>
      </widget>
     </item>
@@ -1021,6 +1061,44 @@
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QPushButton" name="pushButton_connect_ctr">
+       <property name="geometry">
+        <rect>
+         <x>1040</x>
+         <y>40</y>
+         <width>96</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>96</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>连接控制器</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_disconnect_ctr">
+       <property name="geometry">
+        <rect>
+         <x>1050</x>
+         <y>100</y>
+         <width>96</width>
+         <height>40</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>96</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>断开控制器</string>
+       </property>
       </widget>
      </widget>
     </item>

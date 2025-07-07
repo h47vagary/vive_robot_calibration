@@ -37,19 +37,23 @@ private slots:
     void slot_start_playback();
     void slot_end_playback();
 
+    // Robot2Tracker Calibration
+    void slot_mark_point();
     void slot_delete_calib_result();
     void slot_save_calib_result();
     void slot_compute();
-    
-    void slot_mark_point();
 
+    // Tracker2TCP Calibration
     void slot_tracker2tcp_mark_point();
     void slot_tracker2tcp_calibrate();
-    void slot_tracker2tcp_clear_point();
+    void slot_tracker2tcp_delete_calib_result();
+    void slot_tracker2tcp_save_calib_result();
     
+    // Flange2TCP Calibration
     void slot_flange2tcp_mark_point();
     void slot_flange2tcp_calibrate();
-    void slot_flange2tcp_clear_point();
+    void slot_flange2tcp_delete_calib_result();
+    void slot_flange2tcp_save_calib_result();
     
     void slot_track_pose_timeout();
     void slot_start_update_track_pose();
@@ -61,6 +65,8 @@ private slots:
     void slot_vive_tracker_reader_interval();
     void slot_parse_chart();
     void slot_traj_filtering();
+
+    void slot_linear_error_compute(); // 计算线性误差
 
 public slots:
     void slot_compute_result_received(double result);
@@ -75,7 +81,6 @@ signals:
     void signal_end_record();
     void signal_start_playback();
     void signal_end_playback();
-    void signal_flang2tcp_mark_point(int point_index);
     void signal_linear_error_acquire();
 
 private:

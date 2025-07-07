@@ -11,6 +11,7 @@
 #include "interpolation.h"
 #include "comm_manager.h"
 #include "calibration_config.h"
+#include "calibration_config_async.h"
 
 MainWindow::MainWindow(QWidget  *parent)
     : QMainWindow(parent)
@@ -70,32 +71,31 @@ void MainWindow::init_style()
 void MainWindow::init_config_file()
 {
     calibration_config_ = std::make_unique<CalibrationConfig>();
-    if (!CalibrationConfig::from_file(D_CONFIG_CALIBRATION_PATH, *calibration_config_))
-    {
-        std::cerr << "Failed to load calibration config file: " << D_CONFIG_CALIBRATION_PATH << std::endl;
-        std::cerr << "Creating default empty config file..." << std::endl;
-        // 保存一个默认空配置，自动创建文件和目录
-        calibration_config_->to_file(D_CONFIG_CALIBRATION_PATH);
-        return;
-    }
-    else
-    {
-        // flange2tcp_calibration_->init(calibration_config_->flange2tcp.calibrated,
-        //                             calibration_config_->flange2tcp.alg_type,
-        //                             calibration_config_->flange2tcp.calibration_matrix);
 
-        // tracker2tcp_calibration_->init(calibration_config_->tracker2tcp.calibrated,
-        //                             calibration_config_->tracker2tcp.alg_type,
-        //                             calibration_config_->tracker2tcp.position_calibration_matrix,
-        //                             calibration_config_->tracker2tcp.orientation_calibration_matrix);
+    CalibrationConfigAsync::load_async(
+        D_CONFIG_CALIBRATION_PATH, 
+        calibration_config_.get(),
+        nullptr,
+        [this]() {
+            std::cerr << "Failed to load calibration config file: " << D_CONFIG_CALIBRATION_PATH << std::endl;
+            std::cerr << "Creating default empty config file..." << std::endl;
+            calibration_config_->to_file(D_CONFIG_CALIBRATION_PATH);
+        }
+    );
 
-        calibration_manager_->init(calibration_config_->root2tracker.calibrated,
-                                calibration_config_->root2tracker.alg_type,
-                                *calibration_config_->root2tracker.position_calibration_matrix,
-                                *calibration_config_->root2tracker.orientation_offset_matrix);
-    }
+    flange2tcp_calibration_->init(calibration_config_->flange2tcp.calibrated,
+                                *calibration_config_->flange2tcp.calibration_matrix);
+
+    tracker2tcp_calibration_->init(calibration_config_->tracker2tcp.calibrated,
+                                *calibration_config_->tracker2tcp.orientation_calibration_matrix,
+                                *calibration_config_->tracker2tcp.position_calibration_vector);
+
+    calibration_manager_->init(calibration_config_->root2tracker.calibrated,
+                            calibration_config_->root2tracker.alg_type,
+                            *calibration_config_->root2tracker.position_calibration_matrix,
+                            *calibration_config_->root2tracker.orientation_offset_matrix);
+
     std::cout << "Calibration config loaded successfully." << std::endl;
-
 }
 
 Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
@@ -181,14 +181,15 @@ void MainWindow::init_connect()
     connect(ui->pushButton_vive_start, SIGNAL(clicked()), this, SLOT(slot_start_update_track_pose()));
     connect(ui->pushButton_vive_stop, SIGNAL(clicked()), this, SLOT(slot_stop_update_track_pose()));
     connect(ui->pushButton_tracker2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_point()));
-    connect(ui->pushButton_tracker2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_clear_point()));
+    connect(ui->pushButton_tracker2tcp_clear_result, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_delete_calib_result()));
     connect(ui->pushButton_tracker2tcp_calibrate_pos, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_calibrate()));
     connect(ui->pushButton_tracker2tcp_calibrate_ori, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_rotation_use_robotpose()));
     connect(ui->pushButton_flange2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_mark_point()));
-    connect(ui->pushButton_flange2tcp_clear_point, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_clear_point()));
+    connect(ui->pushButton_flange2tcp_clear_result, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_delete_calib_result()));
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
     connect(ui->checkBox_use_track2tcp, SIGNAL(toggled(bool)), this, SLOT(slot_use_tracker2tcp(bool)));
-    connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
+    //connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
+    connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SLOT(slot_linear_error_compute()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
     connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
     connect(ui->pushButton_traj_filtering, SIGNAL(clicked()), this, SLOT(slot_traj_filtering()));
@@ -209,7 +210,6 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_end_record, msg_handler_, &MessageHandler::slot_handler_end_record);
     connect(this, &MainWindow::signal_start_playback, msg_handler_, &MessageHandler::slot_handler_start_playback);
     connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);
-    connect(this, &MainWindow::signal_flang2tcp_mark_point, msg_handler_, &MessageHandler::slot_handler_flang2tcp_mark_point);
     connect(this, &MainWindow::signal_linear_error_acquire, msg_handler_, &MessageHandler::slot_linear_error_acquire);
 }
 
@@ -472,6 +472,11 @@ void MainWindow::slot_delete_calib_result()
 void MainWindow::slot_save_calib_result()
 {
     std::cout << __FUNCTION__ << std::endl;
+    calibration_manager_->get_calibrated(calibration_config_->root2tracker.calibrated);
+    calibration_manager_->get_calibration_algorithm(calibration_config_->root2tracker.alg_type);
+    calibration_manager_->get_position_calibration_matrix(*calibration_config_->root2tracker.position_calibration_matrix);
+    calibration_manager_->get_orientation_offset_matrix(*calibration_config_->root2tracker.orientation_offset_matrix);
+    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
 }
 void MainWindow::slot_compute()
 {
@@ -479,7 +484,6 @@ void MainWindow::slot_compute()
     calibration_manager_->set_calibration_algorithm(2);
     int ret = calibration_manager_->calibrate(0, max_error);
     ui->label_calibration_error->setText(QString::number(max_error));
-
 }
 
 void MainWindow::slot_mark_point()
@@ -565,9 +569,17 @@ void MainWindow::slot_tracker2tcp_calibrate()
     }
 }
 
-void MainWindow::slot_tracker2tcp_clear_point()
+void MainWindow::slot_tracker2tcp_delete_calib_result()
 {
     tracker2tcp_calibration_->clear_calibration_pose();
+}
+
+void MainWindow::slot_tracker2tcp_save_calib_result()
+{
+    tracker2tcp_calibration_->get_calibrated(calibration_config_->tracker2tcp.calibrated);
+    tracker2tcp_calibration_->get_ori_calibration_matrix(*calibration_config_->tracker2tcp.orientation_calibration_matrix);
+    tracker2tcp_calibration_->get_calibration_pos_vec(*calibration_config_->tracker2tcp.position_calibration_vector);
+    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
 }
 
 void MainWindow::slot_flange2tcp_mark_point()
@@ -593,14 +605,21 @@ void MainWindow::slot_flange2tcp_calibrate()
     {
         std::cout << "flange2tcp calibrate success" << std::endl;
         Eigen::Matrix4d calib_matrix;
-        flange2tcp_calibration_->get_pose_calibration_matrix(calib_matrix);
+        flange2tcp_calibration_->get_ori_calibration_matrix(calib_matrix);
         std::cout << "flange2tcp calib matrix:\n" << calib_matrix << std::endl;
     }
 }
 
-void MainWindow::slot_flange2tcp_clear_point()
+void MainWindow::slot_flange2tcp_delete_calib_result()
 {
     flange2tcp_calibration_->clear_calibration_pose();
+}
+
+void MainWindow::slot_flange2tcp_save_calib_result()
+{
+    flange2tcp_calibration_->get_calibrated(calibration_config_->flange2tcp.calibrated);
+    flange2tcp_calibration_->get_ori_calibration_matrix(*calibration_config_->flange2tcp.calibration_matrix);
+    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
 }
 
 void MainWindow::slot_track_pose_timeout()
@@ -741,4 +760,65 @@ void MainWindow::slot_traj_filtering()
         csv_parser_window->plotData();
         csv_parser_window->show();
     }
+}
+
+void MainWindow::slot_linear_error_compute()
+{
+    // 获取机器人当前点位
+    std::vector<double> cur_rob_pos;
+    if (comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
+    {
+        return;
+    }
+
+    CartesianPose pose(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2),
+                                    cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
+    
+    
+    // TCP 相对于追踪器的位置变换
+    Eigen::Vector4d pos_vec;
+    tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
+    Eigen::Matrix4d pos_matrix = Eigen::Matrix4d::Identity();
+    pos_matrix.block<3,1>(0,3) = pos_vec.head<3>();
+
+    // 当前追踪器在定位器坐标系位姿
+    CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
+
+    // 标定出来的定位器坐标相对于机器人基座标的齐次变换矩阵
+    Eigen::Matrix4d location2robotbase_mat;
+    calibration_manager_->get_position_calibration_matrix(location2robotbase_mat);
+
+    // 求TCP在定位器坐标系的位置变化矩阵
+    Eigen::Matrix4d tcp2location_pos_mat = tracker_mat * pos_matrix;
+    // 求TCP在基坐标系下的位置变换矩阵
+    Eigen::Matrix4d tcp2robotbase_pos_mat = location2robotbase_mat * tcp2location_pos_mat;
+    Eigen::Matrix3d tcp2robotbase_ori_mat = tcp2robotbase_pos_mat.block<3, 3>(0, 0);
+
+    // 获取TCP姿态补偿矩阵
+    Eigen::Matrix3d orientation_offset_matrix;
+    calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
+
+    // 进行补偿TCP姿态
+    // Eigen::Matrix3d tcp2robotbase_ori_mat_offset = orientation_offset_matrix * tcp2robotbase_ori_mat; //左乘
+    Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix;
+
+    Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
+    tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
+    tcp2robotbase_mat.block<3, 1>(0, 3) = tcp2robotbase_pos_mat.block<3, 1>(0, 3);
+
+    CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
+
+    std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
+                << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
+
+    std::cout << "read robot_tcp_pose point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
+
+    double x = pose.position.x - robot_tcp_pose.position.x;
+    double y = pose.position.y - robot_tcp_pose.position.y;
+    double z = pose.position.z - robot_tcp_pose.position.z;
+    linear_error_ = std::sqrt(x * x + y * y + z * z);
+    std::cout << "#### linear_error: " << linear_error_ << std::endl;
+    ui->label_linear_error->setText(QString::number(linear_error_, 'f', 2));
 }

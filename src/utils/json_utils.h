@@ -14,3 +14,6 @@ CartesianPosition json_to_cartesian_position(const Json::Value& val);
 // CartesianOrientation
 Json::Value cartesian_orientation_to_json(const CartesianOrientation& ori);
 CartesianOrientation json_to_cartesian_orientation(const Json::Value& val);
+
+Json::Value eigen_vector_to_json(const Eigen::VectorXd& vec);
+Eigen::VectorXd json_to_eigen_vector(const Json::Value& val);
