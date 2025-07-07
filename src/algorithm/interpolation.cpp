@@ -18,21 +18,21 @@ bool LinearPoseInterpolator::interpolate_with_eular(const std::vector<Timestampe
     output.clear();
     output.push_back(input[0]);
     size_t curr_idx = 0;
-    uint64_t next_time = input[0].timestamp_us;
+    uint64_t next_time = input[0].timestamp_ms;
 
     while (curr_idx < input.size() - 1)
     {
         const auto &p1 = input[curr_idx];
         const auto &p2 = input[curr_idx + 1];
 
-        if (next_time + interval_us_ > p2.timestamp_us)
+        if (next_time + interval_us_ > p2.timestamp_ms)
         {
             ++curr_idx;
             continue;
         }
 
         next_time += interval_us_;
-        double ratio = static_cast<double>(next_time - p1.timestamp_us) / (p2.timestamp_us - p1.timestamp_us);
+        double ratio = static_cast<double>(next_time - p1.timestamp_ms) / (p2.timestamp_ms - p1.timestamp_ms);
 
         CartesianPosition pos;
         pos.x = p1.pose.position.x + ratio * (p2.pose.position.x - p1.pose.position.x);
@@ -60,21 +60,21 @@ bool LinearPoseInterpolator::interpolate_with_quaternion(const std::vector<Times
     output.clear();
     output.push_back(input[0]);
     size_t curr_idx = 0;
-    uint64_t next_time = input[0].timestamp_us;
+    uint64_t next_time = input[0].timestamp_ms;
 
     while (curr_idx < input.size() - 1)
     {
         const auto &p1 = input[curr_idx];
         const auto &p2 = input[curr_idx + 1];
 
-        if (next_time + interval_us_ > p2.timestamp_us)
+        if (next_time + interval_us_ > p2.timestamp_ms)
         {
             ++curr_idx;
             continue;
         }
 
         next_time += interval_us_;
-        double ratio = static_cast<double>(next_time - p1.timestamp_us) / (p2.timestamp_us - p1.timestamp_us);
+        double ratio = static_cast<double>(next_time - p1.timestamp_ms) / (p2.timestamp_ms - p1.timestamp_ms);
 
         // 插值位置（线性）
         CartesianPosition pos;

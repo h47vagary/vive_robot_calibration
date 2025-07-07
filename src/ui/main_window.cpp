@@ -323,7 +323,7 @@ void MainWindow::slot_end_record()
     poses_tcp2rb_timestampe.clear();
     for (size_t i = 0; i < poses.size(); ++i)
     {
-        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_us, poses_timestampe[i].button_mask});
+        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_ms, poses_timestampe[i].button_mask});
     }
 
     // 插补
@@ -342,7 +342,7 @@ void MainWindow::slot_end_record()
     filter_poses(poses_filted, ui->checkBox_filtering->isChecked());
     for (size_t i = 0; i < poses_filted.size(); ++i)
     {
-        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_us,
+        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_ms,
                                                                 poses_tcp2rb_timestampe_interpolation[i].button_mask});
     }
     
@@ -395,7 +395,7 @@ void MainWindow::slot_end_record()
     poses_tcp2rb_timestampe.clear();
     for (size_t i = 0; i < poses.size(); ++i)
     {
-        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_us, poses_timestampe[i].button_mask});
+        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_ms, poses_timestampe[i].button_mask});
     }
     // interpolate
     std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
@@ -412,7 +412,7 @@ void MainWindow::slot_end_record()
     filter_poses(poses_filted, ui->checkBox_filtering->isChecked());
     for (size_t i = 0; i < poses_filted.size(); ++i)
     {
-        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_us, 
+        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_ms, 
                                                                 poses_tcp2rb_timestampe_interpolation[i].button_mask});
     }
     // save to file

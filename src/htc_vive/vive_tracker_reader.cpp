@@ -106,7 +106,7 @@ void ViveTrackerReader::on_timer_tick()
         else
         {
             recorded_poses_[record_count_].pose = pose;
-            recorded_poses_[record_count_].timestamp_us = now_us;
+            recorded_poses_[record_count_].timestamp_ms = now_us;
             record_count_++;
         }
     }
@@ -222,13 +222,13 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, s
 
     file << "x,y,z,A,B,C,button,T,delta_ms\n";
 
-    uint64_t last_timestamp = poses[0].timestamp_us;
+    uint64_t last_timestamp = poses[0].timestamp_ms;
 
     for (size_t i = 0; i < poses.size(); ++i)
     {
         const auto& timestampe_pose = poses[i];
 
-        uint64_t curr_timestamp = timestampe_pose.timestamp_us;
+        uint64_t curr_timestamp = timestampe_pose.timestamp_ms;
         uint64_t delta_ms = 0;
         if (i > 0)
         {
@@ -258,7 +258,7 @@ void ViveTrackerReader::enable_record(size_t max_size)
     recorded_poses_.resize(max_record_size_);
 
     record_count_ = 0;
-    record_start_timestamp_us_ = TimeDealUtils::get_timestamp();
+    record_start_timestamp_ms_ = TimeDealUtils::get_timestamp();
     record_enabled_ = true;
 }
 
@@ -370,7 +370,7 @@ void ViveTrackerReader::read_loop()
                 else
                 {
                     recorded_poses_[record_count_].pose = pose;
-                    recorded_poses_[record_count_].timestamp_us = 
+                    recorded_poses_[record_count_].timestamp_ms = 
                         std::chrono::duration_cast<std::chrono::microseconds>(
                             loop_start.time_since_epoch()).count();
                     recorded_poses_[record_count_].button_mask = button_mask;

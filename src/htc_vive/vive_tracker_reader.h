@@ -74,7 +74,7 @@ private:
     size_t record_count_;                                       // 当前缓存的轨迹数量
 
     std::atomic<int> loop_interval_ms_;                         // 读取间隔时间(ms)
-    uint64_t record_start_timestamp_us_ = 0;    
+    uint64_t record_start_timestamp_ms_ = 0;    
 
     MMRESULT timer_id_ = 0;                                     // 定时器句柄
 
