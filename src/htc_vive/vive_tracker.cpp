@@ -76,7 +76,6 @@ bool ViveTracker::get_pose(float& x, float& y, float& z,
     
     if (!pose.bPoseIsValid) 
     {
-        std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
         return false;
     }
 
@@ -113,7 +112,6 @@ bool ViveTracker::get_pose(double &x, double &y, double &z,
     
     if (!pose.bPoseIsValid) 
     {
-        std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
         return false;
     }
 
@@ -161,7 +159,6 @@ bool ViveTracker::get_pose_non_blocking(float &x, float &y, float &z, float &qx,
     const vr::TrackedDevicePose_t& pose = poses[tracker_index_];
     if (!pose.bPoseIsValid) 
     {
-        std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
         return false;
     }
 
@@ -210,7 +207,6 @@ bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double 
     const vr::TrackedDevicePose_t& pose = poses[tracker_index_];
     if (!pose.bPoseIsValid) 
     {
-        std::cerr << __FUNCTION__ << " Pose not valid" << std::endl;
         return false;
     }
 

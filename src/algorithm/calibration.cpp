@@ -20,17 +20,20 @@ int CalibrationManager::calibrate(double rz, double &error_out)
     int result;
     if(c_calibration_method == 0)
     {
-        std::cout << "使用基于Rz值和位置的标定" << std::endl;
+        //std::cout << "使用基于Rz值和位置的标定" << std::endl;
+        std::cout << "use calibration based on Rz value and position" << std::endl;
         result = calculate_position_calibration_matrix(rz, error_out);
     }
     else if(c_calibration_method == 1)
     {
-        std::cout << "使用九点标定" << std::endl;
+        // std::cout << "使用九点标定" << std::endl;
+        std::cout << "use nine-point calibration" << std::endl;
         result = calculate_position_calibration_matrix(error_out);
     }
     else if(c_calibration_method == 2)
     {
-        std::cout << "使用SVD标定" << std::endl;
+        //std::cout << "使用SVD标定" << std::endl;
+        std::cout << "use svd calibration" << std::endl;
         result = calculate_position_calibration_matrix_svd(error_out);
     }
     else
@@ -292,7 +295,14 @@ int CalibrationManager::calculate_position_calibration_matrix(double rz, double 
 int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_out)
 {
     int n = robot_calibration_positions_.size();
-    if(n < 2 ||  device_calibration_positions_.size() != n) return -1;
+    if(n < 2 ||  device_calibration_positions_.size() != n)
+    {
+        std::cerr << "Not enough calibration points or mismatched sizes." << std::endl;
+        std::cerr << "robot_calibration_positions_.size() = " << robot_calibration_positions_.size() << std::endl;
+        std::cerr << "device_calibration_positions_.size() = " << device_calibration_positions_.size() << std::endl;
+        max_error_ = error_out = -1000;
+        return -1;
+    }
     Eigen::Vector3d robot_position_centroid = Eigen::Vector3d::Zero();
     Eigen::Vector3d device_position_centroid = Eigen::Vector3d::Zero();
     for(int i = 0; i < n; ++i)

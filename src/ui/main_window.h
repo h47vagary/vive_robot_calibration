@@ -60,13 +60,13 @@ private slots:
     void slot_stop_update_track_pose();
     void slot_tracker2tcp_mark_rotation_use_robotpose();
 
-    void slot_use_tracker2tcp(bool);
-
     void slot_vive_tracker_reader_interval();
     void slot_parse_chart();
     void slot_traj_filtering();
 
     void slot_linear_error_compute(); // 计算线性误差
+
+    void slot_tracker2tcp_mark_pose_use_hand_filled(); // 使用手动输入的位姿标记 Tracker2TCP 的点
 
 public slots:
     void slot_compute_result_received(double result);

@@ -187,12 +187,14 @@ void MainWindow::init_connect()
     connect(ui->pushButton_flange2tcp_markpoint, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_mark_point()));
     connect(ui->pushButton_flange2tcp_clear_result, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_delete_calib_result()));
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
-    connect(ui->checkBox_use_track2tcp, SIGNAL(toggled(bool)), this, SLOT(slot_use_tracker2tcp(bool)));
+    connect(ui->pushButton_hand_filled, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_pose_use_hand_filled()));
     //connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SLOT(slot_linear_error_compute()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
     connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
     connect(ui->pushButton_traj_filtering, SIGNAL(clicked()), this, SLOT(slot_traj_filtering()));
+    connect(ui->pushButton_tracker2tcp_save_result, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_save_calib_result()));
+    connect(ui->pushButton_flange2tcp_save_result, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_save_calib_result()));
 
     mark_buttons_.clear();
     mark_buttons_ << ui->pushButton_mark_point1 << ui->pushButton_mark_point2 << ui->pushButton_mark_point3
@@ -476,7 +478,7 @@ void MainWindow::slot_save_calib_result()
     calibration_manager_->get_calibration_algorithm(calibration_config_->root2tracker.alg_type);
     calibration_manager_->get_position_calibration_matrix(*calibration_config_->root2tracker.position_calibration_matrix);
     calibration_manager_->get_orientation_offset_matrix(*calibration_config_->root2tracker.orientation_offset_matrix);
-    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
+    CalibrationConfigAsync::save_async(D_CONFIG_CALIBRATION_PATH, calibration_config_.get());
 }
 void MainWindow::slot_compute()
 {
@@ -489,10 +491,14 @@ void MainWindow::slot_compute()
 void MainWindow::slot_mark_point()
 {
     // 检查是否已标定 flange2tcp 和 tracker2tcp
-    bool flange2tcp_calibrated = false, tracker2tcp_calibrated = false;
-    flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
+    //bool flange2tcp_calibrated = false, 
+    //flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
+    //tracker2tcp_calibration_->get_calibrated(tracker2tcp_calibrated);
+
+    bool tracker2tcp_calibrated = false;
     tracker2tcp_calibration_->get_calibrated(tracker2tcp_calibrated);
-    if (!flange2tcp_calibrated || !tracker2tcp_calibrated)
+    // if (!flange2tcp_calibrated || !tracker2tcp_calibrated)
+    if (!tracker2tcp_calibrated)
     {
         std::cout << "flange2tcp and tracker2tcp need to be calibrated first" << std::endl;
         return;
@@ -502,6 +508,7 @@ void MainWindow::slot_mark_point()
     QPushButton* btn = qobject_cast<QPushButton*>(obj);
     if (!btn) return;
     int index = mark_buttons_.indexOf(btn);
+    std::cout << "mark button index: " << index << std::endl;
     if (index < 0)
     {
         std::cout << "Invalid button clicked" << std::endl;
@@ -510,12 +517,17 @@ void MainWindow::slot_mark_point()
 
     // 获取机器人当前点位
     std::vector<double> cur_rob_pos;
+    cur_rob_pos.resize(7);
     if (!comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
     {
+        std::cout << "cur_rob_pos: " << cur_rob_pos.at(0) << ", "
+                  << cur_rob_pos.at(1) << ", " << cur_rob_pos.at(2) << ", "
+                  << cur_rob_pos.at(3) << ", " << cur_rob_pos.at(4) << ", "
+                  << cur_rob_pos.at(5) << std::endl;
         CartesianPosition position(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2));
         CartesianOrientation orientation(cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
-        calibration_manager_->set_robot_calibration_positon(index+1, position);
-        calibration_manager_->set_robot_calibration_orientation(index+1, orientation);
+        calibration_manager_->set_robot_calibration_positon(index, position);
+        calibration_manager_->set_robot_calibration_orientation(index, orientation);
     }
     
     // 获取 Tracker 当前位姿的旋转矩阵
@@ -549,7 +561,7 @@ void MainWindow::slot_tracker2tcp_mark_point()
     tracker2tcp_calibration_->set_calibration_pose(size, pose);
     std::cout << "point" << size << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
                 << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
-    ui->label_tracker2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(size + 1));
+    ui->label_tracker2tcp_marked_num->setText(QString("需7个点,已记录点数: %1").arg(size + 1));
 }
 
 void MainWindow::slot_tracker2tcp_calibrate()
@@ -572,6 +584,7 @@ void MainWindow::slot_tracker2tcp_calibrate()
 void MainWindow::slot_tracker2tcp_delete_calib_result()
 {
     tracker2tcp_calibration_->clear_calibration_pose();
+    ui->label_tracker2tcp_marked_num->setText(QString("需7个点,已记录点数: %1").arg(0));
 }
 
 void MainWindow::slot_tracker2tcp_save_calib_result()
@@ -579,7 +592,7 @@ void MainWindow::slot_tracker2tcp_save_calib_result()
     tracker2tcp_calibration_->get_calibrated(calibration_config_->tracker2tcp.calibrated);
     tracker2tcp_calibration_->get_ori_calibration_matrix(*calibration_config_->tracker2tcp.orientation_calibration_matrix);
     tracker2tcp_calibration_->get_calibration_pos_vec(*calibration_config_->tracker2tcp.position_calibration_vector);
-    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
+    CalibrationConfigAsync::save_async(D_CONFIG_CALIBRATION_PATH, calibration_config_.get());
 }
 
 void MainWindow::slot_flange2tcp_mark_point()
@@ -588,11 +601,15 @@ void MainWindow::slot_flange2tcp_mark_point()
     flange2tcp_calibration_->get_calibration_poses(mark_poses);
     int size = mark_poses.size();
     std::vector<double> cur_rob_pos;
+    cur_rob_pos.resize(7);
     if (!comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
     {
         CartesianPose pose(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2),
                             cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
+        std::cout << "flange2tcp_mark_point: " << size << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                    << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
         flange2tcp_calibration_->set_calibration_pose(size, pose);
+        ui->label_flange2tcp_marked_num->setText(QString("需7个点,已记录点数: %1").arg(size + 1));
     }
 }
 
@@ -613,13 +630,14 @@ void MainWindow::slot_flange2tcp_calibrate()
 void MainWindow::slot_flange2tcp_delete_calib_result()
 {
     flange2tcp_calibration_->clear_calibration_pose();
+    ui->label_flange2tcp_marked_num->setText(QString("需7个点,已记录点数: %1").arg(0));
 }
 
 void MainWindow::slot_flange2tcp_save_calib_result()
 {
     flange2tcp_calibration_->get_calibrated(calibration_config_->flange2tcp.calibrated);
     flange2tcp_calibration_->get_ori_calibration_matrix(*calibration_config_->flange2tcp.calibration_matrix);
-    CalibrationConfigAsync::save_async(D_CONFIG_BASE_PATH, calibration_config_.get());
+    CalibrationConfigAsync::save_async(D_CONFIG_CALIBRATION_PATH, calibration_config_.get());
 }
 
 void MainWindow::slot_track_pose_timeout()
@@ -660,11 +678,16 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
     
     // 获取当前机器人位姿
     std::vector<double> cur_rob_pos;
+    cur_rob_pos.resize(7);
     if (comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
     {
         std::cerr << "nrc get current position robot" << std::endl;
         return;
     }
+    std::cout << "cur_rob_pos: " << cur_rob_pos.at(0) << ", "
+              << cur_rob_pos.at(1) << ", " << cur_rob_pos.at(2) << ", "
+              << cur_rob_pos.at(3) << ", " << cur_rob_pos.at(4) << ", "
+              << cur_rob_pos.at(5) << std::endl;
     CartesianPose pose(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2),
                             cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
 
@@ -692,22 +715,6 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
     // 计算TCP在机器人基座标下的姿态补偿
     calibration_manager_->set_calibration_orientation(pose.orientation, tcp2rbase_pose.orientation);
     calibration_manager_->calculate_orientation_offset_matrix();
-}
-
-void MainWindow::slot_use_tracker2tcp(bool)
-{
-    if (ui->checkBox_use_track2tcp->isChecked())
-    {
-        std::cout << "use_track2tcp_ is_checked true" << std::endl;
-        use_track2tcp_ = true;
-        Eigen::Vector4d tcp2tracker_pos_vec(-6.32326, 37.9684, -264.24, 1);
-        tracker2tcp_calibration_->set_calibration_pos_vec(tcp2tracker_pos_vec);
-    }
-    else
-    {
-        std::cout << "use_track2tcp_ is_checked false" << std::endl;
-        use_track2tcp_ = false;
-    }
 }
 
 void MainWindow::slot_vive_tracker_reader_interval()
@@ -766,11 +773,16 @@ void MainWindow::slot_linear_error_compute()
 {
     // 获取机器人当前点位
     std::vector<double> cur_rob_pos;
+    cur_rob_pos.resize(7);
     if (comm_->nrc_get_current_position_robot(NRC_FIRST_ROBOT, NRC_PCS, cur_rob_pos))
     {
         return;
     }
 
+    std::cout << "cur_rob_pos: " << cur_rob_pos.at(0) << ", "
+              << cur_rob_pos.at(1) << ", " << cur_rob_pos.at(2) << ", "
+              << cur_rob_pos.at(3) << ", " << cur_rob_pos.at(4) << ", "
+              << cur_rob_pos.at(5) << std::endl;
     CartesianPose pose(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2),
                                     cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
     
@@ -821,4 +833,19 @@ void MainWindow::slot_linear_error_compute()
     linear_error_ = std::sqrt(x * x + y * y + z * z);
     std::cout << "#### linear_error: " << linear_error_ << std::endl;
     ui->label_linear_error->setText(QString::number(linear_error_, 'f', 2));
+}
+
+void MainWindow::slot_tracker2tcp_mark_pose_use_hand_filled()
+{
+    double x = ui->lineEdit_hand_filled_x->text().toDouble();
+    double y = ui->lineEdit_hand_filled_y->text().toDouble();
+    double z = ui->lineEdit_hand_filled_z->text().toDouble();
+    // 手动填写追踪器相对于TCP的位姿
+    Eigen::Vector4d tcp2tracker_pos_vec(x, y, z, 1);
+    std::cout << "tcp2tracker_pos_vec: ["
+                << tcp2tracker_pos_vec.x() << ", "
+                << tcp2tracker_pos_vec.y() << ", "
+                << tcp2tracker_pos_vec.z() << "]" << std::endl;
+
+    tracker2tcp_calibration_->set_calibration_pos_vec(tcp2tracker_pos_vec);
 }

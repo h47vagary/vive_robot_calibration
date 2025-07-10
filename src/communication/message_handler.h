@@ -21,6 +21,7 @@
 #include "common_header.h"
 
 #define CONTROLLER_IP "192.168.1.13"
+//#define CONTROLLER_IP "192.168.80.135"
 #define CONTROLLER_PORT "6001"
 #define CONTROLLER_SERIAL_ID 0x9206
 #define CONTROLLER_RECEIVE_ID 0x9208

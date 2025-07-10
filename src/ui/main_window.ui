@@ -32,7 +32,7 @@
        <property name="title">
         <string>机器人基座标与定位器基座标标定</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,2,2,2,2" columnstretch="1,1,1,3,3,3" rowminimumheight="0,0,0,0,0" columnminimumwidth="1,1,1,1,1,1">
+       <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,0,0,0,0" columnstretch="1,1,1,1,1,1">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinAndMaxSize</enum>
         </property>
@@ -45,90 +45,6 @@
         <property name="spacing">
          <number>6</number>
         </property>
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="4">
-         <spacer name="horizontalSpacer_9">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="3">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pushButton_mark_point1">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定点一</string>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>16</width>
-            <height>16</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="pushButton_mark_point2">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定点二</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="pushButton_mark_point3">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定点三</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <widget class="QPushButton" name="pushButton_mark_point5">
           <property name="minimumSize">
@@ -142,255 +58,8 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="pushButton_save_mark_result">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>保存标定结果</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="pushButton_compute">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>计算</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="1" column="5">
          <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_mark_point4">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定点四</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" colspan="2">
-         <widget class="QLabel" name="label_calibration_error_tag">
-          <property name="text">
-           <string>标定误差</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="5">
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="4">
-         <spacer name="horizontalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="3">
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton_mark_point6">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>标定点六</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="3" column="4">
-         <widget class="QCheckBox" name="checkBox_use_track2tcp">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>追踪器转置TCP点位</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="pushButton_delete_mark_result">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>删除标定结果</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="QLabel" name="label_calibration_error">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="5">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="2">
-         <spacer name="horizontalSpacer_11">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_linear_error_tag">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>96</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>线性误差</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLabel" name="label_linear_error">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="2">
-         <widget class="QPushButton" name="pushButton_once_get">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>32</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>获取</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3">
-         <spacer name="horizontalSpacer_12">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -415,8 +84,336 @@
           </property>
          </spacer>
         </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton_delete_mark_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>删除标定结果</string>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="5">
          <spacer name="horizontalSpacer_14">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="5">
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="4">
+         <spacer name="horizontalSpacer_9">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="pushButton_save_mark_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>保存标定结果</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton_compute">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>计算</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButton_mark_point1">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定点一</string>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>16</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="5">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="pushButton_mark_point6">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定点六</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="5">
+         <spacer name="horizontalSpacer_10">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="pushButton_mark_point3">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定点三</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_mark_point4">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定点四</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_calibration_error_tag">
+          <property name="text">
+           <string>标定误差</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pushButton_mark_point2">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>标定点二</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="label_calibration_error">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="QLabel" name="label_linear_error">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <spacer name="horizontalSpacer_21">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="3">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="4">
+         <spacer name="horizontalSpacer_20">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="4">
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="label_linear_error_tag">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>96</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>线性误差</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="pushButton_once_get">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>获取</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <spacer name="horizontalSpacer_12">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -433,26 +430,16 @@
       <widget class="QGroupBox" name="groupBox_tracker2tcp_calib">
        <property name="geometry">
         <rect>
-         <x>750</x>
+         <x>730</x>
          <y>20</y>
-         <width>391</width>
-         <height>171</height>
+         <width>411</width>
+         <height>211</height>
         </rect>
        </property>
        <property name="title">
         <string>Tracker &lt;-&gt; TCP 标定</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,1,1" columnstretch="1,1,1">
-        <item row="0" column="1" colspan="2">
-         <widget class="QLabel" name="label_tracker2tcp_marked_num">
-          <property name="text">
-           <string>需6个点,已记录点数: 0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
+       <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,1,1,1" columnstretch="1,1,1,1">
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_tracker2tcp_markpoint">
           <property name="minimumSize">
@@ -466,20 +453,37 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="pushButton_tracker2tcp_clear_result">
+        <item row="3" column="3">
+         <widget class="QLineEdit" name="lineEdit_hand_filled_z">
           <property name="minimumSize">
            <size>
             <width>96</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>清除标定结果</string>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLineEdit" name="lineEdit_hand_filled_y">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="lineEdit_hand_filled_x">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
          <widget class="QPushButton" name="pushButton_tracker2tcp_save_result">
           <property name="minimumSize">
            <size>
@@ -492,20 +496,73 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <spacer name="horizontalSpacer_16">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+        <item row="1" column="3">
+         <widget class="QPushButton" name="pushButton_tracker2tcp_clear_result">
+          <property name="minimumSize">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>96</width>
+            <height>40</height>
            </size>
           </property>
-         </spacer>
+          <property name="text">
+           <string>清除标定结果</string>
+          </property>
+         </widget>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_hand_filled">
+          <property name="text">
+           <string>手填参数</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="lineEdit_hand_filled_x_tag">
+          <property name="text">
+           <string>x</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="lineEdit_hand_filled_y_tag">
+          <property name="text">
+           <string>y</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLabel" name="lineEdit_hand_filled_z_tag">
+          <property name="text">
+           <string>z</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton_hand_filled">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>写入</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
          <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_ori">
           <property name="minimumSize">
            <size>
@@ -518,7 +575,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="1" column="0">
          <widget class="QPushButton" name="pushButton_tracker2tcp_calibrate_pos">
           <property name="minimumSize">
            <size>
@@ -531,36 +588,8 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <spacer name="horizontalSpacer_19">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
-       <property name="geometry">
-        <rect>
-         <x>750</x>
-         <y>200</y>
-         <width>391</width>
-         <height>171</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>法兰盘 &lt;-&gt; TCP 标定</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1">
-        <item row="0" column="1" colspan="2">
-         <widget class="QLabel" name="label_flange2tcp_marked_num">
+        <item row="0" column="1" colspan="3">
+         <widget class="QLabel" name="label_tracker2tcp_marked_num">
           <property name="text">
            <string>需6个点,已记录点数: 0</string>
           </property>
@@ -569,19 +598,21 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="pushButton_flange2tcp_clear_result">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>清除标定结果</string>
-          </property>
-         </widget>
-        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_flang2tcp_calib">
+       <property name="geometry">
+        <rect>
+         <x>730</x>
+         <y>240</y>
+         <width>411</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>法兰盘 &lt;-&gt; TCP 标定</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1">
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_flange2tcp_markpoint">
           <property name="minimumSize">
@@ -595,42 +626,13 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <spacer name="horizontalSpacer_17">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="2">
-         <spacer name="horizontalSpacer_15">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="3" column="1">
-         <widget class="QPushButton" name="pushButton_flange2tcp_save_result">
-          <property name="minimumSize">
-           <size>
-            <width>96</width>
-            <height>40</height>
-           </size>
-          </property>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="label_flange2tcp_marked_num">
           <property name="text">
-           <string>保存标定结果</string>
+           <string>需6个点,已记录点数: 0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -647,18 +649,31 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <spacer name="horizontalSpacer_18">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+        <item row="1" column="2">
+         <widget class="QPushButton" name="pushButton_flange2tcp_clear_result">
+          <property name="minimumSize">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>96</width>
+            <height>40</height>
            </size>
           </property>
-         </spacer>
+          <property name="text">
+           <string>清除标定结果</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton_flange2tcp_save_result">
+          <property name="minimumSize">
+           <size>
+            <width>96</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>保存标定结果</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1084,7 +1099,7 @@
       <widget class="QPushButton" name="pushButton_disconnect_ctr">
        <property name="geometry">
         <rect>
-         <x>1050</x>
+         <x>1040</x>
          <y>100</y>
          <width>96</width>
          <height>40</height>
