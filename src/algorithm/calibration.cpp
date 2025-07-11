@@ -20,19 +20,16 @@ int CalibrationManager::calibrate(double rz, double &error_out)
     int result;
     if(c_calibration_method == 0)
     {
-        //std::cout << "使用基于Rz值和位置的标定" << std::endl;
         std::cout << "use calibration based on Rz value and position" << std::endl;
         result = calculate_position_calibration_matrix(rz, error_out);
     }
     else if(c_calibration_method == 1)
     {
-        // std::cout << "使用九点标定" << std::endl;
         std::cout << "use nine-point calibration" << std::endl;
         result = calculate_position_calibration_matrix(error_out);
     }
     else if(c_calibration_method == 2)
     {
-        //std::cout << "使用SVD标定" << std::endl;
         std::cout << "use svd calibration" << std::endl;
         result = calculate_position_calibration_matrix_svd(error_out);
     }

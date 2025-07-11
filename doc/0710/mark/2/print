@@ -1,0 +1,25 @@
+PS E:\iNexbot\Project\VIVE_Spray\vive_robot_calibration\build> ."E:/iNexbot/Project/VIVE_Spray/vive_robot_calibration/build/vive_robot_calibration.exe"
+MainWindow constructed
+CSVParserWindow
+CSVParserWindow
+CSVParserWindow
+CSVParserWindow
+Calibration config loaded successfully.
+slot_connect_ctr
+[MessageHandler] Thread started.
+[MessageHandler] Connected to controller
+point0 x:10.9981 y:-746.476 z:-1526.66 A:0.530695 B:0.026507 C:-1.59072
+point1 x:6.97898 y:-763.939 z:-1587.5 A:-0.0779656 B:0.0237131 C:-1.54248
+point2 x:17.5304 y:-787.645 z:-1478.91 A:1.28855 B:-0.0309715 C:-1.6252
+point3 x:-46.4707 y:-758.542 z:-1511.4 A:0.488661 B:0.309624 C:-1.0604
+point4 x:10.7599 y:-745.453 z:-1524.62 A:0.530198 B:0.0266968 C:-1.5908
+point5 x:102.679 y:-746.77 z:-1534.16 A:0.528681 B:0.0255111 C:-1.5915
+point6 x:92.8256 y:-742.741 z:-1651.18 A:0.529759 B:0.0267816 C:-1.59051
+Sphere
+x1: 10.9981 *px: -10.3494 x1-*px: 21.3474
+y1: -746.476 *py: -813.162 y1-*py: 66.6862
+z1: -1526.66 *pz: -1539.17 z1-*pz: 12.5142
+tool_calculate_7points ox: -10.3494 oy: -813.162 oz: -1539.17
+tracker2tcp calibrate success
+tcp2tracker_vec: [64.2724, -20.6718, 22.3853]
+PS E:\iNexbot\Project\VIVE_Spray\vive_robot_calibration\build> 
