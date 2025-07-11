@@ -330,7 +330,7 @@ void MainWindow::slot_end_record()
 
     // 插补
     std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
-    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    if (ui->checkBox_label_interpolation_interval->isChecked())
     {
         LinearPoseInterpolator polator(ui->lineEdit_label_interpolation_interval->text().toUInt());
         polator.interpolate_with_quaternion(poses_tcp2rb_timestampe, poses_tcp2rb_timestampe_interpolation);
@@ -351,7 +351,7 @@ void MainWindow::slot_end_record()
     // 保存文件
     vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_timestampe);
     vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
-    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    if (ui->checkBox_label_interpolation_interval->isChecked())
     {
         vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
         vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
@@ -368,7 +368,7 @@ void MainWindow::slot_end_record()
     csv_parser_window_vive2robot->plotData();
     csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
 
-    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    if (ui->checkBox_label_interpolation_interval->isChecked())
     {
         csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
         csv_parser_window_vive2robot_inter->show();
@@ -401,7 +401,7 @@ void MainWindow::slot_end_record()
     }
     // interpolate
     std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
-    if (ui->checkBox_label_interpolation_interval->isCheckable())
+    if (ui->checkBox_label_interpolation_interval->isChecked())
     {
         LinearPoseInterpolator polator(ui->lineEdit_label_interpolation_interval->text().toUInt());
         polator.interpolate_with_quaternion(poses_tcp2rb_timestampe, poses_tcp2rb_timestampe_interpolation);
@@ -420,39 +420,45 @@ void MainWindow::slot_end_record()
     // save to file
     vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_timestampe);
     vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
-    if (ui->checkBox_label_interpolation_interval->isCheckable())
-    {
+
+    if (ui->checkBox_label_interpolation_interval->isChecked())
         vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
+
+    if (ui->checkBox_filtering->isChecked())
         vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
-    }
+    
     // clear cache
     vive_tracker_reader_->clear_recorded_poses();
     poses_tcp2rb.clear();
+    
     // show chart
-    if (ui->checkBox_end_with_chart->isCheckable())
+    if (!ui->checkBox_end_with_chart->isChecked())
+        return;
+
+    csv_parser_window_vive->loadData("vive_traj.csv");
+    csv_parser_window_vive->show();
+    csv_parser_window_vive->plotData();
+    csv_parser_window_vive->setWindowTitle("vive数据曲线");
+
+    csv_parser_window_vive2robot->loadData("vive_traj2robot.csv");
+    csv_parser_window_vive2robot->show();
+    csv_parser_window_vive2robot->plotData();
+    csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
+
+    if (ui->checkBox_label_interpolation_interval->isChecked())
     {
-        csv_parser_window_vive->loadData("vive_traj.csv");
-        csv_parser_window_vive->show();
-        csv_parser_window_vive->plotData();
-        csv_parser_window_vive->setWindowTitle("vive数据曲线");
-
-        csv_parser_window_vive2robot->loadData("vive_traj2robot.csv");
-        csv_parser_window_vive2robot->show();
-        csv_parser_window_vive2robot->plotData();
-        csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
-
-        if (ui->checkBox_label_interpolation_interval->isCheckable())
-        {
-            csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
-            csv_parser_window_vive2robot_inter->show();
-            csv_parser_window_vive2robot_inter->plotData();
-            csv_parser_window_vive2robot_inter->setWindowTitle("vive2robot_插补_数据曲线");
-
-            csv_parser_window_vive2robot_inter_filter->loadData("vive_traj2robot_interpolation_filted.csv");
-            csv_parser_window_vive2robot_inter_filter->show();
-            csv_parser_window_vive2robot_inter_filter->plotData();
-            csv_parser_window_vive2robot_inter_filter->setWindowTitle("vive2robot_插补_二次滤波_数据曲线");
-        }
+        csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
+        csv_parser_window_vive2robot_inter->show();
+        csv_parser_window_vive2robot_inter->plotData();
+        csv_parser_window_vive2robot_inter->setWindowTitle("vive2robot_插补_数据曲线");
+    }
+    
+    if (ui->checkBox_filtering->isChecked())
+    {
+        csv_parser_window_vive2robot_inter_filter->loadData("vive_traj2robot_interpolation_filted.csv");
+        csv_parser_window_vive2robot_inter_filter->show();
+        csv_parser_window_vive2robot_inter_filter->plotData();
+        csv_parser_window_vive2robot_inter_filter->setWindowTitle("vive2robot_插补_二次滤波_数据曲线");
     }
 #endif
 }

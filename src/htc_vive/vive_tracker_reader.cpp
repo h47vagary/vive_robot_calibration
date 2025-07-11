@@ -232,7 +232,7 @@ bool ViveTrackerReader::save_record_poses_to_file(const std::string &filename, s
         uint64_t delta_ms = 0;
         if (i > 0)
         {
-            delta_ms = curr_timestamp - last_timestamp;
+            delta_ms = (curr_timestamp - last_timestamp);
         }
 
         file << timestampe_pose.pose.position.x << ","
@@ -308,30 +308,31 @@ void ViveTrackerReader::read_loop()
             bool ok = false;
 
             auto fetch_start = std::chrono::steady_clock::now();
-            if (pose_fetch_mode_ == PoseFetchMode::Blocking) 
+            if (pose_fetch_mode_ == PoseFetchMode::Blocking)
             {
                 ok = vive_get_pose_euler(&x, &y, &z, &A, &B, &C, &button_mask);
-            } 
+            }
             else
             {
                 ok = vive_get_pose_euler_non_blocking(&x, &y, &z, &A, &B, &C, &button_mask);
             }
             auto fetch_end = std::chrono::steady_clock::now();
-            auto fetch_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(fetch_end - fetch_start).count();
-            // std::cout << "[POSE FETCH] Duration: " << fetch_duration_us << " us"
+            auto fetch_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(fetch_end - fetch_start).count();
+            // std::cout << "[POSE FETCH] Duration: " << fetch_duration_ms << " ms"
             // << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
             // << " | OK: " << ok << " | x: " << x << " | y: " << y << " | z: " << z << " | A: " << A << " | B: " << B << " | C: " << C << std::endl;
 
 
             // 处理按钮状态变化
-            uint64_t changed_mask = button_mask ^ last_button_mask_;
-            if (changed_mask != 0) 
+            uint64_t changed_mask = button_mask ^ last_button_mask_;    // 找出变化的按钮
+            if (changed_mask != 0)      // 如果有按钮状态变化
             {
+                // 执行逻辑接口
                 auto invoke_callbacks = [&] (TrackerButton btn, uint64_t bit) {
-                    bool now_pressed = (button_mask & bit) != 0;
-                    if (changed_mask & bit) 
+                    bool now_pressed = (button_mask & bit) != 0;        // 当前按钮是否按下
+                    if (changed_mask & bit)     // changed_mask 中包含当前变化的按钮  // bit 代表当前检查的按钮   // 或: 代表检查的按钮是否变化
                     {
-                        for (auto& cb : button_callbacks_) 
+                        for (auto& cb : button_callbacks_)  // 触发该按钮所有的回调
                         {
                             cb(btn, now_pressed);
                         }
@@ -371,7 +372,7 @@ void ViveTrackerReader::read_loop()
                 {
                     recorded_poses_[record_count_].pose = pose;
                     recorded_poses_[record_count_].timestamp_ms = 
-                        std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::duration_cast<std::chrono::milliseconds>(
                             loop_start.time_since_epoch()).count();
                     recorded_poses_[record_count_].button_mask = button_mask;
                     record_count_++;
@@ -383,19 +384,19 @@ void ViveTrackerReader::read_loop()
             if (frame_count % STATS_INTERVAL == 0)
             {
                 auto now = std::chrono::steady_clock::now();
-                auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - stats_start).count();
-                
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - stats_start).count();
+
                 // 防止除以零和异常大的时间差
                 if (elapsed < 1000) elapsed = 1000; // 最小1ms防止计算异常
                 
-                double fps = STATS_INTERVAL / (elapsed / 1e6);
-                int64_t jitter = std::chrono::duration_cast<std::chrono::microseconds>(
+                double fps = STATS_INTERVAL / (elapsed / 1000.0);
+                int64_t jitter = std::chrono::duration_cast<std::chrono::milliseconds>(
                     now - next_loop_time).count();
                 
                 std::cout << "Tracker FPS: " << fps 
                           << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
                           << " | Buffer: " << record_count_ << "/" << max_record_size_
-                          << " | Loop jitter: " << jitter << "us"
+                          << " | Loop jitter: " << jitter << "ms"
                           << std::endl;
                  
                 stats_start = now;
@@ -408,7 +409,7 @@ void ViveTrackerReader::read_loop()
             std::this_thread::sleep_until(next_loop_time);
         } else {
             // std::cerr << "Frame overrun by " 
-            //           << std::chrono::duration_cast<std::chrono::microseconds>(
+            //           << std::chrono::duration_cast<std::chrono::milliseconds>(
             //               now - next_loop_time).count() 
             //           << "us" << std::endl;
         }

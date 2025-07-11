@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <openvr.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,15 +21,15 @@ class ViveTrackerReader
 public:
     // 点位采集
     enum class PoseFetchMode {
-        Blocking,               // 阻塞式接口   vive_get_pose_euler
-        NonBlocking,            // 非阻塞式接口 vive_get_pose_euler_non_blocking
+        Blocking,                       // 阻塞式接口   vive_get_pose_euler
+        NonBlocking,                    // 非阻塞式接口 vive_get_pose_euler_non_blocking
     };
 
     // 追踪器按钮
     enum class TrackerButton {
-        Trigger,                // 扳机按钮     k_EButton_SteamVR_Trigger
-        Grip,                   // 握持按钮     k_EButton_Grip
-        Touchpad,               // 触摸板       k_EButton_SteamVR_Touchpad
+        Trigger,                      // 扳机按钮   vr::k_EButton_SteamVR_Trigger
+        Grip,                         // 握持按钮   vr::k_EButton_Grip
+        Touchpad,                     // 触摸板     vr::k_EButton_SteamVR_Touchpad
     };
 
     ViveTrackerReader();
