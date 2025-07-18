@@ -48,12 +48,59 @@ void MovingAverageFilter::filter_orientation(std::vector<CartesianPose>& traject
 {
     if (trajectory.empty()) return;
 
-    MovingAverageFilter fx(window_size_), fy(window_size_), fz(window_size_), fw(window_size_);
-    for (auto& pose : trajectory)
+    // 四元数滑动窗口滤波器
+    MovingAverageFilter fx_q(window_size_);
+    MovingAverageFilter fy_q(window_size_);
+    MovingAverageFilter fz_q(window_size_);
+    MovingAverageFilter fw_q(window_size_);
+
+    Quaternion q_prev, q_cur, q_filtered;
+
+    // 处理第一个点
+    Utils::euler_ABC_to_quaternion(trajectory[0].orientation.A,
+                                   trajectory[0].orientation.B,
+                                   trajectory[0].orientation.C,
+                                   q_cur);
+
+    // 填入初始值
+    q_filtered.x = fx_q.update(q_cur.x);
+    q_filtered.y = fy_q.update(q_cur.y);
+    q_filtered.z = fz_q.update(q_cur.z);
+    q_filtered.w = fw_q.update(q_cur.w);
+    q_filtered.normalize();
+
+    Utils::quaternion_to_euler_ABC(q_filtered,
+                                   trajectory[0].orientation.A,
+                                   trajectory[0].orientation.B,
+                                   trajectory[0].orientation.C);
+
+    q_prev = q_cur;
+
+    for (size_t i = 1; i < trajectory.size(); ++i)
     {
-        pose.orientation.A = fx.update(pose.orientation.A);
-        pose.orientation.B = fy.update(pose.orientation.B);
-        pose.orientation.C = fz.update(pose.orientation.C);
+        Utils::euler_ABC_to_quaternion(trajectory[i].orientation.A,
+                                       trajectory[i].orientation.B,
+                                       trajectory[i].orientation.C,
+                                       q_cur);
+
+        // 保证方向一致，避免跳变
+        if (q_prev.dot(q_cur) < 0)
+        {
+            q_cur = -q_cur;
+        }
+
+        q_filtered.x = fx_q.update(q_cur.x);
+        q_filtered.y = fy_q.update(q_cur.y);
+        q_filtered.z = fz_q.update(q_cur.z);
+        q_filtered.w = fw_q.update(q_cur.w);
+        q_filtered.normalize();
+
+        Utils::quaternion_to_euler_ABC(q_filtered,
+                                       trajectory[i].orientation.A,
+                                       trajectory[i].orientation.B,
+                                       trajectory[i].orientation.C);
+
+        q_prev = q_cur;
     }
 }
 
