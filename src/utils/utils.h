@@ -103,6 +103,7 @@ void euler_RPY_to_matrix(const double &roll, const double &pitch, const double &
 
 void matrix_to_eular_ABC(const Eigen::Matrix3d &matrix, double &A, double &B, double &C);
 void matrix_to_eular_RPY(const Eigen::Matrix3d &matrix, double &roll, double &pitch, double &yaw);
+void matrix_to_quaternion(const Eigen::Matrix3d &matrix, Quaternion &quat);
 
 void euler_ABC_to_quaternion(const double &A, const double &B, const double &C, Quaternion &quat);
 void quaternion_to_euler_ABC(const Quaternion &quat, double &A, double &B, double &C);

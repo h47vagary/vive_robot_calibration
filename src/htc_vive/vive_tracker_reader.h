@@ -30,6 +30,7 @@ public:
         Trigger,                      // 扳机按钮   vr::k_EButton_SteamVR_Trigger
         Grip,                         // 握持按钮   vr::k_EButton_Grip
         Touchpad,                     // 触摸板     vr::k_EButton_SteamVR_Touchpad
+        Menu,                         // 菜单键     vr::k_EButton_ApplicationMenu
     };
 
     ViveTrackerReader();

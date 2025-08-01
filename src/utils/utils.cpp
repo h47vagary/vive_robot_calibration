@@ -49,6 +49,16 @@ void Utils::matrix_to_eular_RPY(const Eigen::Matrix3d &matrix, double &roll, dou
     roll = atan2(matrix(2, 1), matrix(2, 2));
 }
 
+void Utils::matrix_to_quaternion(const Eigen::Matrix3d &matrix, Quaternion &quat)
+{
+    Eigen::Quaterniond quaternion(matrix);
+    quat.w = quaternion.w();
+    quat.x = quaternion.x();
+    quat.y = quaternion.y();
+    quat.z = quaternion.z();
+    quat = quat.normalize();
+}
+
 void Utils::euler_ABC_to_quaternion(const double &A, const double &B, const double &C, Quaternion &quat)
 {
     Eigen::Matrix3d matrix;

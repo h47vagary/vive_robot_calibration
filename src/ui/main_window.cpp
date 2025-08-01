@@ -45,7 +45,10 @@ MainWindow::MainWindow(QWidget  *parent)
     vive_tracker_reader_->register_button_callback([](ViveTrackerReader::TrackerButton btn, bool pressed) 
     {
         std::string btn_name = (btn == ViveTrackerReader::TrackerButton::Trigger ? "Trigger" :
-                            btn == ViveTrackerReader::TrackerButton::Grip ? "Grip" : "Touchpad");
+                            btn == ViveTrackerReader::TrackerButton::Grip ? "Grip" : 
+                            btn == ViveTrackerReader::TrackerButton::Touchpad ? "Touchpad" :
+                            btn == ViveTrackerReader::TrackerButton::Menu ? "Menu" :
+                            "Unknown");
         std::cout << "Button " << btn_name << (pressed ? " pressed" : " released") << std::endl;
     });
 
@@ -105,6 +108,7 @@ Eigen::Matrix4d MainWindow::get_tracker2tcp_rotation_matrix()
 
 void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &device_poses, std::vector<CartesianPose> &robot_poses)
 {
+    std::cout << __FUNCTION__ << std::endl;
     // TCP 相对于追踪器的位置变换
     Eigen::Vector4d pos_vec;
     tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
@@ -118,7 +122,9 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
     // 获取TCP姿态补偿矩阵
     Eigen::Matrix3d orientation_offset_matrix;
     calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
+    std::cout << "orientation_offset_matrix: " << std::endl << orientation_offset_matrix << std::endl;
 
+    static int index = 1;
     for (auto iter : device_poses)
     {
         // 将追踪器位姿转为矩阵
@@ -132,14 +138,22 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
         Eigen::Matrix3d tcp2robotbase_ori_mat = tcp2robotbase_pos_mat.block<3, 3>(0, 0);
 
         // 进行补偿TCP姿态
+        std::cout << "====================== Begin << " << index << " =====================" << std::endl;
+        std::cout << "tcp2robotbase_ori_mat: " << std::endl << tcp2robotbase_ori_mat << std::endl;
         Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix;
+        std::cout << "tcp2robotbase_ori_mat_offset: " << std::endl << tcp2robotbase_ori_mat_offset << std::endl;
+        std::cout << "orientation_offset_matrix: " << std::endl << orientation_offset_matrix << std::endl;
         Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
         tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
         tcp2robotbase_mat.block<3, 1>(0, 3) = tcp2robotbase_pos_mat.block<3, 1>(0, 3);
+        std::cout << "tcp2robotbase_mat: " << std::endl << tcp2robotbase_mat << std::endl;
         CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-
+        std::cout << "robot_tcp_pose: " << "A: " << robot_tcp_pose.orientation.A << " B: " << robot_tcp_pose.orientation.B << " C: " << robot_tcp_pose.orientation.C << std::endl;
         robot_poses.push_back(robot_tcp_pose);
+        std::cout << "====================== End << " << index << " =======================" << std::endl;
+        index++;
     }
+    index = 1; // 重置索引
 }
 
 void MainWindow::filter_poses(std::vector<CartesianPose> &poses, bool is_filtering)

@@ -342,6 +342,7 @@ void ViveTrackerReader::read_loop()
                 invoke_callbacks(TrackerButton::Trigger,    vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Trigger));
                 invoke_callbacks(TrackerButton::Grip,       vr::ButtonMaskFromId(vr::k_EButton_Grip));
                 invoke_callbacks(TrackerButton::Touchpad,   vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad));
+                invoke_callbacks(TrackerButton::Menu,       vr::ButtonMaskFromId(vr::k_EButton_ApplicationMenu));
 
                 // 最后更新上一帧的按键状态
                 last_button_mask_ = button_mask;

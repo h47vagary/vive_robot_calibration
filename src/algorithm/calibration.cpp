@@ -111,6 +111,14 @@ void CalibrationManager::device_pose_to_robot_pose(const CartesianPosition &devi
     Eigen::Matrix3d device_orientation_matrix, robot_orientation_matrix;
     cartesian_orientation_to_matrix(device_orientation, device_orientation_matrix);
     robot_orientation_matrix = *orientation_offset_matrix_ * device_orientation_matrix;
+
+    std::cout << std::endl;
+    std::cout << "===============device_pose_to_robot_pose begin=======================" << std::endl;
+    std::cout << "device_orientation: " << device_orientation.A << device_orientation.B << device_orientation.C << std::endl;
+    std::cout << "device_orientation_matrix: " << std::endl << device_orientation_matrix << std::endl;
+    std::cout << "*orientation_offset_matrix_: " << std::endl << *orientation_offset_matrix_ << std::endl;
+    std::cout << "robot_orientation_matrix: " << std::endl << robot_orientation_matrix << std::endl;
+    std::cout << "===============device_pose_to_robot_pose end=======================" << std::endl;
     matrix_to_cartesian_orientation(robot_orientation_matrix, robot_pose.orientation);
 }
 
