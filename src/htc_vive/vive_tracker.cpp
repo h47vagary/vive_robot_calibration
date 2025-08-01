@@ -54,8 +54,8 @@ bool ViveTracker::find_tracker()
     return false;
 }
 
-bool ViveTracker::get_pose(float& x, float& y, float& z,
-                           float& qx, float& qy, float& qz, float& qw,
+bool ViveTracker::get_pose(double& x, double& y, double& z,
+                           double& qx, double& qy, double& qz, double& qw,
                            uint64_t& button_mask)
 {
     if (!vr_system_) 
@@ -126,7 +126,7 @@ bool ViveTracker::get_pose(double &x, double &y, double &z,
     return true;
 }
 
-bool ViveTracker::get_pose_non_blocking(float &x, float &y, float &z, float &qx, float &qy, float &qz, float &qw, uint64_t &button_mask)
+bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double &qx, double &qy, double &qz, double &qw, uint64_t &button_mask)
 {
     if (!vr_system_) 
     {
@@ -221,8 +221,8 @@ bool ViveTracker::get_pose_non_blocking(double &x, double &y, double &z, double 
     return true;
 }
 
-void ViveTracker::quat_inverse(float qx, float qy, float qz, float qw,
-                               float& iqx, float& iqy, float& iqz, float& iqw) const
+void ViveTracker::quat_inverse(double qx, double qy, double qz, double qw,
+                               double& iqx, double& iqy, double& iqz, double& iqw) const
 {
     iqx = -qx;
     iqy = -qy;
@@ -230,9 +230,9 @@ void ViveTracker::quat_inverse(float qx, float qy, float qz, float qw,
     iqw = qw;
 }
 
-void ViveTracker::quat_multiply(float ax, float ay, float az, float aw,
-                                float bx, float by, float bz, float bw,
-                                float& rx, float& ry, float& rz, float& rw) const
+void ViveTracker::quat_multiply(double ax, double ay, double az, double aw,
+                                double bx, double by, double bz, double bw,
+                                double& rx, double& ry, double& rz, double& rw) const
 {
     rw = aw * bw - ax * bx - ay * by - az * bz;
     rx = aw * bx + ax * bw + ay * bz - az * by;
@@ -241,8 +241,8 @@ void ViveTracker::quat_multiply(float ax, float ay, float az, float aw,
 }
 
 void ViveTracker::get_position_and_rotation(const vr::TrackedDevicePose_t& pose,
-                                            float& x, float& y, float& z,
-                                            float& qx, float& qy, float& qz, float& qw) const
+                                            double& x, double& y, double& z,
+                                            double& qx, double& qy, double& qz, double& qw) const
 {
     const vr::HmdMatrix34_t& mat = pose.mDeviceToAbsoluteTracking;
     x = mat.m[0][3];

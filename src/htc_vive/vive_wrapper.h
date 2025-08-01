@@ -57,8 +57,8 @@ bool vive_find_tracker();
  *
  * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
  */
-bool vive_get_pose_quaternion(float* x, float* y, float* z,
-                   float* qx, float* qy, float* qz, float* qw,
+bool vive_get_pose_quaternion(double* x, double* y, double* z,
+                   double* qx, double* qy, double* qz, double* qw,
                    uint64_t* button_mask);
 
 /**
@@ -96,8 +96,8 @@ bool vive_get_pose_euler(double* x, double* y, double* z,
  *
  * @return true 获取成功，false 获取失败或 Tracker 姿态无效。
  */
-bool vive_get_pose_quaternion_non_blocking(float* x, float* y, float* z,
-                               float* qx, float* qy, float* qz, float* qw,
+bool vive_get_pose_quaternion_non_blocking(double* x, double* y, double* z,
+                               double* qx, double* qy, double* qz, double* qw,
                                uint64_t* button_mask);
 
 /**

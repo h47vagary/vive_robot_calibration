@@ -304,6 +304,7 @@ void ViveTrackerReader::read_loop()
 
             // 获取姿态数据
             double x = 0, y = 0, z = 0, A = 0, B = 0, C = 0;
+            double qx = 0, qy = 0, qz = 0, qw = 1;
             uint64_t button_mask = 0;
             bool ok = false;
 
@@ -315,6 +316,7 @@ void ViveTrackerReader::read_loop()
             else
             {
                 ok = vive_get_pose_euler_non_blocking(&x, &y, &z, &A, &B, &C, &button_mask);
+                ok = vive_get_pose_quaternion_non_blocking(&x, &y, &z, &qx, &qy, &qz, &qw, &button_mask);
             }
             auto fetch_end = std::chrono::steady_clock::now();
             auto fetch_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(fetch_end - fetch_start).count();

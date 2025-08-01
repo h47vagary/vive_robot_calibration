@@ -20,8 +20,8 @@ bool vive_find_tracker()
     return g_tracker.find_tracker();
 }
 
-bool vive_get_pose_quaternion(float* x, float* y, float* z,
-                   float* qx, float* qy, float* qz, float* qw,
+bool vive_get_pose_quaternion(double* x, double* y, double* z,
+                   double* qx, double* qy, double* qz, double* qw,
                    uint64_t* button_mask)
 {
     if (!x || !y || !z || !qx || !qy || !qz || !qw || !button_mask)
@@ -38,7 +38,7 @@ bool vive_get_pose_euler(double *x, double *y, double *z, double *A, double *B, 
     return g_tracker.get_pose(*x, *y, *z, *A, *B, *C, *button_mask);
 }
 
-bool vive_get_pose_quaternion_non_blocking(float *x, float *y, float *z, float *qx, float *qy, float *qz, float *qw, uint64_t *button_mask)
+bool vive_get_pose_quaternion_non_blocking(double *x, double *y, double *z, double *qx, double *qy, double *qz, double *qw, uint64_t *button_mask)
 {
     if (!x || !y || !z || !qx || !qy || !qz || !qw || !button_mask)
         return false;

@@ -50,8 +50,8 @@ public:
      * @param[out] button_mask 按钮状态掩码
      * @return 获取成功返回true，失败返回false
      */
-    bool get_pose(float& x, float& y, float& z,
-                  float& qx, float& qy, float& qz, float& qw,
+    bool get_pose(double& x, double& y, double& z,
+                  double& qx, double& qy, double& qz, double& qw,
                   uint64_t& button_mask);
 
     /**
@@ -74,8 +74,8 @@ public:
      * @brief 非阻塞式获取姿态信息(四元数)
      * @note 使用 GetDeviceToAbsoluteTrackingPose() 立即返回当前数据
      */
-    bool get_pose_non_blocking(float& x, float& y, float& z,
-                              float& qx, float& qy, float& qz, float& qw,
+    bool get_pose_non_blocking(double& x, double& y, double& z,
+                              double& qx, double& qy, double& qz, double& qw,
                               uint64_t& button_mask);
 
     /**
@@ -96,22 +96,22 @@ private:
     /**
      * @brief 计算四元数的逆
      */
-    void quat_inverse(float qx, float qy, float qz, float qw,
-                      float& iqx, float& iqy, float& iqz, float& iqw) const;
+    void quat_inverse(double qx, double qy, double qz, double qw,
+                      double& iqx, double& iqy, double& iqz, double& iqw) const;
 
     /**
      * @brief 四元数乘法
      */
-    void quat_multiply(float ax, float ay, float az, float aw,
-                       float bx, float by, float bz, float bw,
-                       float& rx, float& ry, float& rz, float& rw) const;
+    void quat_multiply(double ax, double ay, double az, double aw,
+                       double bx, double by, double bz, double bw,
+                       double& rx, double& ry, double& rz, double& rw) const;
 
     /**
      * @brief 从姿态矩阵提取位置和四元数旋转
      */
     void get_position_and_rotation(const vr::TrackedDevicePose_t& pose,
-                                   float& x, float& y, float& z,
-                                   float& qx, float& qy, float& qz, float& qw) const;
+                                   double& x, double& y, double& z,
+                                   double& qx, double& qy, double& qz, double& qw) const;
 
     /**
      * @brief 从姿态矩阵提取位置和欧拉角旋转
