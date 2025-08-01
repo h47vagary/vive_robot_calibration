@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "Eigen/Eigen"
+
 
 struct CartesianPosition
 {
@@ -38,23 +40,59 @@ struct CartesianOrientation
     }
 };
 
+struct CartesianQuaternion
+{
+    double qx;
+    double qy;
+    double qz;
+    double qw;
+
+    CartesianQuaternion() :
+        qx(0.0), qy(0.0), qz(0.0), qw(1.0)
+    {
+    }
+
+    CartesianQuaternion(double qx_, double qy_, double qz_, double qw_) :
+        qx(qx_), qy(qy_), qz(qz_), qw(qw_)
+    {
+    }
+
+    
+};
+
 struct CartesianPose
 {
     CartesianPosition position;
     CartesianOrientation orientation;
+    CartesianQuaternion quat;
 
     CartesianPose()
     {
     }
 
-    CartesianPose(const CartesianPosition &pos, const CartesianOrientation &ori) :
-        position(pos), orientation(ori)
+    CartesianPose(const CartesianPosition &pos, const CartesianOrientation &ori, const CartesianQuaternion &q) :
+        position(pos), orientation(ori), quat(q)
     {
     }
 
-    CartesianPose(double x, double y, double z, double A, double B, double C) :
-        position(x, y, z), orientation(A, B, C)
+    CartesianPose(double x, double y, double z, double A, double B, double C, double qx, double qy, double qz, double qw) :
+        position(x, y, z), orientation(A, B, C), quat(qx, qy, qz, qw)
     {
+    }
+
+    CartesianPose(double x, double y, double z, double A, double B, double C)
+    {
+        Eigen::Matrix3d matrix;
+        matrix =
+            Eigen::AngleAxisd(A, Eigen::Vector3d::UnitX()) *
+            Eigen::AngleAxisd(B, Eigen::Vector3d::UnitY()) *
+            Eigen::AngleAxisd(C, Eigen::Vector3d::UnitZ());
+        Eigen::Quaterniond quaternion(matrix);
+
+
+        position = CartesianPosition(x, y, z);
+        orientation = CartesianOrientation(A, B, C);
+        quat = CartesianQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w());
     }
 };
 

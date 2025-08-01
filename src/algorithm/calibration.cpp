@@ -168,6 +168,7 @@ void CalibrationManager::set_calibration_orientation(const CartesianOrientation 
     device_calibration_orientation_ = device_orientation;
 }
 
+
 void CalibrationManager::set_robot_calibration_positon(const int &index, const CartesianPosition &robot_position)
 {
     if(index >= robot_calibration_positions_.size())
@@ -194,6 +195,18 @@ void CalibrationManager::set_robot_calibration_orientation(const int &index, con
 void CalibrationManager::set_device_calibration_orientation(const int &index, const CartesianOrientation &device_orientation)
 {
     device_calibration_orientation_ = device_orientation;
+}
+
+void CalibrationManager::set_calibration_quaternion(const CartesianQuaternion &robot_quaternion, const CartesianQuaternion &device_quaternion)
+{
+    robot_calibration_quaternion_ = robot_quaternion;
+    device_calibration_quaternion_ = device_quaternion;
+}
+
+void CalibrationManager::get_calibration_quaternion(CartesianQuaternion &robot_quaternion, CartesianQuaternion &device_quaternion)
+{
+    robot_quaternion = robot_calibration_quaternion_;
+    device_quaternion = device_calibration_quaternion_;
 }
 
 int CalibrationManager::clear_calibration_position()
@@ -387,6 +400,29 @@ int CalibrationManager::calculate_orientation_offset_matrix()
     return 0;
 }
 
+int CalibrationManager::calculate_orientation_offset_matrix_quaternion()
+{
+    std::cout << __FUNCTION__ << std::endl;
+    Eigen::Matrix3d robot_orientation_matrix;
+    Eigen::Matrix3d device_orientation_matrix;
+    quart_to_matrix(robot_calibration_quaternion_, robot_orientation_matrix);
+    quart_to_matrix(device_calibration_quaternion_, device_orientation_matrix);
+    std::cout << "robot_orientation_matrix: " << std::endl;
+    std::cout << robot_orientation_matrix << std::endl;
+
+    std::cout << "device_orientation_matrix: " << std::endl;
+    std::cout << device_orientation_matrix << std::endl;
+    if(fabs(device_orientation_matrix.determinant()) < EPSILON) return -1;
+    // *orientation_offset_matrix_ = robot_orientation_matrix * device_orientation_matrix.transpose();       // 补偿方向：设备坐标变换到robot坐标
+    *orientation_offset_matrix_ = device_orientation_matrix.transpose() * robot_orientation_matrix;          // 补偿方向：robot坐标变换到设备坐标
+    std::cout << __FUNCTION__ << " *orientation_offset_matrix_:" << std::endl;
+    std::cout << *orientation_offset_matrix_ << std::endl;
+    double A, B, C;
+    Utils::matrix_to_eular_ABC(*orientation_offset_matrix_, A, B, C);
+    std::cout << "*orientation_offset_matrix_->A " << A << " B " << B << " C " << C << std::endl;
+    return 0;
+}
+
 void CalibrationManager::cartesian_orientation_to_matrix(const CartesianOrientation &orientation, Eigen::Matrix3d &matrix)
 {
     Utils::euler_ABC_to_matrix(orientation.A, orientation.B, orientation.C, matrix);
@@ -395,6 +431,21 @@ void CalibrationManager::cartesian_orientation_to_matrix(const CartesianOrientat
 void CalibrationManager::matrix_to_cartesian_orientation(const Eigen::Matrix3d &matrix, CartesianOrientation &orientation)
 {
     Utils::matrix_to_eular_ABC(matrix, orientation.A, orientation.B, orientation.C);
+}
+
+void CalibrationManager::quart_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3d &matrix)
+{
+    Utils::quaternion_to_matrix(quat, matrix);
+}
+
+void CalibrationManager::matrix_to_quart(const Eigen::Matrix3d &matrix, CartesianQuaternion &quat)
+{
+    Quaternion quart;
+    Utils::matrix_to_quaternion(matrix, quart);
+    quat.qx = quart.x;
+    quat.qy = quart.y;  
+    quat.qz = quart.z;  
+    quat.qw = quart.w;
 }
 
 void CalibrationManager::optimize_svd(const std::vector<Eigen::Vector3d> &robot_positions, const std::vector<Eigen::Vector3d> &device_positions, Eigen::Matrix3d &rotation, Eigen::Vector3d &transformation)

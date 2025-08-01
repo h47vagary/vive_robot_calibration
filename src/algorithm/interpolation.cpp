@@ -34,22 +34,31 @@ bool LinearPoseInterpolator::interpolate_with_eular(const std::vector<Timestampe
         next_time += interval_us_;
         double ratio = static_cast<double>(next_time - p1.timestamp_ms) / (p2.timestamp_ms - p1.timestamp_ms);
 
+        // 插值位置（线性）
         CartesianPosition pos;
         pos.x = p1.pose.position.x + ratio * (p2.pose.position.x - p1.pose.position.x);
         pos.y = p1.pose.position.y + ratio * (p2.pose.position.y - p1.pose.position.y);
         pos.z = p1.pose.position.z + ratio * (p2.pose.position.z - p1.pose.position.z);
 
-        CartesianOrientation ori;
-        ori.A = p1.pose.orientation.A + ratio * (p2.pose.orientation.A - p1.pose.orientation.A);
-        ori.B = p1.pose.orientation.B + ratio * (p2.pose.orientation.B - p1.pose.orientation.B);
-        ori.C = p1.pose.orientation.C + ratio * (p2.pose.orientation.C - p1.pose.orientation.C);
+        // 欧拉角转四元数
+        Quaternion q1, q2, q_t;
+        Utils::euler_ABC_to_quaternion(p1.pose.orientation.A, p1.pose.orientation.B, p1.pose.orientation.C, q1);
+        Utils::euler_ABC_to_quaternion(p2.pose.orientation.A, p2.pose.orientation.B, p2.pose.orientation.C, q2);
+
+        // 插值四元数
+        Utils::slerp(q1, q2, ratio, q_t);
+
+        // 四元数转欧拉角
+        double A, B, C;
+        Utils::quaternion_to_euler_ABC(q_t, A, B, C);
 
         output.push_back(TimestampePose{
-            CartesianPose(pos, ori), 
+            CartesianPose(pos, CartesianOrientation(A, B, C), CartesianQuaternion(q_t.x, q_t.y, q_t.z, q_t.w)),
             next_time,
-            p1.button_mask      // 沿用当前段起点的 button_mask
+            p1.button_mask
         });
     }
+
     return true;
 }
 
@@ -82,26 +91,26 @@ bool LinearPoseInterpolator::interpolate_with_quaternion(const std::vector<Times
         pos.y = p1.pose.position.y + ratio * (p2.pose.position.y - p1.pose.position.y);
         pos.z = p1.pose.position.z + ratio * (p2.pose.position.z - p1.pose.position.z);
 
-        // 欧拉角转四元数
-        Quaternion q1, q2, q_t;
-        Utils::euler_ABC_to_quaternion(p1.pose.orientation.A, p1.pose.orientation.B, p1.pose.orientation.C, q1);
-        Utils::euler_ABC_to_quaternion(p2.pose.orientation.A, p2.pose.orientation.B, p2.pose.orientation.C, q2);
-
-        // slerp 插值
+        // 使用已存储的四元数插值
+        Quaternion q1(p1.pose.quat.qw, p1.pose.quat.qx, p1.pose.quat.qy, p1.pose.quat.qz);
+        Quaternion q2(p2.pose.quat.qw, p2.pose.quat.qx, p2.pose.quat.qy, p2.pose.quat.qz);
+        Quaternion q_t;
         Utils::slerp(q1, q2, ratio, q_t);
+        std::cout << "p1.pose.quat: " << p1.pose.quat.qw << ", " << p1.pose.quat.qx << ", " << p1.pose.quat.qy << ", " << p1.pose.quat.qz << std::endl;
+        std::cout << "p2.pose.quat: " << p2.pose.quat.qw << ", " << p2.pose.quat.qx << ", " << p2.pose.quat.qy << ", " << p2.pose.quat.qz << std::endl;
+        std::cout << "q_t: " << q_t.w << ", " << q_t.x << ", " << q_t.y << ", " << q_t.z << std::endl;
 
-        // 四元数转欧拉角
-        CartesianOrientation ori;
-        Utils::quaternion_to_euler_ABC(q_t, ori.A, ori.B, ori.C);
+        // 四元数转欧拉角（用于可视化/兼容）
+        double A, B, C;
+        Utils::quaternion_to_euler_ABC(q_t, A, B, C);
+        std::cout << "Interpolated Euler angles: A: " << A << ", B: " << B << ", C: " << C << std::endl;
 
-        // 输出插值后的姿态
         output.push_back(TimestampePose{
-            CartesianPose(pos, ori), 
+            CartesianPose(pos, CartesianOrientation(A, B, C), CartesianQuaternion(q_t.x, q_t.y, q_t.z, q_t.w)),
             next_time,
-            p1.button_mask      // 沿用当前段起点的 button_mask
+            p1.button_mask
         });
     }
 
     return true;
 }
-

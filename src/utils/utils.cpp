@@ -20,6 +20,12 @@ void Utils::euler_RPY_to_matrix(const double &roll, const double &pitch, const d
             Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX());
 }
 
+void Utils::quaternion_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3d &matrix)
+{
+    Eigen::Quaterniond eigen_quat(quat.qw, quat.qx, quat.qy, quat.qz);
+    matrix = eigen_quat.toRotationMatrix();
+}
+
 void Utils::matrix_to_eular_ABC(const Eigen::Matrix3d &matrix, double &A, double &B, double &C)
 {
     if (fabs(matrix(1, 2)) < EPSILON && fabs(matrix(2, 2)) < EPSILON)
@@ -128,6 +134,41 @@ CartesianPose Utils::matrix_to_pose(const Eigen::Matrix4d &mat)
     
     Eigen::Matrix3d rotation = mat.block<3,3>(0,0);
     Utils::matrix_to_eular_ABC(rotation, pose.orientation.A, pose.orientation.B, pose.orientation.C);
+
+    return pose;
+}
+
+Eigen::Matrix4d Utils::pose_to_matrix_quaternion(const CartesianPose &pose)
+{
+    Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
+    Eigen::Matrix3d rotation;
+
+    Utils::quaternion_to_matrix(pose.quat, rotation);
+
+    mat.block<3,3>(0,0) = rotation;
+    mat(0, 3) = pose.position.x;
+    mat(1, 3) = pose.position.y;
+    mat(2, 3) = pose.position.z;
+
+    return mat;
+}
+
+CartesianPose Utils::matrix_to_pose_quaternion(const Eigen::Matrix4d &mat)
+{
+    CartesianPose pose;
+    pose.position.x = mat(0,3);
+    pose.position.y = mat(1,3);
+    pose.position.z = mat(2,3);
+    Quaternion quat;
+    Eigen::Matrix3d rotation = mat.block<3,3>(0,0);
+    Utils::matrix_to_quaternion(rotation, quat);
+    pose.quat.qw = quat.w;
+    pose.quat.qx = quat.x;
+    pose.quat.qy = quat.y;
+    pose.quat.qz = quat.z;
+
+
+    Utils::quaternion_to_euler_ABC(quat, pose.orientation.A, pose.orientation.B, pose.orientation.C);
 
     return pose;
 }

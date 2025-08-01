@@ -315,15 +315,11 @@ void ViveTrackerReader::read_loop()
             }
             else
             {
-                ok = vive_get_pose_euler_non_blocking(&x, &y, &z, &A, &B, &C, &button_mask);
+                //ok = vive_get_pose_euler_non_blocking(&x, &y, &z, &A, &B, &C, &button_mask);
                 ok = vive_get_pose_quaternion_non_blocking(&x, &y, &z, &qx, &qy, &qz, &qw, &button_mask);
             }
             auto fetch_end = std::chrono::steady_clock::now();
             auto fetch_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(fetch_end - fetch_start).count();
-            // std::cout << "[POSE FETCH] Duration: " << fetch_duration_ms << " ms"
-            // << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
-            // << " | OK: " << ok << " | x: " << x << " | y: " << y << " | z: " << z << " | A: " << A << " | B: " << B << " | C: " << C << std::endl;
-
 
             // 处理按钮状态变化
             uint64_t changed_mask = button_mask ^ last_button_mask_;    // 找出变化的按钮
@@ -355,12 +351,32 @@ void ViveTrackerReader::read_loop()
             pose.position.x = x;
             pose.position.y = y;
             pose.position.z = z;
+            /*
             pose.orientation.A = A;
             pose.orientation.B = B;
             pose.orientation.C = C;
+            */
+            Quaternion quart(qw, qx, qy, qz);
+            Utils::quaternion_to_euler_ABC(quart, A, B, C);
+            pose.orientation.A = A;
+            pose.orientation.B = B;
+            pose.orientation.C = C;
+            //Utils::quaternion_to_euler_ABC(quart, pose.orientation.A, pose.orientation.B, pose.orientation.C);
+
+            pose.quat.qx = qx;
+            pose.quat.qy = qy;
+            pose.quat.qz = qz;
+            pose.quat.qw = qw;
 
             active_index_.store(write_index, std::memory_order_release);
             write_index = 1 - write_index;
+                        
+            #if 0
+            std::cout << "[POSE FETCH] Duration: " << fetch_duration_ms << " ms"
+            << " | Mode: " << (pose_fetch_mode_ == PoseFetchMode::Blocking ? "Blocking" : "NonBlocking")
+            << " | OK: " << ok << " | x: " << x << " | y: " << y << " | z: " << z << " | A: " << A << " | B: " << B << " | C: " << C << 
+                " | qx: " << qx << " | qy: " << qy << " | qz: " << qz << " | qw: " << qw << std::endl;
+            #endif
 
             // 记录数据
             if (ok && record_enabled_)

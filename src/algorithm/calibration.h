@@ -42,12 +42,16 @@ public:
     void set_device_calibration_position(const int &index, const CartesianPosition &device_position);
     void set_robot_calibration_orientation(const int &index, const CartesianOrientation &robot_orientation);
     void set_device_calibration_orientation(const int &index, const CartesianOrientation &device_orientation);
+
+    void set_calibration_quaternion(const CartesianQuaternion &robot_quaternion, const CartesianQuaternion &device_quaternion);
+    void get_calibration_quaternion(CartesianQuaternion &robot_quaternion, CartesianQuaternion &device_quaternion);
     
     int clear_calibration_position();
     void set_calibration_algorithm(int method);
     void get_calibration_algorithm(int& method);
 
     int calculate_orientation_offset_matrix();
+    int calculate_orientation_offset_matrix_quaternion();
 
 private:
     int calculate_position_calibration_matrix(double &error_out);
@@ -57,6 +61,8 @@ private:
 
     void cartesian_orientation_to_matrix(const CartesianOrientation &orientation, Eigen::Matrix3d &matrix);
     void matrix_to_cartesian_orientation(const Eigen::Matrix3d &matrix, CartesianOrientation &orientation);
+    void quart_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3d &matrix);
+    void matrix_to_quart(const Eigen::Matrix3d &matrix, CartesianQuaternion &quat);
 
     void optimize_svd(const std::vector<Eigen::Vector3d> &robot_positions, const std::vector<Eigen::Vector3d> &device_positions,
                       Eigen::Matrix3d &rotation, Eigen::Vector3d &transformation);
@@ -70,6 +76,8 @@ private:
     std::vector<CartesianPosition> device_calibration_positions_;
     CartesianOrientation robot_calibration_orientation_;
     CartesianOrientation device_calibration_orientation_;
+    CartesianQuaternion robot_calibration_quaternion_;
+    CartesianQuaternion device_calibration_quaternion_;
 
     int c_calibration_method = 2;    // 0-基于RZ值和位置的标定 1-九点标定 2-SVD标定
     const int c_max_iteration = 50;

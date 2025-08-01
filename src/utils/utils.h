@@ -101,6 +101,8 @@ namespace Utils
 void euler_ABC_to_matrix(const double &A, const double &B, const double &C, Eigen::Matrix3d &matrix);
 void euler_RPY_to_matrix(const double &roll, const double &pitch, const double &yaw, Eigen::Matrix3d &matrix);
 
+void quaternion_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3d &matrix);
+
 void matrix_to_eular_ABC(const Eigen::Matrix3d &matrix, double &A, double &B, double &C);
 void matrix_to_eular_RPY(const Eigen::Matrix3d &matrix, double &roll, double &pitch, double &yaw);
 void matrix_to_quaternion(const Eigen::Matrix3d &matrix, Quaternion &quat);
@@ -113,6 +115,9 @@ void slerp(const Quaternion &quat_start, const Quaternion &quat_end, const doubl
 
 Eigen::Matrix4d pose_to_matrix(const CartesianPose &pose);
 CartesianPose matrix_to_pose(const Eigen::Matrix4d &mat);
+
+Eigen::Matrix4d pose_to_matrix_quaternion(const CartesianPose &pose);
+CartesianPose matrix_to_pose_quaternion(const Eigen::Matrix4d &mat);
 
 void print_matrix(const Eigen::Matrix4d &mat);
 }
