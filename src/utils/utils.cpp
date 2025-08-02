@@ -4,20 +4,22 @@
 #include <fstream>
 #include <string>
 
+static double clamp_angle(double angle_rad, double max_abs_rad)
+{
+    if (angle_rad > max_abs_rad)
+        return max_abs_rad;
+    else if (angle_rad < -max_abs_rad)
+        return -max_abs_rad;
+    else
+        return angle_rad;
+}
+
 void Utils::euler_ABC_to_matrix(const double &A, const double &B, const double &C, Eigen::Matrix3d &matrix)
 {
     matrix =
             Eigen::AngleAxisd(A, Eigen::Vector3d::UnitX()) *
             Eigen::AngleAxisd(B, Eigen::Vector3d::UnitY()) *
             Eigen::AngleAxisd(C, Eigen::Vector3d::UnitZ());
-}
-
-void Utils::euler_RPY_to_matrix(const double &roll, const double &pitch, const double &yaw, Eigen::Matrix3d &matrix)
-{
-    matrix =
-            Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) *
-            Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
-            Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX());
 }
 
 void Utils::quaternion_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3d &matrix)
@@ -28,6 +30,7 @@ void Utils::quaternion_to_matrix(const CartesianQuaternion &quat, Eigen::Matrix3
 
 void Utils::matrix_to_eular_ABC(const Eigen::Matrix3d &matrix, double &A, double &B, double &C)
 {
+    #if 1
     if (fabs(matrix(1, 2)) < EPSILON && fabs(matrix(2, 2)) < EPSILON)
     {
         if (matrix(0, 2) > EPSILON)
@@ -46,13 +49,12 @@ void Utils::matrix_to_eular_ABC(const Eigen::Matrix3d &matrix, double &A, double
         C = atan2(-matrix(0, 1), matrix(0, 0));
     }
     B = atan2(matrix(0, 2), cos(A) * matrix(2, 2)- sin(A) * matrix(1, 2));
-}
-
-void Utils::matrix_to_eular_RPY(const Eigen::Matrix3d &matrix, double &roll, double &pitch, double &yaw)
-{
-    yaw = atan2(matrix(1, 0), matrix(0, 0));
-    pitch = atan2(-matrix(2, 0), cos(yaw) * matrix(0, 0) + sin(yaw) * matrix(1, 0));
-    roll = atan2(matrix(2, 1), matrix(2, 2));
+    #else
+    Eigen::Vector3d euler = matrix.eulerAngles(0, 1, 2); // XYZ 内旋
+    A = euler[0];  // X
+    B = euler[1];  // Y
+    C = euler[2];  // Z
+    #endif
 }
 
 void Utils::matrix_to_quaternion(const Eigen::Matrix3d &matrix, Quaternion &quat)
@@ -62,6 +64,36 @@ void Utils::matrix_to_quaternion(const Eigen::Matrix3d &matrix, Quaternion &quat
     quat.x = quaternion.x();
     quat.y = quaternion.y();
     quat.z = quaternion.z();
+    quat = quat.normalize();
+}
+
+void Utils::matrix_to_quaternion_with_pitch_limit(
+    const Eigen::Matrix3d &matrix,
+    Quaternion &quat,
+    double pitch_limit_deg)
+{
+    // 1. 矩阵转Eigen四元数
+    Eigen::Quaterniond q_eigen(matrix);
+
+    // 2. Eigen四元数转ZYX欧拉角（Yaw-Pitch-Roll）
+    Eigen::Vector3d euler_zyx = q_eigen.toRotationMatrix().eulerAngles(2, 1, 0);
+
+    // 3. 限制Pitch角（中间角，索引1）
+    double pitch_limit_rad = pitch_limit_deg * M_PI / 180.0;
+    euler_zyx[1] = clamp_angle(euler_zyx[1], pitch_limit_rad);
+
+    // 4. 由限制后的欧拉角重新生成四元数
+    Eigen::AngleAxisd yawAngle(euler_zyx[0], Eigen::Vector3d::UnitZ());
+    Eigen::AngleAxisd pitchAngle(euler_zyx[1], Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd rollAngle(euler_zyx[2], Eigen::Vector3d::UnitX());
+    Eigen::Quaterniond q_limited = yawAngle * pitchAngle * rollAngle;
+
+    // 5. 转成你的Quaternion类，并归一化
+    quat.w = q_limited.w();
+    quat.x = q_limited.x();
+    quat.y = q_limited.y();
+    quat.z = q_limited.z();
+
     quat = quat.normalize();
 }
 
@@ -138,7 +170,7 @@ CartesianPose Utils::matrix_to_pose(const Eigen::Matrix4d &mat)
     return pose;
 }
 
-Eigen::Matrix4d Utils::pose_to_matrix_quaternion(const CartesianPose &pose)
+Eigen::Matrix4d Utils::pose_to_matrix_use_quaternion(const CartesianPose &pose)
 {
     Eigen::Matrix4d mat = Eigen::Matrix4d::Identity();
     Eigen::Matrix3d rotation;
@@ -153,7 +185,7 @@ Eigen::Matrix4d Utils::pose_to_matrix_quaternion(const CartesianPose &pose)
     return mat;
 }
 
-CartesianPose Utils::matrix_to_pose_quaternion(const Eigen::Matrix4d &mat)
+CartesianPose Utils::matrix_to_pose_use_quaternion(const Eigen::Matrix4d &mat)
 {
     CartesianPose pose;
     pose.position.x = mat(0,3);
@@ -162,6 +194,7 @@ CartesianPose Utils::matrix_to_pose_quaternion(const Eigen::Matrix4d &mat)
     Quaternion quat;
     Eigen::Matrix3d rotation = mat.block<3,3>(0,0);
     Utils::matrix_to_quaternion(rotation, quat);
+    //Utils::matrix_to_quaternion_with_pitch_limit(rotation, quat);
     pose.quat.qw = quat.w;
     pose.quat.qx = quat.x;
     pose.quat.qy = quat.y;

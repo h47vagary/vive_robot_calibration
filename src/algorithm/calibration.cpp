@@ -313,11 +313,18 @@ int CalibrationManager::calculate_position_calibration_matrix(double rz, double 
 int CalibrationManager::calculate_position_calibration_matrix_svd(double &error_out)
 {
     int n = robot_calibration_positions_.size();
-    if(n < 2 ||  device_calibration_positions_.size() != n)
+    // if(n < 2 ||  device_calibration_positions_.size() != n)
+    // {
+    //     std::cerr << "Not enough calibration points or mismatched sizes." << std::endl;
+    //     std::cerr << "robot_calibration_positions_.size() = " << robot_calibration_positions_.size() << std::endl;
+    //     std::cerr << "device_calibration_positions_.size() = " << device_calibration_positions_.size() << std::endl;
+    //     max_error_ = error_out = -1000;
+    //     return -1;
+    // }
+    if(n < 2)
     {
         std::cerr << "Not enough calibration points or mismatched sizes." << std::endl;
         std::cerr << "robot_calibration_positions_.size() = " << robot_calibration_positions_.size() << std::endl;
-        std::cerr << "device_calibration_positions_.size() = " << device_calibration_positions_.size() << std::endl;
         max_error_ = error_out = -1000;
         return -1;
     }

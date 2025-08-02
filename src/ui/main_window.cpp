@@ -122,14 +122,14 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
     // 获取TCP姿态补偿矩阵
     Eigen::Matrix3d orientation_offset_matrix;
     calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
-    std::cout << "orientation_offset_matrix: " << std::endl << orientation_offset_matrix << std::endl;
+    //std::cout << "orientation_offset_matrix: " << std::endl << orientation_offset_matrix << std::endl;
 
     static int index = 1;
     for (auto iter : device_poses)
     {
         // 将追踪器位姿转为矩阵
         //Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(iter);
-        Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_quaternion(iter);
+        Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_use_quaternion(iter);
 
         // 求TCP在定位器坐标系的位置变化矩阵
         Eigen::Matrix4d tcp2location_pos_mat = tracker_mat * pos_matrix;
@@ -140,16 +140,17 @@ void MainWindow::device_poses_to_robot_poses(const std::vector<CartesianPose> &d
 
         // 进行补偿TCP姿态
         std::cout << "====================== Begin << " << index  <<" =====================" << std::endl;
-        std::cout << "tcp2robotbase_ori_mat: " << std::endl << tcp2robotbase_ori_mat << std::endl;
+        //std::cout << "tcp2robotbase_ori_mat: " << std::endl << tcp2robotbase_ori_mat << std::endl;
         Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix;
-        std::cout << "tcp2robotbase_ori_mat_offset: " << std::endl << tcp2robotbase_ori_mat_offset << std::endl;
+        //std::cout << "tcp2robotbase_ori_mat_offset: " << std::endl << tcp2robotbase_ori_mat_offset << std::endl;
         Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
         tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
         tcp2robotbase_mat.block<3, 1>(0, 3) = tcp2robotbase_pos_mat.block<3, 1>(0, 3);
-        std::cout << "tcp2robotbase_mat: " << std::endl << tcp2robotbase_mat << std::endl;
+        //std::cout << "tcp2robotbase_mat: " << std::endl << tcp2robotbase_mat << std::endl;
         //CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-        CartesianPose robot_tcp_pose = Utils::matrix_to_pose_quaternion(tcp2robotbase_mat); // 需要转为ABC，但好像规避不了问题
-        std::cout << "robot_tcp_pose: " << "A: " << robot_tcp_pose.orientation.A << " B: " << robot_tcp_pose.orientation.B << " C: " << robot_tcp_pose.orientation.C << std::endl;
+        CartesianPose robot_tcp_pose = Utils::matrix_to_pose_use_quaternion(tcp2robotbase_mat); // 需要转为ABC
+        std::cout << "tcp2robotbase_mat: \n" << tcp2robotbase_mat << std::endl;
+        //std::cout << "robot_tcp_pose: " << "A: " << robot_tcp_pose.orientation.A << " B: " << robot_tcp_pose.orientation.B << " C: " << robot_tcp_pose.orientation.C << std::endl;
         robot_poses.push_back(robot_tcp_pose);
         std::cout << "====================== End << " << index << " =======================" << std::endl;
         index++;
@@ -252,6 +253,7 @@ void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose po
 
 void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
 {
+    // 获取线性误差：自定义协议向控制器索要位姿的方式
     std::cout << __FUNCTION__ << std::endl;
     std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
                 << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
@@ -265,7 +267,7 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
     // 当前追踪器在定位器坐标系位姿
     CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
     // Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
-    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_quaternion(tracker_pose);
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_use_quaternion(tracker_pose);
 
     // 标定出来的定位器坐标相对于机器人基座标的齐次变换矩阵
     Eigen::Matrix4d location2robotbase_mat;
@@ -291,7 +293,7 @@ void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
 
 
     // CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-    CartesianPose robot_tcp_pose = Utils::matrix_to_pose_quaternion(tcp2robotbase_mat);
+    CartesianPose robot_tcp_pose = Utils::matrix_to_pose_use_quaternion(tcp2robotbase_mat);
 
     std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
                 << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
@@ -342,12 +344,73 @@ void MainWindow::slot_end_record()
     std::vector<TimestampePose> poses_tcp2rb_timestampe;
     std::vector<CartesianPose> poses_tcp2rb;
     extract_pose_vector(poses_timestampe, poses);
+    // debug
+    std::cout << "===============================Poses Timestampe================================" << std::endl;
+    int index = 1;
+    for (const auto& tp : poses_timestampe)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << tp.pose.position.x
+                  << ", y: " << tp.pose.position.y
+                  << ", z: " << tp.pose.position.z
+                  << ", A: " << tp.pose.orientation.A
+                  << ", B: " << tp.pose.orientation.B
+                  << ", C: " << tp.pose.orientation.C
+                  << ", qx: " << tp.pose.quat.qx
+                  << ", qy: " << tp.pose.quat.qy
+                  << ", qz: " << tp.pose.quat.qz
+                  << ", qw: " << tp.pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "===============================Poses Timestampe================================" << std::endl;
+
+    std::cout << "================================Poses================================" << std::endl;
+    index = 1;
+    for (const auto& pose : poses)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << pose.position.x
+                  << ", y: " << pose.position.y
+                  << ", z: " << pose.position.z
+                  << ", A: " << pose.orientation.A
+                  << ", B: " << pose.orientation.B
+                  << ", C: " << pose.orientation.C
+                  << ", qx: " << pose.quat.qx
+                  << ", qy: " << pose.quat.qy
+                  << ", qz: " << pose.quat.qz
+                  << ", qw: " << pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "================================Poses================================" << std::endl;
+    // debug
     device_poses_to_robot_poses(poses, poses_tcp2rb);
     poses_tcp2rb_timestampe.clear();
     for (size_t i = 0; i < poses.size(); ++i)
     {
         poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_ms, poses_timestampe[i].button_mask});
     }
+    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
+    index = 1;
+    for (const auto& tp : poses_tcp2rb_timestampe)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << tp.pose.position.x
+                  << ", y: " << tp.pose.position.y
+                  << ", z: " << tp.pose.position.z
+                  << ", A: " << tp.pose.orientation.A
+                  << ", B: " << tp.pose.orientation.B
+                  << ", C: " << tp.pose.orientation.C
+                  << ", qx: " << tp.pose.quat.qx
+                  << ", qy: " << tp.pose.quat.qy
+                  << ", qz: " << tp.pose.quat.qz
+                  << ", qw: " << tp.pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
+
     // interpolate
     std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
     if (ui->checkBox_label_interpolation_interval->isChecked())
@@ -445,6 +508,7 @@ void MainWindow::slot_compute()
 
 void MainWindow::slot_mark_point()
 {
+    // SVD 标定
     // 检查是否已标定 flange2tcp 和 tracker2tcp
     //bool flange2tcp_calibrated = false, 
     //flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
@@ -488,7 +552,7 @@ void MainWindow::slot_mark_point()
     // 获取 Tracker 当前位姿的旋转矩阵
     CartesianPose pose_tracker = vive_tracker_reader_->get_latest_pose();
     //Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix(pose_tracker);
-    Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix_quaternion(pose_tracker);
+    Eigen::Matrix4d tracker_matrix = Utils::pose_to_matrix_use_quaternion(pose_tracker);
     std::cout << "tracker_matrix: \n" << tracker_matrix << std::endl;
     // 获取 Tracker->tcp 的位置向量变换，再拼成齐次变换矩阵
     Eigen::Vector4d pos_vec;
@@ -501,7 +565,7 @@ void MainWindow::slot_mark_point()
     std::cout << "tcp2location_matrix: \n" << tcp2location_matrix << std::endl;
     // 再将旋转矩阵转回位姿点位
     //CartesianPose pose_tcp = Utils::matrix_to_pose(tcp2location_matrix);
-    CartesianPose pose_tcp = Utils::matrix_to_pose_quaternion(tcp2location_matrix);
+    CartesianPose pose_tcp = Utils::matrix_to_pose_use_quaternion(tcp2location_matrix);
     // 存入标定管理器的位置、姿态
     calibration_manager_->set_device_calibration_position(index, pose_tcp.position);
     calibration_manager_->set_device_calibration_orientation(index, pose_tcp.orientation);
@@ -511,6 +575,7 @@ void MainWindow::slot_mark_point()
 
 void MainWindow::slot_tracker2tcp_mark_point()
 {
+    // 追踪器->TCP 记录点
     CartesianPose pose = vive_tracker_reader_->get_latest_pose();
     std::vector<CartesianPose> mark_poses;
     tracker2tcp_calibration_->get_calibration_poses(mark_poses);
@@ -599,6 +664,7 @@ void MainWindow::slot_flange2tcp_save_calib_result()
 
 void MainWindow::slot_track_pose_timeout()
 {
+    // 更新追踪器点位
     CartesianPose pose = vive_tracker_reader_->get_latest_pose();
 
     // ui->label_vive_A->setText(QString::number(pose.orientation.A));
@@ -630,17 +696,19 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
 {
      // 标定Tracker2TCP的姿态补偿
     std::cout << __FUNCTION__ << std::endl;
-    bool manager_calibrated = false, flange2tcp_calibrated = false, tracker2tcp_pos_calibrated = false;
-    calibration_manager_->get_calibrated(manager_calibrated);
-    flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
-    tracker2tcp_calibration_->get_calibrated(tracker2tcp_pos_calibrated);
-    if (!calibration_manager_ || !flange2tcp_calibration_ || !tracker2tcp_calibration_)
-    {
-        std::cout << "not all calibrated yet" << std::endl;
-        std::cout << "calibration_manager_: " << calibration_manager_ << " flange2tcp_calibration_: " << flange2tcp_calibration_ 
-                    << " tracker2tcp_calibration_: " << tracker2tcp_calibration_ << std::endl;
-        return;
-    }
+
+
+    // bool manager_calibrated = false, flange2tcp_calibrated = false, tracker2tcp_pos_calibrated = false;
+    // calibration_manager_->get_calibrated(manager_calibrated);
+    // flange2tcp_calibration_->get_calibrated(flange2tcp_calibrated);
+    // tracker2tcp_calibration_->get_calibrated(tracker2tcp_pos_calibrated);
+    // if (!calibration_manager_ || !flange2tcp_calibration_ || !tracker2tcp_calibration_)
+    // {
+    //     std::cout << "not all calibrated yet" << std::endl;
+    //     std::cout << "calibration_manager_: " << calibration_manager_ << " flange2tcp_calibration_: " << flange2tcp_calibration_ 
+    //                 << " tracker2tcp_calibration_: " << tracker2tcp_calibration_ << std::endl;
+    //     return;
+    // }
     
     // 获取当前机器人位姿
     std::vector<double> cur_rob_pos;
@@ -650,12 +718,15 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
         std::cerr << "nrc get current position robot" << std::endl;
         return;
     }
-    std::cout << "cur_rob_pos: " << cur_rob_pos.at(0) << ", "
-              << cur_rob_pos.at(1) << ", " << cur_rob_pos.at(2) << ", "
-              << cur_rob_pos.at(3) << ", " << cur_rob_pos.at(4) << ", "
-              << cur_rob_pos.at(5) << std::endl;
+    // std::cout << "cur_rob_pos: " << cur_rob_pos.at(0) << ", "
+    //           << cur_rob_pos.at(1) << ", " << cur_rob_pos.at(2) << ", "
+    //           << cur_rob_pos.at(3) << ", " << cur_rob_pos.at(4) << ", "
+    //           << cur_rob_pos.at(5) << std::endl;
     CartesianPose pose(cur_rob_pos.at(0), cur_rob_pos.at(1), cur_rob_pos.at(2),
                             cur_rob_pos.at(3), cur_rob_pos.at(4), cur_rob_pos.at(5));
+    std::cout << "robot pose: " << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
+                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << 
+                " qx:" << pose.quat.qx << " qy:" << pose.quat.qy << " qz:" << pose.quat.qz << " qw:" << pose.quat.qw << std::endl;
 
     // 获取定位器坐标系相对于机器人坐标系的旋转矩阵
     Eigen::Matrix4d location2robotbase_mat;
@@ -663,7 +734,7 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
     // 获取当前追踪器的位姿，并转换为旋转矩阵（追踪器相对于定位器）
     CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
     //Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
-    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_quaternion(tracker_pose);
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_use_quaternion(tracker_pose);
     // 追踪器在机器人基座标系下的旋转矩阵
     Eigen::Matrix4d tracker2robotbase;
     tracker2robotbase = location2robotbase_mat * tracker_mat;
@@ -679,7 +750,7 @@ void MainWindow::slot_tracker2tcp_mark_rotation_use_robotpose()
     Eigen::Matrix4d tcp2robotbase;
     tcp2robotbase = tracker2robotbase * pos_matrix;
     //CartesianPose tcp2rbase_pose = Utils::matrix_to_pose(tcp2robotbase);
-    CartesianPose tcp2rbase_pose = Utils::matrix_to_pose_quaternion(tcp2robotbase);
+    CartesianPose tcp2rbase_pose = Utils::matrix_to_pose_use_quaternion(tcp2robotbase);
     std::cout << "TCP在机器人基座坐标系下的旋转矩阵 tcp2robotbase: \n" << tcp2robotbase << std::endl;
     std::cout << "tcp2rbase_pose point" << " x:" << tcp2rbase_pose.position.x << " y:" << tcp2rbase_pose.position.y << " z:" << tcp2rbase_pose.position.z
                 << " A:" << tcp2rbase_pose.orientation.A << " B:" << tcp2rbase_pose.orientation.B << " C:" << tcp2rbase_pose.orientation.C << std::endl;
@@ -746,6 +817,7 @@ void MainWindow::slot_traj_filtering()
 
 void MainWindow::slot_linear_error_compute()
 {
+    // 获取线性误差，直接调用二次开发接口获取机器人点位的方式
     // 获取机器人当前点位
     std::vector<double> cur_rob_pos;
     cur_rob_pos.resize(7);
@@ -771,7 +843,7 @@ void MainWindow::slot_linear_error_compute()
     // 当前追踪器在定位器坐标系位姿
     CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
     //Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
-    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_quaternion(tracker_pose);
+    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_use_quaternion(tracker_pose);
 
     // 标定出来的定位器坐标相对于机器人基座标的齐次变换矩阵
     Eigen::Matrix4d location2robotbase_mat;
@@ -796,7 +868,7 @@ void MainWindow::slot_linear_error_compute()
     tcp2robotbase_mat.block<3, 1>(0, 3) = tcp2robotbase_pos_mat.block<3, 1>(0, 3);
 
     //CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-    CartesianPose robot_tcp_pose = Utils::matrix_to_pose_quaternion(tcp2robotbase_mat);
+    CartesianPose robot_tcp_pose = Utils::matrix_to_pose_use_quaternion(tcp2robotbase_mat);
 
     std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
                 << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
