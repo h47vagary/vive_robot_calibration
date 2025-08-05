@@ -52,6 +52,24 @@ MainWindow::MainWindow(QWidget  *parent)
         std::cout << "Button " << btn_name << (pressed ? " pressed" : " released") << std::endl;
     });
 
+    vive_tracker_reader_->register_button_callback([this](ViveTrackerReader::TrackerButton btn, bool pressed) 
+    {
+        if (!pressed) return; // 只处理按下事件
+
+        switch (btn) {
+            case ViveTrackerReader::TrackerButton::Trigger:
+                std::cout << "[Button Trigger Pressed] 开始录制轨迹" << std::endl;
+                slot_start_record();
+                break;
+            case ViveTrackerReader::TrackerButton::Grip:
+                std::cout << "[Button Grip Pressed] 结束录制轨迹并处理数据" << std::endl;
+                slot_end_record();
+                break;
+            default:
+                break;
+        }
+    });
+
     init_connect();
     init_style();
     init_config_file();
@@ -186,6 +204,146 @@ void MainWindow::extract_pose_vector(const std::vector<TimestampePose> &timestam
         //           << std::endl;
         poses_only.push_back(tp.pose);
     }
+}
+
+void MainWindow::process_trajectory_data()
+{
+    // track pose -> robot pose
+    std::vector<TimestampePose> poses_timestampe = vive_tracker_reader_->get_recorded_poses();
+    std::vector<CartesianPose> poses;
+    std::vector<TimestampePose> poses_tcp2rb_timestampe;
+    std::vector<CartesianPose> poses_tcp2rb;
+    extract_pose_vector(poses_timestampe, poses);
+    // debug
+    std::cout << "===============================Poses Timestampe================================" << std::endl;
+    int index = 1;
+    for (const auto& tp : poses_timestampe)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << tp.pose.position.x
+                  << ", y: " << tp.pose.position.y
+                  << ", z: " << tp.pose.position.z
+                  << ", A: " << tp.pose.orientation.A
+                  << ", B: " << tp.pose.orientation.B
+                  << ", C: " << tp.pose.orientation.C
+                  << ", qx: " << tp.pose.quat.qx
+                  << ", qy: " << tp.pose.quat.qy
+                  << ", qz: " << tp.pose.quat.qz
+                  << ", qw: " << tp.pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "===============================Poses Timestampe================================" << std::endl;
+
+    std::cout << "================================Poses================================" << std::endl;
+    index = 1;
+    for (const auto& pose : poses)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << pose.position.x
+                  << ", y: " << pose.position.y
+                  << ", z: " << pose.position.z
+                  << ", A: " << pose.orientation.A
+                  << ", B: " << pose.orientation.B
+                  << ", C: " << pose.orientation.C
+                  << ", qx: " << pose.quat.qx
+                  << ", qy: " << pose.quat.qy
+                  << ", qz: " << pose.quat.qz
+                  << ", qw: " << pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "================================Poses================================" << std::endl;
+    // debug
+    device_poses_to_robot_poses(poses, poses_tcp2rb);
+    poses_tcp2rb_timestampe.clear();
+    for (size_t i = 0; i < poses.size(); ++i)
+    {
+        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_ms, poses_timestampe[i].button_mask});
+    }
+    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
+    index = 1;
+    for (const auto& tp : poses_tcp2rb_timestampe)
+    {
+        std::cout << "Pose " << index << ": "
+                  << " x: " << tp.pose.position.x
+                  << ", y: " << tp.pose.position.y
+                  << ", z: " << tp.pose.position.z
+                  << ", A: " << tp.pose.orientation.A
+                  << ", B: " << tp.pose.orientation.B
+                  << ", C: " << tp.pose.orientation.C
+                  << ", qx: " << tp.pose.quat.qx
+                  << ", qy: " << tp.pose.quat.qy
+                  << ", qz: " << tp.pose.quat.qz
+                  << ", qw: " << tp.pose.quat.qw
+                  << std::endl;
+        ++index;
+    }
+    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
+
+    // interpolate
+    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
+    if (ui->checkBox_label_interpolation_interval->isChecked())
+    {
+        LinearPoseInterpolator polator(ui->lineEdit_label_interpolation_interval->text().toUInt());
+        polator.interpolate_with_quaternion(poses_tcp2rb_timestampe, poses_tcp2rb_timestampe_interpolation);
+        std::cout << "poses_tcp2rb_timestampe_interpolation size: " << poses_tcp2rb_timestampe_interpolation.size() << std::endl;
+    }
+    // filter
+    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation_filter;
+    std::vector<CartesianPose> poses_filted;
+    extract_pose_vector(poses_tcp2rb_timestampe_interpolation, poses_filted);
+    filter_poses(poses_filted, ui->checkBox_filtering->isChecked());
+    for (size_t i = 0; i < poses_filted.size(); ++i)
+    {
+        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_ms, 
+                                                                poses_tcp2rb_timestampe_interpolation[i].button_mask});
+    }
+    // save to file
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_timestampe);
+    vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
+
+    if (ui->checkBox_label_interpolation_interval->isChecked())
+        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
+
+    if (ui->checkBox_filtering->isChecked())
+        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
+    
+    // clear cache
+    vive_tracker_reader_->clear_recorded_poses();
+    poses_tcp2rb.clear();
+    
+    // show chart
+    if (!ui->checkBox_end_with_chart->isChecked())
+        return;
+
+    QMetaObject::invokeMethod(this, [this]() {
+        csv_parser_window_vive->loadData("vive_traj.csv");
+        csv_parser_window_vive->show();
+        csv_parser_window_vive->plotData();
+        csv_parser_window_vive->setWindowTitle("vive数据曲线");
+
+        csv_parser_window_vive2robot->loadData("vive_traj2robot.csv");
+        csv_parser_window_vive2robot->show();
+        csv_parser_window_vive2robot->plotData();
+        csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
+
+        if (ui->checkBox_label_interpolation_interval->isChecked())
+        {
+            csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
+            csv_parser_window_vive2robot_inter->show();
+            csv_parser_window_vive2robot_inter->plotData();
+            csv_parser_window_vive2robot_inter->setWindowTitle("vive2robot_插补_数据曲线");
+        }
+
+        if (ui->checkBox_filtering->isChecked())
+        {
+            csv_parser_window_vive2robot_inter_filter->loadData("vive_traj2robot_interpolation_filted.csv");
+            csv_parser_window_vive2robot_inter_filter->show();
+            csv_parser_window_vive2robot_inter_filter->plotData();
+            csv_parser_window_vive2robot_inter_filter->setWindowTitle("vive2robot_插补_二次滤波_数据曲线");
+        }
+    }, Qt::QueuedConnection); // 用于在线程安全地回到 GUI 线程
 }
 
 void MainWindow::init_connect()
@@ -328,151 +486,16 @@ void MainWindow::slot_start_record()
     vive_tracker_reader_->enable_record();
 }
 
-#define INTERPOLATE_FILTER 1            // 插补->滤波
-#define FILTER_INTERPOLATE_FILTER 0     // 滤波->插补->滤波
-
 void MainWindow::slot_end_record()
 {
     std::cout << __FUNCTION__ << std::endl;
     emit signal_end_record();
     vive_tracker_reader_->disable_record();
 
-#if INTERPOLATE_FILTER
-    // track pose -> robot pose
-    std::vector<TimestampePose> poses_timestampe = vive_tracker_reader_->get_recorded_poses();
-    std::vector<CartesianPose> poses;
-    std::vector<TimestampePose> poses_tcp2rb_timestampe;
-    std::vector<CartesianPose> poses_tcp2rb;
-    extract_pose_vector(poses_timestampe, poses);
-    // debug
-    std::cout << "===============================Poses Timestampe================================" << std::endl;
-    int index = 1;
-    for (const auto& tp : poses_timestampe)
-    {
-        std::cout << "Pose " << index << ": "
-                  << " x: " << tp.pose.position.x
-                  << ", y: " << tp.pose.position.y
-                  << ", z: " << tp.pose.position.z
-                  << ", A: " << tp.pose.orientation.A
-                  << ", B: " << tp.pose.orientation.B
-                  << ", C: " << tp.pose.orientation.C
-                  << ", qx: " << tp.pose.quat.qx
-                  << ", qy: " << tp.pose.quat.qy
-                  << ", qz: " << tp.pose.quat.qz
-                  << ", qw: " << tp.pose.quat.qw
-                  << std::endl;
-        ++index;
-    }
-    std::cout << "===============================Poses Timestampe================================" << std::endl;
-
-    std::cout << "================================Poses================================" << std::endl;
-    index = 1;
-    for (const auto& pose : poses)
-    {
-        std::cout << "Pose " << index << ": "
-                  << " x: " << pose.position.x
-                  << ", y: " << pose.position.y
-                  << ", z: " << pose.position.z
-                  << ", A: " << pose.orientation.A
-                  << ", B: " << pose.orientation.B
-                  << ", C: " << pose.orientation.C
-                  << ", qx: " << pose.quat.qx
-                  << ", qy: " << pose.quat.qy
-                  << ", qz: " << pose.quat.qz
-                  << ", qw: " << pose.quat.qw
-                  << std::endl;
-        ++index;
-    }
-    std::cout << "================================Poses================================" << std::endl;
-    // debug
-    device_poses_to_robot_poses(poses, poses_tcp2rb);
-    poses_tcp2rb_timestampe.clear();
-    for (size_t i = 0; i < poses.size(); ++i)
-    {
-        poses_tcp2rb_timestampe.push_back({poses_tcp2rb[i], poses_timestampe[i].timestamp_ms, poses_timestampe[i].button_mask});
-    }
-    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
-    index = 1;
-    for (const auto& tp : poses_tcp2rb_timestampe)
-    {
-        std::cout << "Pose " << index << ": "
-                  << " x: " << tp.pose.position.x
-                  << ", y: " << tp.pose.position.y
-                  << ", z: " << tp.pose.position.z
-                  << ", A: " << tp.pose.orientation.A
-                  << ", B: " << tp.pose.orientation.B
-                  << ", C: " << tp.pose.orientation.C
-                  << ", qx: " << tp.pose.quat.qx
-                  << ", qy: " << tp.pose.quat.qy
-                  << ", qz: " << tp.pose.quat.qz
-                  << ", qw: " << tp.pose.quat.qw
-                  << std::endl;
-        ++index;
-    }
-    std::cout << "================================Poses TCP2RB Timestampe================================" << std::endl;
-
-    // interpolate
-    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation;
-    if (ui->checkBox_label_interpolation_interval->isChecked())
-    {
-        LinearPoseInterpolator polator(ui->lineEdit_label_interpolation_interval->text().toUInt());
-        polator.interpolate_with_quaternion(poses_tcp2rb_timestampe, poses_tcp2rb_timestampe_interpolation);
-        std::cout << "poses_tcp2rb_timestampe_interpolation size: " << poses_tcp2rb_timestampe_interpolation.size() << std::endl;
-    }
-    // filter
-    std::vector<TimestampePose> poses_tcp2rb_timestampe_interpolation_filter;
-    std::vector<CartesianPose> poses_filted;
-    extract_pose_vector(poses_tcp2rb_timestampe_interpolation, poses_filted);
-    filter_poses(poses_filted, ui->checkBox_filtering->isChecked());
-    for (size_t i = 0; i < poses_filted.size(); ++i)
-    {
-        poses_tcp2rb_timestampe_interpolation_filter.push_back({poses_filted[i], poses_tcp2rb_timestampe_interpolation[i].timestamp_ms, 
-                                                                poses_tcp2rb_timestampe_interpolation[i].button_mask});
-    }
-    // save to file
-    vive_tracker_reader_->save_record_poses_to_file("vive_traj.csv", poses_timestampe);
-    vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot.csv", poses_tcp2rb_timestampe);
-
-    if (ui->checkBox_label_interpolation_interval->isChecked())
-        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation.csv", poses_tcp2rb_timestampe_interpolation);
-
-    if (ui->checkBox_filtering->isChecked())
-        vive_tracker_reader_->save_record_poses_to_file("vive_traj2robot_interpolation_filted.csv", poses_tcp2rb_timestampe_interpolation_filter);
-    
-    // clear cache
-    vive_tracker_reader_->clear_recorded_poses();
-    poses_tcp2rb.clear();
-    
-    // show chart
-    if (!ui->checkBox_end_with_chart->isChecked())
-        return;
-
-    csv_parser_window_vive->loadData("vive_traj.csv");
-    csv_parser_window_vive->show();
-    csv_parser_window_vive->plotData();
-    csv_parser_window_vive->setWindowTitle("vive数据曲线");
-
-    csv_parser_window_vive2robot->loadData("vive_traj2robot.csv");
-    csv_parser_window_vive2robot->show();
-    csv_parser_window_vive2robot->plotData();
-    csv_parser_window_vive2robot->setWindowTitle("vive2robot数据曲线");
-
-    if (ui->checkBox_label_interpolation_interval->isChecked())
-    {
-        csv_parser_window_vive2robot_inter->loadData("vive_traj2robot_interpolation.csv");
-        csv_parser_window_vive2robot_inter->show();
-        csv_parser_window_vive2robot_inter->plotData();
-        csv_parser_window_vive2robot_inter->setWindowTitle("vive2robot_插补_数据曲线");
-    }
-    
-    if (ui->checkBox_filtering->isChecked())
-    {
-        csv_parser_window_vive2robot_inter_filter->loadData("vive_traj2robot_interpolation_filted.csv");
-        csv_parser_window_vive2robot_inter_filter->show();
-        csv_parser_window_vive2robot_inter_filter->plotData();
-        csv_parser_window_vive2robot_inter_filter->setWindowTitle("vive2robot_插补_二次滤波_数据曲线");
-    }
-#endif
+    // 使用 std::thread 启动后台任务
+    std::thread([this]() {
+        process_trajectory_data(); // 真正处理逻辑
+    }).detach(); // 分离线程，后台运行
 }
 
 void MainWindow::slot_start_playback()

@@ -109,6 +109,8 @@ private:
     void filter_poses(std::vector<CartesianPose>& poses, bool is_filtering);
     void extract_pose_vector(const std::vector<TimestampePose>& timestampe_poses, std::vector<CartesianPose>& poses_only);
 
+    void process_trajectory_data();     // 结束记录后处理轨迹数据
+
     CSVParserWindow* csv_parser_window_vive;
     CSVParserWindow* csv_parser_window_vive2robot;
     CSVParserWindow* csv_parser_window_vive2robot_inter;
