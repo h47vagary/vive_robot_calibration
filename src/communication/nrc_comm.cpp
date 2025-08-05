@@ -69,6 +69,11 @@ int NrcComm::nrc_get_current_position_robot(int robot_num, int coord, std::vecto
     return get_current_position_robot(socket_fd_, robot_num, coord, pos);
 }
 
+int NrcComm::nrc_get_connection_status() const
+{
+    return get_connection_status(socket_fd_);
+}
+
 void NrcComm::recv_callback_wrapper(int messageID, const char* message)
 {
     if (instance_)

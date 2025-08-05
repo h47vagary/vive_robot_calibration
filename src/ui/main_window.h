@@ -70,9 +70,6 @@ private slots:
 
 public slots:
     void slot_compute_result_received(double result);
-    void slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose);
-
-    void slot_get_linear_error_use_robot_pose(CartesianPose pose);      // 多一个网络传输时间，稳定后获取才准
 
 signals:
     void signal_connect_ctr();
@@ -81,7 +78,6 @@ signals:
     void signal_end_record();
     void signal_start_playback();
     void signal_end_playback();
-    void signal_linear_error_acquire();
 
 private:
     void init_connect();

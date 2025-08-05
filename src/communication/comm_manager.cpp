@@ -27,6 +27,11 @@ public:
         return nrc_comm.nrc_get_current_position_robot(robot_numm, coord, pos);
     }
 
+    int nrc_get_connection_status() const
+    {
+        return nrc_comm.nrc_get_connection_status();
+    }
+
     void shutdown()
     {
         nrc_comm.disconnect();

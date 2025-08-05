@@ -37,9 +37,7 @@ public:
     void stop();               // 停止线程和通信
 
 signals:
-    void signal_flange2tcp_mark_point_received(int index, CartesianPose pose);
     void signal_compute_result_received(double result);
-    void signal_get_linear_error_use_robot_pose(CartesianPose pose);
     
 
 public slots:
@@ -49,7 +47,6 @@ public slots:
     void slot_handler_end_record();                                 // 结束录制
     void slot_handler_start_playback();                             // 开始回放
     void slot_handler_end_playback();                               // 结束回放
-    void slot_linear_error_acquire();                               // 获取线性误差（需要一次机器人姿态）
 
 private:
     bool handle_pose_with_point(const std::string& msg, std::function<void(int, const CartesianPose&)> emitter);

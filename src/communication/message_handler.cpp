@@ -14,6 +14,7 @@ MessageHandler::~MessageHandler()
 
 void MessageHandler::start()
 {
+    
     if (running_)
     {
         std::cout << "[MessageHandler] start() called but thread already running." << std::endl;
@@ -116,13 +117,6 @@ void MessageHandler::handle_message(int msg_id, const std::string& msg)
             std::cout << "transfer_robot_compute_result fail !" << std::endl;
         break;
     }
-    case E_JSON_COMMAND_RECEIVE_LINEAR_ERROR_USE_ROBOT_POSE_:
-    {
-        handle_pose_with_point(msg, [this](int index, const CartesianPose& pose) {
-            emit signal_get_linear_error_use_robot_pose(pose);
-        });
-        break;
-    }
     default:
     {
         std::cout << "unknown command !" << std::endl;
@@ -172,13 +166,5 @@ void MessageHandler::slot_handler_end_playback()
     if (!running_) return;
     std::string json_str_out;
     MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_END_PLAYBACK_, ++serial_id_send_, json_str_out);
-    comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
-}
-
-void MessageHandler::slot_linear_error_acquire()
-{
-    if (!running_) return;
-    std::string json_str_out;
-    MsgStructTransfer::transfer_command(E_JSON_COMMAND_SET_LINEAR_ERROR_USE_ROBOT_POSE_, ++serial_id_send_, json_str_out);
     comm_->nrc_send_message(CONTROLLER_SERIAL_ID, json_str_out);
 }

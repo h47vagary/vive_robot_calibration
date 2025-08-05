@@ -366,7 +366,6 @@ void MainWindow::init_connect()
     connect(ui->pushButton_flange2tcp_clear_result, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_delete_calib_result()));
     connect(ui->pushButton_flange2tcp_calibrate, SIGNAL(clicked()), this, SLOT(slot_flange2tcp_calibrate()));
     connect(ui->pushButton_hand_filled, SIGNAL(clicked()), this, SLOT(slot_tracker2tcp_mark_pose_use_hand_filled()));
-    //connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SIGNAL(signal_linear_error_acquire()));
     connect(ui->pushButton_once_get, SIGNAL(clicked()), this, SLOT(slot_linear_error_compute()));
     connect(ui->pushButton_refresh_rate, SIGNAL(clicked()), this, SLOT(slot_vive_tracker_reader_interval()));
     connect(ui->pushButton_parse_chart, SIGNAL(clicked()), this, SLOT(slot_parse_chart()));
@@ -381,8 +380,7 @@ void MainWindow::init_connect()
         connect(iter, SIGNAL(clicked()), this, SLOT(slot_mark_point()));
 
     connect(msg_handler_, &MessageHandler::signal_compute_result_received, this, &MainWindow::slot_compute_result_received);
-    connect(msg_handler_, &MessageHandler::signal_flange2tcp_mark_point_received, this, &MainWindow::slot_fanlge2tcp_mark_point_received);
-    connect(msg_handler_, &MessageHandler::signal_get_linear_error_use_robot_pose, this, &MainWindow::slot_get_linear_error_use_robot_pose);
+
     connect(track_pose_timer_, &QTimer::timeout, this, &MainWindow::slot_track_pose_timeout);
     connect(this, &MainWindow::signal_connect_ctr, msg_handler_, &MessageHandler::slot_handler_start);
     connect(this, &MainWindow::signal_disconnect_ctr, msg_handler_, &MessageHandler::slot_handler_stop);
@@ -390,81 +388,12 @@ void MainWindow::init_connect()
     connect(this, &MainWindow::signal_end_record, msg_handler_, &MessageHandler::slot_handler_end_record);
     connect(this, &MainWindow::signal_start_playback, msg_handler_, &MessageHandler::slot_handler_start_playback);
     connect(this, &MainWindow::signal_end_playback, msg_handler_, &MessageHandler::slot_handler_end_playback);
-    connect(this, &MainWindow::signal_linear_error_acquire, msg_handler_, &MessageHandler::slot_linear_error_acquire);
 }
 
 void MainWindow::slot_compute_result_received(double result)
 {
     std::cout << __FUNCTION__ << " result: " << result << std::endl;
     ui->label_calibration_error->setText(QString::number(result, 'f', 2));
-}
-
-void MainWindow::slot_fanlge2tcp_mark_point_received(int index, CartesianPose pose)
-{
-    std::cout << __FUNCTION__ << " index: " << index << std::endl;
-    
-    flange2tcp_calibration_->set_calibration_pose(index, pose);
-    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
-                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
-    ui->label_flange2tcp_marked_num->setText(QString("需6个点,已记录点数: %1").arg(index));
-}
-
-void MainWindow::slot_get_linear_error_use_robot_pose(CartesianPose pose)
-{
-    // 获取线性误差：自定义协议向控制器索要位姿的方式
-    std::cout << __FUNCTION__ << std::endl;
-    std::cout << "point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
-                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
-    
-    // TCP 相对于追踪器的位置变换
-    Eigen::Vector4d pos_vec;
-    tracker2tcp_calibration_->get_calibration_pos_vec(pos_vec);
-    Eigen::Matrix4d pos_matrix = Eigen::Matrix4d::Identity();
-    pos_matrix.block<3,1>(0,3) = pos_vec.head<3>();
-
-    // 当前追踪器在定位器坐标系位姿
-    CartesianPose tracker_pose = vive_tracker_reader_->get_latest_pose();
-    // Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix(tracker_pose);
-    Eigen::Matrix4d tracker_mat = Utils::pose_to_matrix_use_quaternion(tracker_pose);
-
-    // 标定出来的定位器坐标相对于机器人基座标的齐次变换矩阵
-    Eigen::Matrix4d location2robotbase_mat;
-    calibration_manager_->get_position_calibration_matrix(location2robotbase_mat);
-
-    // 求TCP在定位器坐标系的位置变化矩阵
-    Eigen::Matrix4d tcp2location_pos_mat = tracker_mat * pos_matrix;
-    // 求TCP在基坐标系下的位置变换矩阵
-    Eigen::Matrix4d tcp2robotbase_pos_mat = location2robotbase_mat * tcp2location_pos_mat;
-    Eigen::Matrix3d tcp2robotbase_ori_mat = tcp2robotbase_pos_mat.block<3, 3>(0, 0);
-
-    // 获取TCP姿态补偿矩阵
-    Eigen::Matrix3d orientation_offset_matrix;
-    calibration_manager_->get_orientation_offset_matrix(orientation_offset_matrix);
-
-    // 进行补偿TCP姿态
-    // Eigen::Matrix3d tcp2robotbase_ori_mat_offset = orientation_offset_matrix * tcp2robotbase_ori_mat; //左乘
-    Eigen::Matrix3d tcp2robotbase_ori_mat_offset = tcp2robotbase_ori_mat * orientation_offset_matrix;
-
-    Eigen::Matrix4d tcp2robotbase_mat = Eigen::Matrix4d::Identity();
-    tcp2robotbase_mat.block<3, 3>(0, 0) = tcp2robotbase_ori_mat_offset;
-    tcp2robotbase_mat.block<3, 1>(0, 3) = tcp2robotbase_pos_mat.block<3, 1>(0, 3);
-
-
-    // CartesianPose robot_tcp_pose = Utils::matrix_to_pose(tcp2robotbase_mat);
-    CartesianPose robot_tcp_pose = Utils::matrix_to_pose_use_quaternion(tcp2robotbase_mat);
-
-    std::cout << "convert robot_tcp_pose point" << " x:" << robot_tcp_pose.position.x << " y:" << robot_tcp_pose.position.y << " z:" << robot_tcp_pose.position.z
-                << " A:" << robot_tcp_pose.orientation.A << " B:" << robot_tcp_pose.orientation.B << " C:" << robot_tcp_pose.orientation.C << std::endl;
-
-    std::cout << "read robot_tcp_pose point" << " x:" << pose.position.x << " y:" << pose.position.y << " z:" << pose.position.z
-                << " A:" << pose.orientation.A << " B:" << pose.orientation.B << " C:" << pose.orientation.C << std::endl;
-
-    double x = pose.position.x - robot_tcp_pose.position.x;
-    double y = pose.position.y - robot_tcp_pose.position.y;
-    double z = pose.position.z - robot_tcp_pose.position.z;
-    linear_error_ = std::sqrt(x * x + y * y + z * z);
-    std::cout << "#### linear_error: " << linear_error_ << std::endl;
-    ui->label_linear_error->setText(QString::number(linear_error_, 'f', 2));
 }
 
 void MainWindow::slot_connect_ctr()
